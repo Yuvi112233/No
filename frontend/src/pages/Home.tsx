@@ -180,9 +180,8 @@ export default function Home() {
           distance: calculateDistance(
             userLocation.lat,
             userLocation.lng,
-            // Assuming salon has lat/lng or we parse from location string
-            parseFloat((salon as any).lat || '30.7333'),
-            parseFloat((salon as any).lng || '76.7794')
+            salon.latitude || 30.7333,
+            salon.longitude || 76.7794
           )
         }))
         .sort((a, b) => (a.distance || 0) - (b.distance || 0))
