@@ -445,26 +445,83 @@ export default function Home() {
 
       {/* Hero Section - Different for logged in/out users */}
       {user ? (
-        /* Logged In User - Clean Header */
-        <section className="bg-white px-4 py-6 relative overflow-hidden shadow-md">
-          <div className="max-w-7xl mx-auto">
-            {/* Header with Greeting */}
-            <div className="flex items-center justify-between mb-6">
-              {/* Left: Greeting */}
-              <div>
-                <p className="text-gray-500 text-sm">Hello, {user.name?.split(' ')[0] || 'User'}! 👋</p>
-                <h1 className="text-xl font-bold text-gray-900">
-                  Discover Your Perfect Salon
-                </h1>
+        /* Logged In User - Seamless Header with Background Image */
+        <section className="relative overflow-hidden">
+          {/* Background Image Layer - Covers header and carousel area */}
+          <div className="absolute inset-0 h-[420px] md:h-[480px]">
+            <img
+              src="/4.png"
+              alt="Salon Background"
+              className="w-full h-full object-cover"
+            />
+
+          </div>
+
+          {/* Content Layer */}
+          <div className="relative z-10 px-4 pt-6 pb-8">
+            <div className="max-w-7xl mx-auto">
+              {/* Header with Greeting */}
+              <div className="flex items-center justify-between mb-6">
+                {/* Left: Greeting */}
+                <div>
+                  <p className="text-blue-100 text-sm font-medium">Hello, {user.name?.split(' ')[0] || 'User'}! 👋</p>
+                  <h1 className="text-xl font-bold text-white">
+                    Discover Your Perfect Salon
+                  </h1>
+                </div>
+
+                {/* Right: Animation - Peeking from edge */}
+                <div className="absolute -right-6 top-3 w-24 h-24 pointer-events-none">
+                  <DotLottieReact
+                    src="https://lottie.host/dfb2ab5d-ecdc-4aa4-ab64-181def37bd11/DWB1LXlcDu.lottie"
+                    loop
+                    autoplay
+                  />
+                </div>
               </div>
 
-              {/* Right: Animation - Peeking from edge */}
-              <div className="absolute -right-6 top-3 w-24 h-24 pointer-events-none ">
-                <DotLottieReact
-                  src="https://lottie.host/dfb2ab5d-ecdc-4aa4-ab64-181def37bd11/DWB1LXlcDu.lottie"
-                  loop
-                  autoplay
-                />
+              {/* Promotional Banner - Seamlessly Integrated */}
+              <div className="relative rounded-2xl overflow-hidden h-44 md:h-56 shadow-xl backdrop-blur-sm">
+                {/* Gradient background */}
+                <div className="absolute inset-0 bg-transparent"></div>
+
+
+                {/* Subtle pattern overlay */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute top-5 right-10 w-32 h-32 bg-white rounded-full blur-2xl animate-pulse"></div>
+                  <div className="absolute bottom-5 left-10 w-40 h-40 bg-white rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                </div>
+
+                {/* Content with smooth text transitions */}
+                <div className="relative h-full flex items-center px-5 md:px-8">
+                  {promoSlides.map((slide, index) => (
+                    <div
+                      key={slide.id}
+                      className={`absolute inset-0 flex items-center px-5 md:px-8 transition-all duration-700 ${index === currentSlide
+                        ? 'opacity-100 translate-x-0'
+                        : 'opacity-0 -translate-x-4 pointer-events-none'
+                        }`}
+                    >
+                      <div className="flex-1 pr-20 md:pr-24">
+                        <h2 className="text-xl md:text-3xl font-bold text-white mb-1.5 leading-tight">
+                          {slide.title}
+                        </h2>
+                        <p className="text-xs md:text-sm text-white/90 mb-3">
+                          {slide.subtitle}
+                        </p>
+                        <Button className="bg-white hover:bg-gray-50 text-teal-600 font-semibold px-5 py-2 rounded-full text-xs md:text-sm shadow-lg hover:shadow-xl transition-all duration-200">
+                          {slide.buttonText}
+                        </Button>
+                      </div>
+
+                      {/* Discount Badge */}
+                      <div className="absolute right-5 md:right-8 top-1/2 -translate-y-1/2 bg-yellow-300 rounded-full w-16 h-16 md:w-24 md:h-24 flex flex-col items-center justify-center shadow-xl border-3 border-white/40">
+                        <p className="text-[9px] md:text-xs text-yellow-900 font-medium">Up to</p>
+                        <p className="text-xl md:text-3xl font-black text-yellow-900">{slide.discount}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -531,68 +588,6 @@ export default function Home() {
           </section>
         </>
       )}
-
-
-
-      {/* Promotional Carousel */}
-      <section className="px-4 pb-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="relative rounded-3xl overflow-hidden shadow-xl h-64 md:h-80">
-            {/* Carousel Container */}
-            <div
-              className="flex transition-transform duration-500 ease-in-out h-full"
-              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-            >
-              {promoSlides.map((slide) => (
-                <div key={slide.id} className="w-full flex-shrink-0 relative">
-                  {/* Background Image */}
-                  <img
-                    src={slide.image}
-                    alt={slide.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className={`absolute inset-0 bg-gradient-to-r ${slide.gradient}`}></div>
-
-                  {/* Content */}
-                  <div className="absolute inset-0 flex items-center justify-between px-4 md:px-8">
-                    <div className="text-white max-w-xs md:max-w-md">
-                      <h2 className="text-xl md:text-3xl font-bold mb-1 md:mb-2 leading-tight">
-                        {slide.title}
-                      </h2>
-                      <p className="text-sm md:text-base text-white/80 mb-3 md:mb-4">
-                        {slide.subtitle}
-                      </p>
-                      <Button className="bg-cyan-400 hover:bg-cyan-500 text-gray-900 font-semibold px-4 md:px-8 py-3 md:py-6 rounded-full text-sm md:text-lg shadow-lg">
-                        {slide.buttonText}
-                      </Button>
-                    </div>
-
-                    {/* Discount Badge */}
-                    <div className="bg-amber-100 rounded-full w-24 h-20 md:w-32 md:h-32 flex flex-col items-center justify-center shadow-2xl">
-                      <p className="text-xs md:text-sm text-amber-800 font-medium">Up to</p>
-                      <p className="text-xl md:text-4xl font-bold text-amber-600">{slide.discount}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-
-
-            {/* Dots Indicator */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-              {promoSlides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all duration-200 ${index === currentSlide ? 'bg-white' : 'bg-white/50'
-                    }`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Service Categories - What are you looking for today */}
       <section className="px-4 py-6 bg-white">
