@@ -2,14 +2,14 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card"; 
+import { Badge } from "@/components/ui/badge"; 
 import { Star, MapPin, Clock, Heart, ShoppingCart, Zap, ImageIcon, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast"; 
 import { useAuth } from "../context/AuthContext";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../context/CartContext"; 
 import { api } from "../lib/api";
 import type { SalonDetails } from "../types";
 
@@ -204,7 +204,7 @@ export default function SalonProfile() {
 
             {/* Category Thumbnails - Premium Style */}
             <div className="absolute bottom-4 left-4 right-4 flex gap-3 overflow-x-auto scrollbar-hide z-10 pb-1">
-              {['Interior', 'Reception', 'Services', 'Exterior'].map((category) => {
+              {['Interior', 'Services', 'Exterior'].map((category) => {
                 const categoryPhotos = (salon as any).photos.filter((p: any) => p.category === category.toLowerCase());
 
                 // Skip categories with no photos
