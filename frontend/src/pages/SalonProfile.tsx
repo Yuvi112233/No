@@ -186,70 +186,74 @@ export default function SalonProfile() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 pb-24 md:pb-8">
       {/* Hero Banner - Main Photo with Category Thumbnails */}
-      <div className="relative h-64 md:h-80 bg-gradient-to-r from-teal-600 to-cyan-600 overflow-hidden">
-        {(salon as any).photos && (salon as any).photos.length > 0 ? (
-          <>
-            <img
-              src={(salon as any).photos[0].url}
-              alt={salon.name}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/30"></div>
+      {/* Hero Banner Container with Overlapping Thumbnails */}
+      <div className="relative">
+        {/* Hero Image */}
+        <div className="relative h-64 md:h-80 bg-gradient-to-r from-teal-600 to-cyan-600 overflow-hidden">
+          {(salon as any).photos && (salon as any).photos.length > 0 ? (
+            <>
+              <img
+                src={(salon as any).photos[0].url}
+                alt={salon.name}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/30"></div>
 
-            {/* Photo Count Badge */}
-            <div className="absolute top-4 right-4 bg-black/60 text-white px-3 py-1.5 rounded-lg flex items-center space-x-1 backdrop-blur-sm z-10">
-              <ImageIcon className="h-4 w-4" />
-              <span className="text-sm font-medium">1/{(salon as any).photos.length}</span>
-            </div>
+              {/* Photo Count Badge */}
+              <div className="absolute top-4 right-4 bg-black/60 text-white px-3 py-1.5 rounded-lg flex items-center space-x-1 backdrop-blur-sm z-10">
+                <ImageIcon className="h-4 w-4" />
+                <span className="text-sm font-medium">1/{(salon as any).photos.length}</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920')] bg-cover bg-center"></div>
+              <div className="absolute inset-0 bg-black/30"></div>
+            </>
+          )}
+        </div>
 
-            {/* Category Thumbnails - Premium Style */}
-            <div className="absolute bottom-4 left-4 right-4 flex gap-3 overflow-x-auto scrollbar-hide z-10 pb-1">
-              {['Interior', 'Services', 'Exterior'].map((category) => {
-                const categoryPhotos = (salon as any).photos.filter((p: any) => p.category === category.toLowerCase());
+        {/* Category Thumbnails - Overlapping (Half on hero, half on content) */}
+        <div className="absolute left-4 right-4 flex gap-2.5 overflow-x-auto scrollbar-hide z-20 pb-1" style={{ bottom: '-32px' }}>
+          {['Interior', 'Services', 'Exterior'].map((category) => {
+            const categoryPhotos = (salon as any).photos?.filter((p: any) => p.category === category.toLowerCase()) || [];
 
-                // Skip categories with no photos
-                if (categoryPhotos.length === 0) return null;
+            // Skip categories with no photos
+            if (categoryPhotos.length === 0) return null;
 
-                const photo = categoryPhotos[0];
+            const photo = categoryPhotos[0];
 
-                return (
-                  <div
-                    key={category}
-                    onClick={() => {
-                      setSelectedCategory(category.toLowerCase());
-                      setCurrentPhotoIndex(0);
-                      setIsGalleryOpen(true);
-                    }}
-                    className="flex-shrink-0 relative rounded-xl overflow-hidden border-3 border-white shadow-2xl cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)] hover:scale-[1.08] active:scale-95 transition-all duration-300"
-                    style={{ width: '90px', height: '68px' }}
-                  >
-                    <img
-                      src={photo.url}
-                      alt={category}
-                      className="w-full h-full object-cover"
-                    />
-                    {/* Gradient overlay for better text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
-                    {/* Category label */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-white text-[11px] font-bold drop-shadow-lg tracking-wide">{category}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920')] bg-cover bg-center"></div>
-            <div className="absolute inset-0 bg-black/30"></div>
-          </>
-        )}
+            return (
+              <div
+                key={category}
+                onClick={() => {
+                  setSelectedCategory(category.toLowerCase());
+                  setCurrentPhotoIndex(0);
+                  setIsGalleryOpen(true);
+                }}
+                className="flex-shrink-0 relative rounded-xl overflow-hidden border-3 border-white shadow-xl cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200"
+                style={{ width: '100px', height: '75px' }}
+              >
+                <img
+                  src={photo.url}
+                  alt={category}
+                  className="w-full h-full object-cover"
+                />
+                {/* Dark overlay at bottom for text */}
+                <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/85 to-transparent"></div>
+                {/* Category label at bottom */}
+                <div className="absolute inset-x-0 bottom-0 flex items-center justify-center pb-1.5">
+                  <span className="text-white text-xs font-semibold drop-shadow-lg">{category}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Salon Header - positioned below hero banner */}
-        <div className="mb-8 mt-6">
+        {/* Salon Header - positioned below hero banner with extra top margin for overlapping thumbnails */}
+        <div className="mb-8 mt-12">
           <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-teal-100">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
