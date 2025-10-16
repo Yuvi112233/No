@@ -214,7 +214,7 @@ export default function SalonProfile() {
         </div>
 
         {/* Category Thumbnails - Overlapping (Half on hero, half on content) */}
-        <div className="absolute left-4 right-4 flex gap-2.5 overflow-x-auto scrollbar-hide z-20 pb-1" style={{ bottom: '-32px' }}>
+        <div className="absolute left-0 right-0 flex justify-center gap-2.5 z-20 pb-1" style={{ bottom: '-32px' }}>
           {['Interior', 'Services', 'Exterior'].map((category) => {
             const categoryPhotos = (salon as any).photos?.filter((p: any) => p.category === category.toLowerCase()) || [];
 

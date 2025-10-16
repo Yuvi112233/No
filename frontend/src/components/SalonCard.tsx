@@ -163,7 +163,7 @@ export default function SalonCard({ salon, showWaitTime = true, showDistance = f
 
   return (
     <Link href={`/salon/${salon.id}`}>
-     <Card className="group overflow-hidden bg-white border-2 border-gray-100 hover:border-teal-300 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl h-full flex flex-col">
+      <Card className="group overflow-hidden bg-white border-2 border-gray-100 hover:border-teal-300 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl h-full flex flex-col min-h-[380px]">
         <div className="relative overflow-hidden">
           {/* Image with gradient overlay */}
           <div className="relative h-48 overflow-hidden">
@@ -216,11 +216,11 @@ export default function SalonCard({ salon, showWaitTime = true, showDistance = f
           )}
         </div>
 
-        <CardContent className="p-5">
-          <div className="space-y-3">
+        <CardContent className="p-5 flex-1 flex flex-col">
+          <div className="space-y-3 flex-1 flex flex-col">
             {/* Title and Rating */}
             <div className="flex items-start justify-between gap-3">
-              <h3 className="font-bold text-lg text-gray-900 leading-tight flex-1 line-clamp-1">
+              <h3 className="font-bold text-lg text-gray-900 leading-tight flex-1 line-clamp-1 min-h-[28px]">
                 {salon.name}
               </h3>
               <div className="flex items-center gap-1 bg-white px-2.5 py-1.5 rounded-xl border-2 border-amber-200 shadow-sm flex-shrink-0">
@@ -233,9 +233,9 @@ export default function SalonCard({ salon, showWaitTime = true, showDistance = f
             </div>
 
             {/* Location */}
-            <div className="flex items-start gap-2">
+            <div className="flex items-start gap-2 flex-1">
               <MapPin className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" />
-              <span className={`text-sm text-gray-600 leading-5 line-clamp-2 ${getDisplayLocation() === 'Loading location...'
+              <span className={`text-sm text-gray-600 leading-5 line-clamp-2 min-h-[40px] ${getDisplayLocation() === 'Loading location...'
                 ? 'text-gray-400 animate-pulse'
                 : ''
                 }`}>
@@ -244,7 +244,7 @@ export default function SalonCard({ salon, showWaitTime = true, showDistance = f
             </div>
 
             {/* Bottom info bar */}
-            <div className="flex items-center justify-between pt-3 border-t-2 border-gray-100">
+            <div className="flex items-center justify-between pt-3 border-t-2 border-gray-100 mt-auto">
               {showDistance && distance !== undefined && (
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-xl border border-blue-200">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
