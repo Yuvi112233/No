@@ -450,7 +450,7 @@ export default function Home() {
           {/* Background Image Layer - Covers header and carousel area */}
           <div className="absolute inset-0 h-[420px] md:h-[480px]">
             <img
-              src="/4.png"
+              src="/5.png"
               alt="Salon Background"
               className="w-full h-full object-cover"
             />
@@ -463,9 +463,11 @@ export default function Home() {
               {/* Header with Greeting */}
               <div className="flex items-center justify-between mb-6">
                 {/* Left: Greeting */}
-                <div>
-                  <p className="text-blue-100 text-sm font-medium">Hello, {user.name?.split(' ')[0] || 'User'}! 👋</p>
-                  <h1 className="text-xl font-bold text-white">
+                <div className="space-y-1">
+                  <p className="text-white text-base font-semibold tracking-wide">
+                    Hello, {user.name?.split(' ')[0] || 'User'}! 👋
+                  </p>
+                  <h1 className="text-xl md:text-3xl font-bold text-yellow-200 ">
                     Discover Your Perfect Salon
                   </h1>
                 </div>
@@ -481,7 +483,7 @@ export default function Home() {
               </div>
 
               {/* Promotional Banner - Seamlessly Integrated */}
-              <div className="relative rounded-2xl overflow-hidden h-44 md:h-56 shadow-xl backdrop-blur-sm">
+              <div className="relative rounded-2xl overflow-hidden h-44 md:h-56  ">
                 {/* Gradient background */}
                 <div className="absolute inset-0 bg-transparent"></div>
 
