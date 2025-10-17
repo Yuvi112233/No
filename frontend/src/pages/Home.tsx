@@ -98,11 +98,11 @@ export default function Home() {
   }
 
 
-  useEffect(() => {
+  const handleSearch = () => {
     if ((searchQuery || location) && allSalonsRef.current) {
       allSalonsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, [searchQuery, location]);
+  };
 
   // Handle loading and error states
   if (error) {
@@ -457,27 +457,47 @@ export default function Home() {
           </div>
 
           {/* Content Layer */}
-          <div className="relative z-10 px-4 pt-6 pb-8">
+          <div className="relative z-10 px-4 pt-4 pb-5">
             <div className="max-w-7xl mx-auto">
               {/* Header with Greeting */}
               <div className="flex items-center justify-between mb-6">
                 {/* Left: Greeting */}
                 <div className="space-y-1">
-                  <p className="text-white text-base font-semibold tracking-wide">
+                  <p className="text-white text-base font-bricolage tracking-wide">
                     Hello, {user.name?.split(' ')[0] || 'User'}! 👋
                   </p>
-                  <h1 className="text-xl md:text-3xl font-bold text-yellow-200 ">
+                  <h1 className="text-xl md:text-3xl  text-yellow-200 font-bricolage ">
                     Discover Your Perfect Salon
                   </h1>
                 </div>
 
                 {/* Right: Animation - Peeking from edge */}
-                <div className="absolute -right-6 top-3 w-24 h-24 pointer-events-none">
+                <div className="absolute -right-6 top-2 w-20 h-20 pointer-events-none">
                   <DotLottieReact
                     src="https://lottie.host/dfb2ab5d-ecdc-4aa4-ab64-181def37bd11/DWB1LXlcDu.lottie"
                     loop
                     autoplay
                   />
+                </div>
+              </div>
+
+              {/* Search Bar */}
+              <div className="mb-4">
+                <div className="relative w-full max-w-sm flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Search salons or services..."
+                    className="pl-4 pr-4 py-2.5 text-sm border-2 border-white/20 focus-visible:ring-2 focus-visible:ring-white/50 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg flex-1"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  />
+                  <Button
+                    onClick={handleSearch}
+                    className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-xl shadow-lg flex-shrink-0"
+                  >
+                    <Search className="h-5 w-5" />
+                  </Button>
                 </div>
               </div>
 
