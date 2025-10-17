@@ -29,7 +29,8 @@ import {
     CheckCircle,
     Sparkles,
     UserCircle,
-    RefreshCw
+    RefreshCw,
+    ArrowLeft,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -442,6 +443,14 @@ export default function Profile() {
                 </div>
 
                 <div className="relative max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24 sm:pb-8">
+                    {/* Back Button */}
+                    <button
+                        onClick={() => window.history.back()}
+                        className="flex items-center gap-2 text-gray-600 hover:text-teal-600 transition-colors mb-4 group"
+                    >
+                        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                    </button>
+
                     {/* Header */}
                     <div className="mb-6 sm:mb-8">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
