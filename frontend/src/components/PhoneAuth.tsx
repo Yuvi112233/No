@@ -202,7 +202,7 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
                   <div className="w-16 h-10 pl-11 pr-2 text-gray-700 bg-gray-50 border border-gray-300 rounded-l-xl flex items-center justify-center font-semibold text-sm">
                     +91
                   </div>
-                  <input
+                  <input 
                     type="tel"
                     placeholder="Phone Number"
                     value={phoneNumber}
