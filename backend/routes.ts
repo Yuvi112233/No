@@ -77,12 +77,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(userData.email);
       if (existingUser) {
+        console.log(`Registration attempt with existing email: ${userData.email}`);
         return res.status(400).json({ message: 'User already exists with this email' });
       }
 
       // Create user
       const user = await storage.createUser(userData);
-      
+
       // Update with verification fields after creation
       await storage.updateUser(user.id, {
         emailVerified: false,
@@ -185,7 +186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('=== GOOGLE AUTH REQUEST ===');
       console.log('Request body:', JSON.stringify(req.body, null, 2));
-      
+
       const { credential, role } = req.body;
 
       if (!credential) {
@@ -238,16 +239,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           password: null, // No password for Google auth
           role: userRole,
         };
-        
+
         // Only add profileImage if it exists
         if (picture) {
           userData.profileImage = picture;
         }
-        
+
         console.log('Creating user with data:', JSON.stringify(userData, null, 2));
         user = await storage.createUser(userData);
         console.log('User created successfully:', user?.id);
-        
+
         // Update with verification fields after creation
         const updatedUser = await storage.updateUser(user.id, {
           emailVerified: true, // Google emails are verified
@@ -262,27 +263,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('Existing user role:', user.role);
         console.log('Requested role:', userRole);
         console.log('Google profile picture URL:', picture);
-        
+
         // Check for role mismatch - if existing user has different role than requested
         if (user.role !== userRole) {
-          return res.status(403).json({ 
+          return res.status(403).json({
             message: `Account already exists with ${user.role} role. Cannot authenticate as ${userRole}.`,
             existingRole: user.role,
             requestedRole: userRole
           });
         }
-        
+
         const updates: any = {
           emailVerified: true,
           isVerified: true,
         };
-        
+
         // Always update profile image from Google if available
         if (picture) {
           updates.profileImage = picture;
           console.log('Updating profile image to:', picture);
         }
-        
+
         await storage.updateUser(user.id, updates);
         const updatedUser = await storage.getUser(user.id);
         user = updatedUser || user;
@@ -317,9 +318,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         stack: error?.stack,
         name: error?.name
       });
-      res.status(500).json({ 
-        message: 'Failed to authenticate with Google', 
-        error: process.env.NODE_ENV === 'development' ? error : undefined 
+      res.status(500).json({
+        message: 'Failed to authenticate with Google',
+        error: process.env.NODE_ENV === 'development' ? error : undefined
       });
     }
   });
@@ -382,13 +383,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string; role: string };
           // Get the authenticated user
           user = await storage.getUser(decoded.userId);
-          
+
           if (user) {
             // Check if phone is already taken by a DIFFERENT user
             const existingPhoneUser = await storage.getUserByPhone(phoneNumber);
             if (existingPhoneUser && existingPhoneUser.id !== user.id) {
-              return res.status(400).json({ 
-                message: 'Phone number is already registered to another account' 
+              return res.status(400).json({
+                message: 'Phone number is already registered to another account'
               });
             }
             // This is an existing user adding their phone - don't create new user
@@ -402,7 +403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If not authenticated or user not found, check if phone exists
       if (!user) {
         user = await storage.getUserByPhone(phoneNumber);
-        
+
         if (!user) {
           // Create minimal user with just phone number (phone-only auth flow)
           isNewUser = true;
@@ -413,7 +414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             password: null, // No password for phone auth
             role: 'customer',
           });
-          
+
           // Update with verification fields after creation
           const updatedUser = await storage.updateUser(user.id, {
             emailVerified: false,
@@ -621,10 +622,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const existingUser = await storage.getUserByPhone(phone);
       if (existingUser && existingUser.id !== req.user!.userId) {
         // Check if the existing user is a temporary phone-only user (created during OTP send)
-        const isTemporaryUser = existingUser.email?.includes('@placeholder.com') && 
-                                !existingUser.name && 
-                                existingUser.phone === phone;
-        
+        const isTemporaryUser = existingUser.email?.includes('@placeholder.com') &&
+          !existingUser.name &&
+          existingUser.phone === phone;
+
         if (isTemporaryUser) {
           // Delete the temporary user since we're merging it with the Google auth user
           console.log(`Deleting temporary phone-only user ${existingUser.id} for phone ${phone}`);
@@ -811,7 +812,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const offers = await storage.getOffersBySalon(salon.id);
           const photos = await storage.getSalonPhotosBySalon(salon.id);
           const allReviews = await storage.getReviewsBySalon(salon.id);
-          
+
           // Get only the latest review per user
           const latestReviewsMap = new Map();
           allReviews.forEach(review => {
@@ -821,7 +822,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           });
           const reviews = Array.from(latestReviewsMap.values());
-          
+
           console.log(`Found ${photos.length} photos for salon ${salon.id}`);
 
           return {
@@ -858,7 +859,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const services = await storage.getServicesBySalon(salon.id);
       const offers = await storage.getOffersBySalon(salon.id);
       const allReviews = await storage.getReviewsBySalon(salon.id);
-      
+
       // Get only the latest review per user
       const latestReviewsMap = new Map();
       allReviews.forEach(review => {
@@ -868,7 +869,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
       const reviews = Array.from(latestReviewsMap.values());
-      
+
       const queues = await storage.getQueuesBySalon(salon.id);
       const photos = await storage.getSalonPhotosBySalon(salon.id);
       const waitingQueues = queues.filter(q => q.status === 'waiting');
@@ -1018,22 +1019,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/generate-description', async (req, res) => {
-  try {
-    const { serviceName } = req.body;
-    
-    if (!serviceName) {
-      return res.status(400).json({ error: 'Service name is required' });
-    }
-    
-    const description = await generateServiceDescription(serviceName);
-    return res.json({ description });
-  } catch (error: any) {
-    console.error('Error generating description:', error);
-    return res.status(500).json({ error: 'Failed to generate description' });
-  }
-});
+    try {
+      const { serviceName } = req.body;
 
-app.post('/api/services', authenticateToken, async (req, res) => {
+      if (!serviceName) {
+        return res.status(400).json({ error: 'Service name is required' });
+      }
+
+      const description = await generateServiceDescription(serviceName);
+      return res.json({ description });
+    } catch (error: any) {
+      console.error('Error generating description:', error);
+      return res.status(500).json({ error: 'Failed to generate description' });
+    }
+  });
+
+  app.post('/api/services', authenticateToken, async (req, res) => {
     try {
       console.log('Service creation request received:', req.body);
       console.log('User:', req.user);
@@ -1131,24 +1132,24 @@ app.post('/api/services', authenticateToken, async (req, res) => {
 
           // Get all active queues for this salon (not completed or no-show)
           const salonQueues = await storage.getQueuesBySalon(queue.salonId);
-          const activeQueues = salonQueues.filter(q => 
-            q.status === 'waiting' || 
-            q.status === 'notified' || 
-            q.status === 'pending_verification' || 
-            q.status === 'nearby' || 
+          const activeQueues = salonQueues.filter(q =>
+            q.status === 'waiting' ||
+            q.status === 'notified' ||
+            q.status === 'pending_verification' ||
+            q.status === 'nearby' ||
             q.status === 'in-progress'
           );
 
           // Calculate real-time position based on timestamp
           let userPosition = queue.position;
-          
+
           if (queue.status === 'in-progress') {
             userPosition = 0; // Currently being served
           } else if (queue.status === 'completed' || queue.status === 'no-show') {
             userPosition = 0; // No position for completed/no-show
           } else {
             // Sort active queues by timestamp to get real position
-            const sortedQueues = activeQueues.sort((a, b) => 
+            const sortedQueues = activeQueues.sort((a, b) =>
               new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
             );
             const userIndex = sortedQueues.findIndex(q => q.id === queue.id);
@@ -1300,7 +1301,7 @@ app.post('/api/services', authenticateToken, async (req, res) => {
 
       // Get user details for notification
       const queueUser = await storage.getUser(queueData.userId);
-      
+
       // Get service details
       const services = await Promise.all(
         queueData.serviceIds.map(async (serviceId: string) => {
@@ -1309,9 +1310,9 @@ app.post('/api/services', authenticateToken, async (req, res) => {
         })
       );
       const validServices = services.filter(Boolean);
-      
+
       console.log(`Salon queue ${queue.id} services:`, validServices);
-      
+
       // Broadcast queue_join event for voice notifications
       console.log('🚀 About to call broadcastQueueJoin with:', {
         salonId: queueData.salonId,
@@ -1319,16 +1320,16 @@ app.post('/api/services', authenticateToken, async (req, res) => {
         customerName: queueUser?.name || 'A customer',
         serviceName: validServices.length > 0 ? validServices[0].name : 'a service'
       });
-      
+
       wsManager.broadcastQueueJoin(queueData.salonId, {
         queueId: queue.id,
         customerName: queueUser?.name || 'A customer',
         serviceName: validServices.length > 0 ? validServices[0].name : 'a service',
         position: queue.position
       });
-      
+
       console.log('✅ broadcastQueueJoin called successfully');
-      
+
       // Send push notification to salon owner
       const salon = await storage.getSalon(queueData.salonId);
       if (salon && salon.ownerId) {
@@ -1339,10 +1340,10 @@ app.post('/api/services', authenticateToken, async (req, res) => {
           salon.name
         );
       }
-      
+
       // Broadcast general queue update with customer details
       const salonQueues = await storage.getQueuesBySalon(queueData.salonId);
-      broadcastQueueUpdate(queueData.salonId, { 
+      broadcastQueueUpdate(queueData.salonId, {
         queues: salonQueues,
         newQueue: {
           id: queue.id,
@@ -1572,13 +1573,13 @@ app.post('/api/services', authenticateToken, async (req, res) => {
       today.setHours(0, 0, 0, 0);
 
       // Get today's completed customers (not all queues from today)
-      const todayCompletedQueues = queues.filter(q => 
-        q.status === 'completed' && 
+      const todayCompletedQueues = queues.filter(q =>
+        q.status === 'completed' &&
         new Date(q.timestamp).setHours(0, 0, 0, 0) >= today.getTime()
       );
-      
+
       const completedQueues = queues.filter(q => q.status === 'completed');
-      
+
       // Calculate revenue from completed queues using totalPrice
       const totalRevenue = completedQueues.reduce((sum, queue) => {
         const price = typeof queue.totalPrice === 'number' ? queue.totalPrice : parseFloat(queue.totalPrice || '0');

@@ -5,6 +5,7 @@ import PhoneAuth from "./PhoneAuth";
 import PhoneOTPVerification from "./PhoneOTPVerification";
 import WelcomeLoading from "./WelcomeLoading";
 import AdminLoginFlow from "./AdminLoginFlow";
+import { Toaster } from "@/components/ui/toaster";
 
 type AuthStep = 'phone-input' | 'otp-verification' | 'welcome-loading' | 'admin-login';
 
@@ -71,48 +72,55 @@ export default function PhoneAuthFlow({ onComplete }: PhoneAuthFlowProps) {
   }
 
   // Render current step
-  switch (currentStep) {
-    case 'phone-input':
-      return (
-        <PhoneAuth 
-          onOTPSent={handleOTPSent}
-          onBack={() => {}} // No back button for this flow
-          onSwitchToAdmin={handleSwitchToAdmin}
-        />
-      );
-    
-    case 'otp-verification':
-      return (
-        <PhoneOTPVerification
-          phoneNumber={phoneNumber}
-          onVerificationSuccess={handleOTPVerificationSuccess}
-          onBack={() => setCurrentStep('phone-input')}
-        />
-      );
-    
-    case 'welcome-loading':
-      return (
-        <WelcomeLoading
-          onComplete={handleWelcomeComplete}
-          userName={user?.name}
-        />
-      );
-    
-    case 'admin-login':
-      return (
-        <AdminLoginFlow
-          onAuthSuccess={handleAdminAuthSuccess}
-          onSwitchToCustomer={handleSwitchToCustomer}
-        />
-      );
-    
-    default:
-      return (
-        <PhoneAuth 
-          onOTPSent={handleOTPSent}
-          onBack={() => {}}
-          onSwitchToAdmin={handleSwitchToAdmin}
-        />
-      );
-  }
+  return (
+    <>
+      <Toaster />
+      {(() => {
+        switch (currentStep) {
+          case 'phone-input':
+            return (
+              <PhoneAuth 
+                onOTPSent={handleOTPSent}
+                onBack={() => {}} // No back button for this flow
+                onSwitchToAdmin={handleSwitchToAdmin}
+              />
+            );
+          
+          case 'otp-verification':
+            return (
+              <PhoneOTPVerification
+                phoneNumber={phoneNumber}
+                onVerificationSuccess={handleOTPVerificationSuccess}
+                onBack={() => setCurrentStep('phone-input')}
+              />
+            );
+          
+          case 'welcome-loading':
+            return (
+              <WelcomeLoading
+                onComplete={handleWelcomeComplete}
+                userName={user?.name}
+              />
+            );
+          
+          case 'admin-login':
+            return (
+              <AdminLoginFlow
+                onAuthSuccess={handleAdminAuthSuccess}
+                onSwitchToCustomer={handleSwitchToCustomer}
+              />
+            );
+          
+          default:
+            return (
+              <PhoneAuth 
+                onOTPSent={handleOTPSent}
+                onBack={() => {}}
+                onSwitchToAdmin={handleSwitchToAdmin}
+              />
+            );
+        }
+      })()}
+    </>
+  );
 }

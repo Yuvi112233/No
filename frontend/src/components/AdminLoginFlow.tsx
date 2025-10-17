@@ -181,9 +181,31 @@ export default function AdminLoginFlow({
       });
     },
     onError: (error: any) => {
+      // Log the full error for debugging
+      console.error('Admin Registration error:', error);
+      console.error('Error type:', typeof error);
+      console.error('Error message:', error?.message);
+      console.error('Error keys:', Object.keys(error || {}));
+      
+      // Extract the actual error message from the API error format
+      let errorMessage = "Failed to create account. Please try again.";
+      
+      if (error?.message) {
+        // Try to extract message after "API Error XXX: " prefix
+        const match = error.message.match(/API Error \d+:\s*(.+)/);
+        if (match && match[1]) {
+          errorMessage = match[1];
+        } else {
+          // If no match, use the full message
+          errorMessage = error.message;
+        }
+      }
+      
+      console.log('Final error message to display:', errorMessage);
+      
       toast({
-        title: "Registration failed",
-        description: error.message,
+        title: "Registration Failed",
+        description: errorMessage,
         variant: "destructive",
       });
     },
