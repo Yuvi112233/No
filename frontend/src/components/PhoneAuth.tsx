@@ -147,7 +147,7 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
   };
 
   return (
-    <div className="fixed inset-0 z-50  overflow-hidden">
+    <div className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
@@ -155,51 +155,45 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
           alt="Background"
           className="w-full h-full object-cover"
         />
-
       </div>
 
       {/* Content */}
-      <div className="relative flex flex-col h-full">
-
-
-
-
-
+      <div className="relative min-h-full flex flex-col">
         {/* Main Content */}
-        <div className="flex-1 flex flex-col justify-center items-center px-4 py-6">
+        <div className="flex-1 flex flex-col justify-center items-center px-4 py-4 sm:py-6">
           {/* Logo & Hero Text */}
-          <div className="text-center mb-6">
+          <div className="text-center mb-4 sm:mb-6">
             <img
               src="/loadlogo.png"
               alt="SmartQ Logo"
-              className="h-24 w-auto drop-shadow-2xl mx-auto mb-2"
+              className="h-16 sm:h-20 md:h-24 w-auto drop-shadow-2xl mx-auto mb-2"
             />
-            <h1 className="text-3xl font-bold text-white mb-2 leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2 leading-tight">
               India's Leading Salon<br />Booking Platform
             </h1>
-            <p className="text-white/80 text-base font-medium">
+            <p className="text-white/80 text-sm sm:text-base font-medium">
               Book appointments with ease
             </p>
           </div>
 
           {/* Auth Card */}
-          <div className="w-full max-w-sm bg-white/95 backdrop-blur-md rounded-2xl px-6 py-8 shadow-2xl border border-white/20">
+          <div className="w-full max-w-sm bg-white/95 backdrop-blur-md rounded-2xl px-4 sm:px-6 py-6 sm:py-8 shadow-2xl border border-white/20">
             {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-xl font-bold text-gray-900 mb-1.5">Get Started</h1>
+            <div className="mb-6 sm:mb-8">
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-1.5">Get Started</h1>
               <p className="text-gray-500 text-xs leading-relaxed">
                 Login to continue where you left off, or sign up to explore the app.
               </p>
             </div>
 
             {/* Phone Input */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="relative">
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">
+                <div className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">
                   <Phone className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex">
-                  <div className="w-16 h-10 pl-11 pr-2 text-gray-700 bg-gray-50 border border-gray-300 rounded-l-xl flex items-center justify-center font-semibold text-sm">
+                  <div className="w-14 sm:w-16 h-10 sm:h-11 pl-9 sm:pl-11 pr-1 sm:pr-2 text-gray-700 bg-gray-50 border border-gray-300 rounded-l-xl flex items-center justify-center font-semibold text-xs sm:text-sm shrink-0">
                     +91
                   </div>
                   <input 
@@ -208,7 +202,7 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
                     value={phoneNumber}
                     onChange={handlePhoneChange}
                     onKeyPress={handleKeyPress}
-                    className="flex-1 h-10 px-3.5 text-gray-900 bg-gray-50 border border-l-0 border-gray-300 rounded-r-xl focus:outline-none focus:border-teal-500 focus:bg-white placeholder-gray-400 transition-all text-sm"
+                    className="flex-1 min-w-0 h-10 sm:h-11 px-2.5 sm:px-3.5 text-gray-900 bg-gray-50 border border-l-0 border-gray-300 rounded-r-xl focus:outline-none focus:border-teal-500 focus:bg-white placeholder-gray-400 transition-all text-sm"
                     maxLength={11}
                     autoComplete="tel"
                     autoFocus
@@ -217,8 +211,8 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-2.5">
-                  <p className="text-xs text-red-600">{error}</p>
+                <div className="bg-red-50 border border-red-200 rounded-xl p-2 sm:p-2.5">
+                  <p className="text-xs text-red-600 break-words">{error}</p>
                 </div>
               )}
 
@@ -226,12 +220,12 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
               <button
                 onClick={handleSendOTP}
                 disabled={isLoading || !phoneNumber.trim()}
-                className="w-full h-10 text-white font-semibold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
+                className="w-full h-10 sm:h-11 text-white font-semibold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Sending OTP...
+                    <span className="text-xs sm:text-sm">Sending OTP...</span>
                   </div>
                 ) : (
                   "Sign In"
@@ -264,7 +258,7 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
 
             {/* Admin Login */}
             {onSwitchToAdmin && (
-              <div className="text-center mt-6 pt-5 border-t border-gray-200">
+              <div className="text-center mt-4 sm:mt-6 pt-4 sm:pt-5 border-t border-gray-200">
                 <p className="text-gray-500 text-xs">
                   Salon Owner?{" "}
                   <button
@@ -279,7 +273,7 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
           </div>
 
           {/* Trust Badge */}
-          <div className="text-center mt-4">
+          <div className="text-center mt-3 sm:mt-4 mb-4">
             <p className="text-white/60 text-xs">
               🔒 Your data is secure and encrypted
             </p>
