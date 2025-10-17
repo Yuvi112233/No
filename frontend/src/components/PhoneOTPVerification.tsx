@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { ArrowLeft, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 interface PhoneOTPVerificationProps {
   phoneNumber: string;
@@ -71,6 +72,18 @@ export default function PhoneOTPVerification({
       return;
     }
 
+    // Check if online
+    if (!navigator.onLine) {
+      const errorInfo = getErrorMessage({ message: 'NO_INTERNET' });
+      setError(errorInfo.message);
+      toast({
+        title: errorInfo.title,
+        description: errorInfo.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -93,9 +106,19 @@ export default function PhoneOTPVerification({
         setError("Too many failed attempts. Please request a new code.");
         setOtp("");
       } else {
-        const errorMessage = err.message || "Invalid code. Please try again.";
+        const errorInfo = getErrorMessage(err);
+        // For OTP verification, show specific error or default to invalid code
+        const errorMessage = err.message?.includes('API Error') 
+          ? "Invalid code. Please try again."
+          : errorInfo.message;
         setError(errorMessage);
         setOtp("");
+        
+        toast({
+          title: errorInfo.title,
+          description: errorMessage,
+          variant: "destructive",
+        });
       }
 
       setTimeout(() => {
@@ -144,9 +167,10 @@ export default function PhoneOTPVerification({
         otpInputRef.current.focus();
       }
     } catch (err: any) {
+      const errorInfo = getErrorMessage(err);
       toast({
-        title: "Error",
-        description: err.message || "Failed to resend OTP. Please try again.",
+        title: errorInfo.title,
+        description: errorInfo.message,
         variant: "destructive",
       });
     } finally {

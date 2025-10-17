@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Phone } from "lucide-react";
 import { GoogleLogin } from '@react-oauth/google';
+import { getErrorMessage } from "@/lib/errorMessages";
 
 interface PhoneAuthProps {
   onOTPSent: (phoneNumber: string) => void;
@@ -12,16 +13,58 @@ interface PhoneAuthProps {
 export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const { toast } = useToast();
 
   const countryCode = "+91";
+
+  // Monitor online/offline status
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast({
+        title: "Back online! 🎉",
+        description: "Your connection has been restored.",
+      });
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast({
+        title: "You're offline 📡",
+        description: "Please check your internet connection.",
+        variant: "destructive",
+        duration: Infinity,
+      });
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [toast]);
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     if (!credentialResponse.credential) {
       toast({
         title: "Error",
         description: "Failed to get Google credentials",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if online
+    if (!navigator.onLine) {
+      const errorInfo = getErrorMessage({ message: 'NO_INTERNET' });
+      toast({
+        title: errorInfo.title,
+        description: errorInfo.message,
         variant: "destructive",
       });
       return;
@@ -50,11 +93,11 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
       // Reload page to trigger auth context update
       window.location.reload();
     } catch (err: any) {
-      const errorMessage = err.message || "Failed to sign in with Google";
-      setError(errorMessage);
+      const errorInfo = getErrorMessage(err);
+      setError(errorInfo.message);
       toast({
-        title: "Error",
-        description: errorMessage,
+        title: errorInfo.title,
+        description: errorInfo.message,
         variant: "destructive",
       });
     }
@@ -104,12 +147,41 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
       return;
     }
 
+    // Check if online
+    if (!navigator.onLine) {
+      const errorInfo = getErrorMessage({ message: 'NO_INTERNET' });
+      setError(errorInfo.message);
+      toast({
+        title: errorInfo.title,
+        description: errorInfo.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
+    setLoadingMessage('Connecting to server...');
+
+    // Update loading message for cold starts
+    const messageTimer1 = setTimeout(() => {
+      if (isLoading) {
+        setLoadingMessage('Server is waking up...');
+      }
+    }, 5000);
+
+    const messageTimer2 = setTimeout(() => {
+      if (isLoading) {
+        setLoadingMessage('Almost there...');
+      }
+    }, 10000);
 
     try {
       const { api } = await import("../lib/api");
       const response = await api.auth.sendOTP(fullPhoneNumber);
+
+      clearTimeout(messageTimer1);
+      clearTimeout(messageTimer2);
 
       if (response.debug?.otp) {
         localStorage.setItem("debug_otp", response.debug.otp);
@@ -128,15 +200,19 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
 
       onOTPSent(fullPhoneNumber);
     } catch (err: any) {
-      const errorMessage = err.message || "Failed to send OTP. Please try again.";
-      setError(errorMessage);
+      clearTimeout(messageTimer1);
+      clearTimeout(messageTimer2);
+      
+      const errorInfo = getErrorMessage(err);
+      setError(errorInfo.message);
       toast({
-        title: "Error",
-        description: errorMessage,
+        title: errorInfo.title,
+        description: errorInfo.message,
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
+      setLoadingMessage('');
     }
   };
 
@@ -219,13 +295,17 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
               {/* Sign In Button */}
               <button
                 onClick={handleSendOTP}
-                disabled={isLoading || !phoneNumber.trim()}
+                disabled={isLoading || !phoneNumber.trim() || !isOnline}
                 className="w-full h-10 sm:h-11 text-white font-semibold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
               >
-                {isLoading ? (
+                {!isOnline ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-xs sm:text-sm">📡 No Internet</span>
+                  </div>
+                ) : isLoading ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span className="text-xs sm:text-sm">Sending OTP...</span>
+                    <span className="text-xs sm:text-sm">{loadingMessage || 'Sending OTP...'}</span>
                   </div>
                 ) : (
                   "Sign In"

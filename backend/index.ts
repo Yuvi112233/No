@@ -39,26 +39,42 @@ console.log('Setting up CORS...');
 
 app.use(cors({
   origin: function (origin, callback) {
-    console.log('CORS request from origin:', origin);
+    console.log('🌐 CORS request from origin:', origin);
     
-    const allowedOrigins = [
-      'https://noline-woad.vercel.app',  // Production frontend
-      'http://localhost:3000',          // Local development
-      'http://127.0.0.1:3000',         // Local development alternative
-      undefined                         // Allow requests with no origin (mobile apps, etc.)
-    ];
-    
-    if (allowedOrigins.includes(origin)) {
-      console.log('Origin allowed:', origin);
-      callback(null, true);
-    } else {
-      console.log('Origin blocked:', origin);
-      callback(new Error('Not allowed by CORS'));
+    // Allow requests with no origin (mobile apps, Postman, curl)
+    if (!origin) {
+      console.log('✅ No origin - allowing (mobile/native app)');
+      return callback(null, true);
     }
+    
+    // Allow localhost for development (any port)
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      console.log('✅ Localhost - allowing');
+      return callback(null, true);
+    }
+    
+    // Allow ALL Vercel deployments (production + preview branches)
+    if (origin.endsWith('.vercel.app')) {
+      console.log('✅ Vercel deployment - allowing');
+      return callback(null, true);
+    }
+    
+    // Custom domain support (for future launch)
+    const customDomain = process.env.CUSTOM_DOMAIN; // e.g., "altq.com"
+    if (customDomain && origin.includes(customDomain)) {
+      console.log('✅ Custom domain - allowing');
+      return callback(null, true);
+    }
+    
+    // Block everything else
+    console.log('❌ Origin blocked:', origin);
+    callback(new Error(`CORS policy: Origin ${origin} is not allowed`));
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Length', 'X-Request-Id'],
+  maxAge: 86400, // Cache preflight for 24 hours
   optionsSuccessStatus: 200 // For legacy browser support
 }));
 
@@ -92,6 +108,15 @@ app.get("/api/cors-test", (req, res) => {
     message: "CORS is working!",
     origin: req.get('Origin'),
     timestamp: new Date().toISOString()
+  });
+});
+
+// Ping endpoint for keep-alive and health checks
+app.get("/api/ping", (req, res) => {
+  res.json({
+    status: "alive",
+    timestamp: Date.now(),
+    uptime: process.uptime()
   });
 });
 
