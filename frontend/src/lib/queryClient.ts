@@ -23,6 +23,59 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// Enhanced fetch with retry logic
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries: number = 3
+): Promise<Response> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      return response; // Success!
+
+    } catch (error: any) {
+      console.log(`Attempt ${attempt} failed:`, error.message);
+
+      // Don't retry on last attempt
+      if (attempt === maxRetries) {
+        // Enhance error message based on type
+        if (error.name === 'AbortError') {
+          throw new Error('REQUEST_TIMEOUT');
+        }
+        if (!navigator.onLine) {
+          throw new Error('NO_INTERNET');
+        }
+        if (error.message === 'Failed to fetch') {
+          throw new Error('NETWORK_ERROR');
+        }
+        throw error;
+      }
+
+      // Don't retry if user is offline
+      if (!navigator.onLine) {
+        throw new Error('NO_INTERNET');
+      }
+
+      // Wait before retrying (exponential backoff)
+      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+      console.log(`Retrying in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  throw new Error('UNKNOWN_ERROR');
+}
+
 export async function apiRequest(
   method: string,
   url: string,
@@ -51,7 +104,7 @@ export async function apiRequest(
   const fullUrl = url.startsWith('http') ? url : `${baseURL}${url}`;
   console.log('Making API request to:', fullUrl);
 
-  const res = await fetch(fullUrl, {
+  const res = await fetchWithRetry(fullUrl, {
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
