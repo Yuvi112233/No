@@ -42,8 +42,8 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
 
       toast({
         title: response.isNewUser ? "Welcome!" : "Welcome back!",
-        description: response.isNewUser 
-          ? "Your account has been created successfully" 
+        description: response.isNewUser
+          ? "Your account has been created successfully"
           : "You've been logged in successfully",
       });
 
@@ -72,13 +72,13 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
   const formatPhoneNumber = (value: string) => {
     // Remove all non-digits
     let digits = value.replace(/\D/g, '');
-    
+
     // Remove leading zeros
     digits = digits.replace(/^0+/, '');
-    
+
     // Limit to 10 digits
     digits = digits.slice(0, 10);
-    
+
     // Format with space after 5 digits
     if (digits.length <= 5) return digits;
     return `${digits.slice(0, 5)} ${digits.slice(5, 10)}`;
@@ -155,7 +155,7 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
           alt="Background"
           className="w-full h-full object-cover"
         />
-       
+
       </div>
 
       {/* Content */}
@@ -196,10 +196,10 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
             <div className="space-y-4">
               <div className="relative">
                 <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">
-                  <Phone className="w-4 h-4" />
+                  <Phone className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex">
-                  <div className="w-16 h-11 pl-11 pr-2 text-gray-700 bg-gray-50 border border-gray-300 rounded-l-xl flex items-center justify-center font-semibold text-sm">
+                  <div className="w-16 h-10 pl-11 pr-2 text-gray-700 bg-gray-50 border border-gray-300 rounded-l-xl flex items-center justify-center font-semibold text-sm">
                     +91
                   </div>
                   <input
@@ -208,7 +208,7 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
                     value={phoneNumber}
                     onChange={handlePhoneChange}
                     onKeyPress={handleKeyPress}
-                    className="flex-1 h-11 px-4 text-gray-900 bg-gray-50 border border-l-0 border-gray-300 rounded-r-xl focus:outline-none focus:border-teal-500 focus:bg-white placeholder-gray-400 transition-all text-sm"
+                    className="flex-1 h-10 px-3.5 text-gray-900 bg-gray-50 border border-l-0 border-gray-300 rounded-r-xl focus:outline-none focus:border-teal-500 focus:bg-white placeholder-gray-400 transition-all text-sm"
                     maxLength={11}
                     autoComplete="tel"
                     autoFocus
@@ -226,7 +226,7 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
               <button
                 onClick={handleSendOTP}
                 disabled={isLoading || !phoneNumber.trim()}
-                className="w-full h-11 text-white font-semibold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
+                className="w-full h-10 text-white font-semibold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center gap-2">
