@@ -7,6 +7,7 @@ import WelcomeLoading from "./WelcomeLoading";
 import MinimalUserDashboard from "./MinimalUserDashboard";
 import AdminLoginFlow from "./AdminLoginFlow";
 import BookingDetailsModal from "./BookingDetailsModal";
+import { Toaster } from "@/components/ui/toaster";
 
 type AuthStep = 
   | 'loading'
@@ -139,69 +140,76 @@ export default function AuthRouter({ defaultFlow = 'customer' }: AuthRouterProps
   };
 
   // Render current step
-  switch (currentStep) {
-    case 'loading':
-      return <AuthLoadingScreen onComplete={handleLoadingComplete} />;
-    
-    case 'phone-input':
-      return (
-        <PhoneAuth 
-          onOTPSent={handleOTPSent}
-          onBack={() => setCurrentStep('loading')}
-        />
-      );
-    
-    case 'otp-verification':
-      return (
-        <PhoneOTPVerification
-          phoneNumber={phoneNumber}
-          onVerificationSuccess={handleOTPVerificationSuccess}
-          onBack={() => setCurrentStep('phone-input')}
-        />
-      );
-    
-    case 'welcome-loading':
-      return (
-        <WelcomeLoading
-          onComplete={handleWelcomeComplete}
-          userName={user?.name}
-        />
-      );
-    
-    case 'dashboard':
-      if (!user) {
-        // Fallback if user is null
-        setCurrentStep('loading');
-        return <AuthLoadingScreen onComplete={handleLoadingComplete} />;
-      }
-      
-      return (
-        <>
-          <MinimalUserDashboard
-            user={user}
-            onBookSalon={handleBookSalon}
-            onOpenProfile={handleOpenProfile}
-          />
+  return (
+    <>
+      <Toaster />
+      {(() => {
+        switch (currentStep) {
+          case 'loading':
+            return <AuthLoadingScreen onComplete={handleLoadingComplete} />;
           
-          {/* Booking Details Modal */}
-          <BookingDetailsModal
-            isOpen={showBookingModal}
-            onComplete={handleProfileCompletion}
-            onCancel={() => setShowBookingModal(false)}
-            salonName="Selected Salon" // TODO: Get actual salon name
-          />
-        </>
-      );
-    
-    case 'admin-login':
-      return (
-        <AdminLoginFlow
-          onAuthSuccess={handleAdminAuthSuccess}
-          onSwitchToCustomer={handleSwitchToCustomer}
-        />
-      );
-    
-    default:
-      return <AuthLoadingScreen onComplete={handleLoadingComplete} />;
-  }
+          case 'phone-input':
+            return (
+              <PhoneAuth 
+                onOTPSent={handleOTPSent}
+                onBack={() => setCurrentStep('loading')}
+              />
+            );
+          
+          case 'otp-verification':
+            return (
+              <PhoneOTPVerification
+                phoneNumber={phoneNumber}
+                onVerificationSuccess={handleOTPVerificationSuccess}
+                onBack={() => setCurrentStep('phone-input')}
+              />
+            );
+          
+          case 'welcome-loading':
+            return (
+              <WelcomeLoading
+                onComplete={handleWelcomeComplete}
+                userName={user?.name}
+              />
+            );
+          
+          case 'dashboard':
+            if (!user) {
+              // Fallback if user is null
+              setCurrentStep('loading');
+              return <AuthLoadingScreen onComplete={handleLoadingComplete} />;
+            }
+            
+            return (
+              <>
+                <MinimalUserDashboard
+                  user={user}
+                  onBookSalon={handleBookSalon}
+                  onOpenProfile={handleOpenProfile}
+                />
+                
+                {/* Booking Details Modal */}
+                <BookingDetailsModal
+                  isOpen={showBookingModal}
+                  onComplete={handleProfileCompletion}
+                  onCancel={() => setShowBookingModal(false)}
+                  salonName="Selected Salon" // TODO: Get actual salon name
+                />
+              </>
+            );
+          
+          case 'admin-login':
+            return (
+              <AdminLoginFlow
+                onAuthSuccess={handleAdminAuthSuccess}
+                onSwitchToCustomer={handleSwitchToCustomer}
+              />
+            );
+          
+          default:
+            return <AuthLoadingScreen onComplete={handleLoadingComplete} />;
+        }
+      })()}
+    </>
+  );
 }

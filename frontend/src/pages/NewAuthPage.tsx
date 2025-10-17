@@ -6,6 +6,7 @@ import PhoneAuth from "../components/PhoneAuth";
 import PhoneOTPVerification from "../components/PhoneOTPVerification";
 import WelcomeLoading from "../components/WelcomeLoading";
 import AdminLoginFlow from "../components/AdminLoginFlow";
+import { Toaster } from "@/components/ui/toaster";
 import { useState } from "react";
 
 type AuthStep =
@@ -113,45 +114,52 @@ export default function NewAuthPage({ onComplete }: NewAuthPageProps) {
   }
 
   // Render current step
-  switch (currentStep) {
-    case 'loading':
-      return <AuthLoadingScreen onComplete={handleLoadingComplete} />;
+  return (
+    <>
+      <Toaster />
+      {(() => {
+        switch (currentStep) {
+          case 'loading':
+            return <AuthLoadingScreen onComplete={handleLoadingComplete} />;
 
-    case 'phone-input':
-      return (
-        <PhoneAuth
-          onOTPSent={handleOTPSent}
-          onBack={() => setCurrentStep('loading')}
-          onSwitchToAdmin={handleSwitchToAdmin}
-        />
-      );
+          case 'phone-input':
+            return (
+              <PhoneAuth
+                onOTPSent={handleOTPSent}
+                onBack={() => setCurrentStep('loading')}
+                onSwitchToAdmin={handleSwitchToAdmin}
+              />
+            );
 
-    case 'otp-verification':
-      return (
-        <PhoneOTPVerification
-          phoneNumber={phoneNumber}
-          onVerificationSuccess={handleOTPVerificationSuccess}
-          onBack={() => setCurrentStep('phone-input')}
-        />
-      );
+          case 'otp-verification':
+            return (
+              <PhoneOTPVerification
+                phoneNumber={phoneNumber}
+                onVerificationSuccess={handleOTPVerificationSuccess}
+                onBack={() => setCurrentStep('phone-input')}
+              />
+            );
 
-    case 'welcome-loading':
-      return (
-        <WelcomeLoading
-          onComplete={handleWelcomeComplete}
-          userName={user?.name}
-        />
-      );
+          case 'welcome-loading':
+            return (
+              <WelcomeLoading
+                onComplete={handleWelcomeComplete}
+                userName={user?.name}
+              />
+            );
 
-    case 'admin-login':
-      return (
-        <AdminLoginFlow
-          onAuthSuccess={handleAdminAuthSuccess}
-          onSwitchToCustomer={handleSwitchToCustomer}
-        />
-      );
+          case 'admin-login':
+            return (
+              <AdminLoginFlow
+                onAuthSuccess={handleAdminAuthSuccess}
+                onSwitchToCustomer={handleSwitchToCustomer}
+              />
+            );
 
-    default:
-      return <AuthLoadingScreen onComplete={handleLoadingComplete} />;
-  }
+          default:
+            return <AuthLoadingScreen onComplete={handleLoadingComplete} />;
+        }
+      })()}
+    </>
+  );
 }
