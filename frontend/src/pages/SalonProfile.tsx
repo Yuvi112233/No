@@ -192,11 +192,11 @@ export default function SalonProfile() {
         <div className="relative h-64 md:h-80 bg-gradient-to-r from-teal-600 to-cyan-600 overflow-hidden">
           {/* Back Button */}
           <button
-            onClick={() => window.history.back()}
+            onClick={() => setLocation('/')}
             className="absolute top-4 left-4 z-30 flex items-center gap-2 bg-white/90 backdrop-blur-sm text-gray-700 hover:text-teal-600 px-3 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            
+            <span className="font-medium text-sm">Back</span>
           </button>
           {(salon as any).photos && (salon as any).photos.length > 0 ? (
             <>

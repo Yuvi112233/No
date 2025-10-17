@@ -4,7 +4,14 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Trash2, Tag, ShoppingCart, Clock, CheckCircle2, Star } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ArrowLeft, Trash2, Tag, ShoppingCart, Clock, CheckCircle2, Star, Wallet, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -27,6 +34,7 @@ export default function QueueSummary() {
   const { toast } = useToast();
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('pay-at-salon');
   const {
     isModalOpen,
     isPhoneModalOpen,
@@ -292,6 +300,119 @@ export default function QueueSummary() {
                   <p className="text-gray-600 text-sm">No offers available</p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Payment Method */}
+          <Card className="mb-6 border border-teal-100">
+            <CardHeader className="border-b border-teal-100 bg-gray-50/50">
+              <CardTitle className="text-xl text-gray-900 flex items-center gap-2">
+                <Wallet className="w-5 h-5 text-teal-600" />
+                Payment Method
+              </CardTitle>
+              <p className="text-sm text-gray-600 mt-1">Choose your preferred payment option</p>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <Select value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod}>
+                <SelectTrigger className="w-full h-12 border-2 border-gray-200 focus:border-teal-500 rounded-xl">
+                  <SelectValue placeholder="Select payment method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pay-at-salon">
+                    <div className="flex items-center gap-3 py-1">
+                      <Wallet className="w-5 h-5 text-teal-600" />
+                      <div>
+                        <div className="font-semibold text-gray-900">Pay at Salon</div>
+                        <div className="text-xs text-gray-600">Pay after service completion</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="upi" disabled>
+                    <div className="flex items-center gap-3 py-1 opacity-60">
+                      <div className="w-8 h-8 flex items-center justify-center bg-white rounded border border-gray-200">
+                        <img
+                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/2560px-UPI-Logo-vector.svg.png"
+                          alt="Paytm"
+                          className="w-6 h-6 object-contain"
+                        />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-700 flex items-center gap-2">
+                          UPI
+                          <Badge className="bg-amber-500 text-white text-xs px-1.5 py-0">Coming Soon</Badge>
+                        </div>
+                        <div className="text-xs text-gray-500">Google Pay, PhonePe, Paytm & more</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="paytm" disabled>
+                    <div className="flex items-center gap-3 py-1 opacity-60">
+                      <div className="w-8 h-8 flex items-center justify-center bg-white rounded border border-gray-200">
+                        <img
+                          src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg"
+                          alt="Paytm"
+                          className="w-6 h-6 object-contain"
+                        />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-700 flex items-center gap-2">
+                          Paytm
+                          <Badge className="bg-amber-500 text-white text-xs px-1.5 py-0">Coming Soon</Badge>
+                        </div>
+                        <div className="text-xs text-gray-500">Pay using Paytm wallet</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="googlepay" disabled>
+                    <div className="flex items-center gap-3 py-1 opacity-60">
+                      <div className="w-8 h-8 flex items-center justify-center bg-white rounded border border-gray-200">
+                        <img
+                          src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg"
+                          alt="Google Pay"
+                          className="w-6 h-6 object-contain"
+                        />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-700 flex items-center gap-2">
+                          Google Pay
+                          <Badge className="bg-amber-500 text-white text-xs px-1.5 py-0">Coming Soon</Badge>
+                        </div>
+                        <div className="text-xs text-gray-500">Quick & secure payments</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="phonepe" disabled>
+                    <div className="flex items-center gap-3 py-1 opacity-60">
+                      <div className="w-8 h-8 flex items-center justify-center bg-white rounded border border-gray-200">
+                        <img
+                          src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/phonepe-icon.png"
+                          alt="PhonePe"
+                          className="w-6 h-6 object-contain"
+                        />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-700 flex items-center gap-2">
+                          PhonePe
+                          <Badge className="bg-amber-500 text-white text-xs px-1.5 py-0">Coming Soon</Badge>
+                        </div>
+                        <div className="text-xs text-gray-500">Fast & easy payments</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="card" disabled>
+                    <div className="flex items-center gap-3 py-1 opacity-60">
+                      <CreditCard className="w-5 h-5 text-gray-400" />
+                      <div>
+                        <div className="font-semibold text-gray-700 flex items-center gap-2">
+                          Credit/Debit Card
+                          <Badge className="bg-amber-500 text-white text-xs px-1.5 py-0">Coming Soon</Badge>
+                        </div>
+                        <div className="text-xs text-gray-500">Visa, Mastercard, Rupay & more</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </CardContent>
           </Card>
 
