@@ -2,14 +2,14 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card"; 
-import { Badge } from "@/components/ui/badge"; 
-import { Star, MapPin, Clock, Heart, ShoppingCart, Zap, ImageIcon, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Star, MapPin, Clock, Heart, ShoppingCart, Zap, ImageIcon, X, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
-import { useToast } from "@/hooks/use-toast"; 
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "../context/AuthContext";
-import { useCart } from "../context/CartContext"; 
+import { useCart } from "../context/CartContext";
 import { api } from "../lib/api";
 import type { SalonDetails } from "../types";
 
@@ -190,6 +190,14 @@ export default function SalonProfile() {
       <div className="relative">
         {/* Hero Image */}
         <div className="relative h-64 md:h-80 bg-gradient-to-r from-teal-600 to-cyan-600 overflow-hidden">
+          {/* Back Button */}
+          <button
+            onClick={() => window.history.back()}
+            className="absolute top-4 left-4 z-30 flex items-center gap-2 bg-white/90 backdrop-blur-sm text-gray-700 hover:text-teal-600 px-3 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            
+          </button>
           {(salon as any).photos && (salon as any).photos.length > 0 ? (
             <>
               <img
