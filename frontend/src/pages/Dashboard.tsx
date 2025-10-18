@@ -1053,6 +1053,37 @@ export default function Dashboard() {
                           }}
                         />
                       )}
+                {/* Tab Content */}
+                {activeTab === 'queue' && (
+                  <div className="space-y-4">
+                    {/* Arrival Verification Panel - Show when there are pending verifications */}
+                    {hasPendingVerifications && selectedSalonId && (
+                      <ArrivalVerificationPanel
+                        salonId={selectedSalonId}
+                        onVerificationComplete={() => {
+                          queryClient.invalidateQueries({
+                            queryKey: ['/api/salons', selectedSalonId, 'queues']
+                          });
+                        }}
+                      />
+                    )}
+
+                    <div className="flex items-center justify-between gap-2">
+                      <h2 className="text-lg font-bold text-black flex-shrink-0">Current Queue</h2>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowCompletedQueues(!showCompletedQueues)}
+                          className="text-xs px-2 h-7"
+                        >
+                          {showCompletedQueues ? 'Hide' : 'Show'}
+                        </Button>
+                        <Badge variant="outline" className="border-gray-300 text-gray-600 text-xs px-2">
+                          {filteredQueues.length}
+                        </Badge>
+                      </div>
+                    </div>
 
                       <div className="flex items-center justify-between">
                         <h2 className="text-lg font-bold text-black">Current Queue</h2>

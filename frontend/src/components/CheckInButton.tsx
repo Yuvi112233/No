@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { MapPin, Loader2, CheckCircle, AlertCircle, Clock } from "lucide-react";
+import { MapPin, Loader2, CheckCircle, AlertCircle, Clock, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
 
@@ -14,7 +14,7 @@ interface CheckInButtonProps {
   onCheckInError: (error: string) => void;
 }
 
-type CheckInStatus = 'idle' | 'requesting_location' | 'verifying' | 'success' | 'pending' | 'error';
+type CheckInStatus = 'idle' | 'requesting_location' | 'verifying' | 'success' | 'pending' | 'error' | 'permission_denied';
 
 interface CheckInResult {
   success: boolean;
@@ -96,7 +96,7 @@ export default function CheckInButton({
       });
 
       const { latitude, longitude, accuracy } = position.coords;
-      
+
       // Calculate distance
       const dist = calculateDistance(
         latitude,
@@ -138,13 +138,13 @@ export default function CheckInButton({
         throw new Error(result.message);
       }
     } catch (error: any) {
-      setStatus('error');
-      
       let userMessage = 'Failed to check in. Please try again.';
-      
+      let newStatus: CheckInStatus = 'error';
+
       if (error.code === 1) {
         // Permission denied
-        userMessage = 'Location permission denied. Please enable location access to check in.';
+        newStatus = 'permission_denied';
+        userMessage = 'Location permission denied. Please enable location access in your browser settings.';
       } else if (error.code === 2) {
         // Position unavailable
         userMessage = 'Unable to get your location. Please check your device settings.';
@@ -155,19 +155,22 @@ export default function CheckInButton({
         userMessage = error.message;
       }
 
+      setStatus(newStatus);
       setErrorMessage(userMessage);
       onCheckInError(userMessage);
-      
+
       toast({
         title: "Check-in failed",
         description: userMessage,
         variant: "destructive",
       });
 
-      // Reset to idle after 3 seconds
-      setTimeout(() => {
-        setStatus('idle');
-      }, 3000);
+      // Only auto-reset for non-permission errors
+      if (newStatus !== 'permission_denied') {
+        setTimeout(() => {
+          setStatus('idle');
+        }, 3000);
+      }
     }
   };
 
@@ -201,6 +204,13 @@ export default function CheckInButton({
             Awaiting Confirmation
           </>
         );
+      case 'permission_denied':
+        return (
+          <>
+            <Settings className="w-5 h-5 mr-2" />
+            Retry Check-In
+          </>
+        );
       case 'error':
         return (
           <>
@@ -224,6 +234,8 @@ export default function CheckInButton({
         return 'bg-green-600 hover:bg-green-700';
       case 'pending':
         return 'bg-yellow-600 hover:bg-yellow-700';
+      case 'permission_denied':
+        return 'bg-orange-600 hover:bg-orange-700';
       case 'error':
         return 'bg-red-600 hover:bg-red-700';
       default:
@@ -245,11 +257,34 @@ export default function CheckInButton({
       {/* Check-in button */}
       <Button
         onClick={handleCheckIn}
-        disabled={status !== 'idle' && status !== 'error'}
+        disabled={status !== 'idle' && status !== 'error' && status !== 'permission_denied'}
         className={`w-full h-12 text-base font-semibold text-white shadow-lg transition-all ${getButtonColor()}`}
       >
         {getButtonContent()}
       </Button>
+
+      {/* Permission denied message with instructions */}
+      {status === 'permission_denied' && (
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 space-y-3">
+          <div className="flex items-start gap-2">
+            <Settings className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-orange-900 mb-2">
+                Location Permission Required
+              </p>
+              <p className="text-xs text-orange-700 mb-3">
+                To check in, you need to enable location access. Here's how:
+              </p>
+              <ol className="text-xs text-orange-700 space-y-2 list-decimal list-inside">
+                <li>Click the lock icon (🔒) or info icon (ⓘ) in your browser's address bar</li>
+                <li>Find "Location" in the permissions list</li>
+                <li>Change it from "Block" to "Allow"</li>
+                <li>Click the "Retry Check-In" button above</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Error message */}
       {errorMessage && status === 'error' && (
