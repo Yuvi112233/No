@@ -29,12 +29,8 @@ class WhatsAppService {
 
   async sendOTP(phoneNumber: string, otp: string, name: string = 'User'): Promise<boolean> {
     try {
-      console.log(`Attempting to send WhatsApp OTP to: ${phoneNumber}`);
-      console.log(`WhatsApp config check - Token length: ${this.accessToken.length}, Phone ID: ${this.phoneNumberId}`);
-      
       // Ensure phone number is in international format
       const formattedPhone = this.formatPhoneNumber(phoneNumber);
-      console.log(`Formatted phone number: ${formattedPhone}`);
       
       // For now, we'll use a simple text message since templates need approval
       const textMessageData = {
@@ -56,8 +52,7 @@ class WhatsAppService {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        console.log('WhatsApp message sent successfully:', data);
+        await response.json();
         return true;
       } else {
         const errorData = await response.json();

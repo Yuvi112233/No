@@ -725,237 +725,237 @@ export default function Dashboard() {
       {salons.length === 0 ? (
         <div className="flex-1 overflow-y-auto overflow-x-hidden relative z-10" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="p-4 pb-24">
-          <div className="bg-white border border-teal-200 rounded-3xl p-8 text-center mt-8 shadow-sm">
-            <div className="w-20 h-20 bg-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Settings className="h-10 w-10 text-white" />
-            </div>
-            <h2 className="text-xl font-bold text-teal-900 mb-3">No salons found</h2>
-            <p className="text-teal-700 text-sm mb-6">
-              Create your first salon to start managing queues and tracking analytics.
-            </p>
+            <div className="bg-white border border-teal-200 rounded-3xl p-8 text-center mt-8 shadow-sm">
+              <div className="w-20 h-20 bg-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Settings className="h-10 w-10 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-teal-900 mb-3">No salons found</h2>
+              <p className="text-teal-700 text-sm mb-6">
+                Create your first salon to start managing queues and tracking analytics.
+              </p>
 
-            {/* Create Salon Dialog */}
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  className="w-full bg-teal-600 text-white hover:bg-teal-700 rounded-2xl py-3 font-medium"
-                  data-testid="button-create-salon"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Your First Salon
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="mx-2 max-w-[95vw] sm:max-w-md w-full max-h-[90vh] overflow-hidden rounded-3xl p-0">
-                <div className="max-h-[90vh] overflow-y-auto">
-                  <DialogHeader className="text-center p-6 pb-4 sticky top-0 bg-white z-10 border-b border-gray-100">
-                    <DialogTitle className="text-lg font-bold">Create New Salon</DialogTitle>
-                    <DialogDescription className="text-sm text-gray-600">
-                      Add your salon to SmartQ and start managing queues.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="p-6 pt-4">
-                    <Form {...salonForm}>
-                      <form
-                        onSubmit={(e) => {
-                          console.log('🔥 Form submit event triggered');
-                          console.log('Form errors:', salonForm.formState.errors);
-                          console.log('Form values:', salonForm.getValues());
-                          console.log('Form is valid:', salonForm.formState.isValid);
-                          salonForm.handleSubmit(
-                            (data) => {
-                              console.log('✅ Form validation passed, calling onSalonSubmit');
-                              onSalonSubmit(data);
-                            },
-                            (errors) => {
-                              console.log('❌ Form validation failed:', errors);
-                              // Show validation errors to user
-                              const errorMessages = Object.entries(errors)
-                                .map(([field, error]) => `${field}: ${error?.message}`)
-                                .join(', ');
-                              toast({
-                                title: "Form Validation Error",
-                                description: `Please fix the following: ${errorMessages}`,
-                                variant: "destructive",
-                              });
-                            }
-                          )(e);
-                        }}
-                        className="space-y-4"
-                      >
-                        <FormField
-                          control={salonForm.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-sm font-medium text-teal-900">Salon Name</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="Enter salon name"
-                                  {...field}
-                                  data-testid="input-salon-name"
-                                  className="h-12 rounded-xl border-gray-300 focus:border-teal-500 focus:ring-teal-500 text-base"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={salonForm.control}
-                          name="type"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-sm font-medium text-teal-900">Salon Type</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger
-                                    data-testid="select-salon-type"
-                                    className="h-12 rounded-xl border-gray-300 focus:border-teal-500 focus:ring-teal-500 text-base"
-                                  >
-                                    <SelectValue placeholder="Select salon type" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent className="rounded-xl">
-                                  <SelectItem value="men">Men's Salon</SelectItem>
-                                  <SelectItem value="women">Women's Salon</SelectItem>
-                                  <SelectItem value="unisex">Unisex Salon</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={salonForm.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-sm font-medium text-teal-900">Description</FormLabel>
-                              <FormControl>
-                                <Textarea
-                                  placeholder="Describe your salon..."
-                                  {...field}
-                                  value={field.value || ""}
-                                  data-testid="textarea-salon-description"
-                                  className="rounded-xl border-gray-300 focus:border-teal-500 focus:ring-teal-500 resize-none text-base min-h-[80px]"
-                                  rows={3}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        {/* Location Picker */}
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-teal-900">
-                            Salon Location <span className="text-red-500">*</span>
-                          </label>
-                          <LocationPicker
-                            onLocationSelect={(location) => {
-                              setSelectedLocation(location);
-                              // Update the form's location field
-                              salonForm.setValue('location', location.address);
-                            }}
-                            initialLocation={selectedLocation}
-                          />
-                        </div>
-
-                        {/* Image Upload */}
-                        <div className="space-y-3">
-                          <label className="text-sm font-medium text-teal-900">
-                            Salon Photos <span className="text-red-500">*</span>
-                          </label>
-                          <div className={`border-2 border-dashed rounded-2xl p-6 text-center transition-colors ${selectedImages.length === 0
-                            ? 'border-red-200 bg-red-50'
-                            : 'border-teal-200 bg-teal-50'
-                            }`}>
-                            <Camera className={`h-10 w-10 mx-auto mb-3 ${selectedImages.length === 0 ? 'text-red-400' : 'text-teal-400'
-                              }`} />
-                            <input
-                              type="file"
-                              accept="image/*"
-                              multiple
-                              onChange={(e) => {
-                                const files = Array.from(e.target.files || []);
-                                setSelectedImages(files);
-                              }}
-                              className="hidden"
-                              id="salon-images"
-                              data-testid="input-salon-images"
-                            />
-                            <label
-                              htmlFor="salon-images"
-                              className="cursor-pointer block"
-                            >
-                              <div className="text-base font-medium text-teal-900 mb-2">
-                                {selectedImages.length === 0 ? "Add Photos" : `${selectedImages.length} Selected`}
-                              </div>
-                              <div className={`text-sm ${selectedImages.length === 0 ? 'text-red-500' : 'text-teal-600'
-                                }`}>
-                                {selectedImages.length === 0
-                                  ? "Tap to select salon photos"
-                                  : `${selectedImages.length} photo${selectedImages.length !== 1 ? 's' : ''} ready to upload`}
-                              </div>
-                            </label>
-
-                            {selectedImages.length > 0 && (
-                              <div className="grid grid-cols-3 gap-2 mt-4">
-                                {selectedImages.slice(0, 3).map((file, index) => (
-                                  <div key={index} className="relative">
-                                    <img
-                                      src={URL.createObjectURL(file)}
-                                      alt={`Preview ${index + 1}`}
-                                      className="w-full h-20 object-cover rounded-lg border-2 border-teal-200"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setSelectedImages(prev => prev.filter((_, i) => i !== index));
-                                      }}
-                                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold shadow-lg"
-                                    >
-                                      ×
-                                    </button>
-                                  </div>
-                                ))}
-                                {selectedImages.length > 3 && (
-                                  <div className="flex items-center justify-center bg-teal-100 rounded-lg text-sm text-teal-700 font-medium h-20">
-                                    +{selectedImages.length - 3} more
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <Button
-                          type="submit"
-                          className={`w-full rounded-2xl py-3 font-medium mt-6 ${selectedImages.length === 0
-                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                            : "bg-teal-600 text-white hover:bg-teal-700"
-                            }`}
-                          disabled={createSalonMutation.isPending || selectedImages.length === 0}
-                          data-testid="button-submit-salon"
+              {/* Create Salon Dialog */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    className="w-full bg-teal-600 text-white hover:bg-teal-700 rounded-2xl py-3 font-medium"
+                    data-testid="button-create-salon"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Your First Salon
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="mx-2 max-w-[95vw] sm:max-w-md w-full max-h-[90vh] overflow-hidden rounded-3xl p-0">
+                  <div className="max-h-[90vh] overflow-y-auto">
+                    <DialogHeader className="text-center p-6 pb-4 sticky top-0 bg-white z-10 border-b border-gray-100">
+                      <DialogTitle className="text-lg font-bold">Create New Salon</DialogTitle>
+                      <DialogDescription className="text-sm text-gray-600">
+                        Add your salon to SmartQ and start managing queues.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="p-6 pt-4">
+                      <Form {...salonForm}>
+                        <form
+                          onSubmit={(e) => {
+                            console.log('🔥 Form submit event triggered');
+                            console.log('Form errors:', salonForm.formState.errors);
+                            console.log('Form values:', salonForm.getValues());
+                            console.log('Form is valid:', salonForm.formState.isValid);
+                            salonForm.handleSubmit(
+                              (data) => {
+                                console.log('✅ Form validation passed, calling onSalonSubmit');
+                                onSalonSubmit(data);
+                              },
+                              (errors) => {
+                                console.log('❌ Form validation failed:', errors);
+                                // Show validation errors to user
+                                const errorMessages = Object.entries(errors)
+                                  .map(([field, error]) => `${field}: ${error?.message}`)
+                                  .join(', ');
+                                toast({
+                                  title: "Form Validation Error",
+                                  description: `Please fix the following: ${errorMessages}`,
+                                  variant: "destructive",
+                                });
+                              }
+                            )(e);
+                          }}
+                          className="space-y-4"
                         >
-                          {createSalonMutation.isPending ? (
-                            <div className="flex items-center justify-center space-x-2">
-                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                              <span>Creating...</span>
+                          <FormField
+                            control={salonForm.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm font-medium text-teal-900">Salon Name</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Enter salon name"
+                                    {...field}
+                                    data-testid="input-salon-name"
+                                    className="h-12 rounded-xl border-gray-300 focus:border-teal-500 focus:ring-teal-500 text-base"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={salonForm.control}
+                            name="type"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm font-medium text-teal-900">Salon Type</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger
+                                      data-testid="select-salon-type"
+                                      className="h-12 rounded-xl border-gray-300 focus:border-teal-500 focus:ring-teal-500 text-base"
+                                    >
+                                      <SelectValue placeholder="Select salon type" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent className="rounded-xl">
+                                    <SelectItem value="men">Men's Salon</SelectItem>
+                                    <SelectItem value="women">Women's Salon</SelectItem>
+                                    <SelectItem value="unisex">Unisex Salon</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={salonForm.control}
+                            name="description"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm font-medium text-teal-900">Description</FormLabel>
+                                <FormControl>
+                                  <Textarea
+                                    placeholder="Describe your salon..."
+                                    {...field}
+                                    value={field.value || ""}
+                                    data-testid="textarea-salon-description"
+                                    className="rounded-xl border-gray-300 focus:border-teal-500 focus:ring-teal-500 resize-none text-base min-h-[80px]"
+                                    rows={3}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          {/* Location Picker */}
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-teal-900">
+                              Salon Location <span className="text-red-500">*</span>
+                            </label>
+                            <LocationPicker
+                              onLocationSelect={(location) => {
+                                setSelectedLocation(location);
+                                // Update the form's location field
+                                salonForm.setValue('location', location.address);
+                              }}
+                              initialLocation={selectedLocation}
+                            />
+                          </div>
+
+                          {/* Image Upload */}
+                          <div className="space-y-3">
+                            <label className="text-sm font-medium text-teal-900">
+                              Salon Photos <span className="text-red-500">*</span>
+                            </label>
+                            <div className={`border-2 border-dashed rounded-2xl p-6 text-center transition-colors ${selectedImages.length === 0
+                              ? 'border-red-200 bg-red-50'
+                              : 'border-teal-200 bg-teal-50'
+                              }`}>
+                              <Camera className={`h-10 w-10 mx-auto mb-3 ${selectedImages.length === 0 ? 'text-red-400' : 'text-teal-400'
+                                }`} />
+                              <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={(e) => {
+                                  const files = Array.from(e.target.files || []);
+                                  setSelectedImages(files);
+                                }}
+                                className="hidden"
+                                id="salon-images"
+                                data-testid="input-salon-images"
+                              />
+                              <label
+                                htmlFor="salon-images"
+                                className="cursor-pointer block"
+                              >
+                                <div className="text-base font-medium text-teal-900 mb-2">
+                                  {selectedImages.length === 0 ? "Add Photos" : `${selectedImages.length} Selected`}
+                                </div>
+                                <div className={`text-sm ${selectedImages.length === 0 ? 'text-red-500' : 'text-teal-600'
+                                  }`}>
+                                  {selectedImages.length === 0
+                                    ? "Tap to select salon photos"
+                                    : `${selectedImages.length} photo${selectedImages.length !== 1 ? 's' : ''} ready to upload`}
+                                </div>
+                              </label>
+
+                              {selectedImages.length > 0 && (
+                                <div className="grid grid-cols-3 gap-2 mt-4">
+                                  {selectedImages.slice(0, 3).map((file, index) => (
+                                    <div key={index} className="relative">
+                                      <img
+                                        src={URL.createObjectURL(file)}
+                                        alt={`Preview ${index + 1}`}
+                                        className="w-full h-20 object-cover rounded-lg border-2 border-teal-200"
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setSelectedImages(prev => prev.filter((_, i) => i !== index));
+                                        }}
+                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold shadow-lg"
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  ))}
+                                  {selectedImages.length > 3 && (
+                                    <div className="flex items-center justify-center bg-teal-100 rounded-lg text-sm text-teal-700 font-medium h-20">
+                                      +{selectedImages.length - 3} more
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
-                          ) : selectedImages.length === 0 ? (
-                            "Add Photos to Continue"
-                          ) : (
-                            "Create Salon"
-                          )}
-                        </Button>
-                      </form>
-                    </Form>
+                          </div>
+
+                          <Button
+                            type="submit"
+                            className={`w-full rounded-2xl py-3 font-medium mt-6 ${selectedImages.length === 0
+                              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                              : "bg-teal-600 text-white hover:bg-teal-700"
+                              }`}
+                            disabled={createSalonMutation.isPending || selectedImages.length === 0}
+                            data-testid="button-submit-salon"
+                          >
+                            {createSalonMutation.isPending ? (
+                              <div className="flex items-center justify-center space-x-2">
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                <span>Creating...</span>
+                              </div>
+                            ) : selectedImages.length === 0 ? (
+                              "Add Photos to Continue"
+                            ) : (
+                              "Create Salon"
+                            )}
+                          </Button>
+                        </form>
+                      </Form>
+                    </div>
                   </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </div>
       ) : (
@@ -966,54 +966,54 @@ export default function Dashboard() {
               <>
                 {/* Analytics Cards - Mobile Grid */}
                 <div className="p-4 pb-24">
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
-                    <div className="flex items-center justify-between mb-2">
-                      <Users className="h-5 w-5 text-teal-600" />
-                      <span className="text-xs text-teal-500">TODAY</span>
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
+                      <div className="flex items-center justify-between mb-2">
+                        <Users className="h-5 w-5 text-teal-600" />
+                        <span className="text-xs text-teal-500">TODAY</span>
+                      </div>
+                      <div className="text-2xl font-bold text-teal-900" data-testid="text-customers-today">
+                        {analyticsLoading ? "..." : analytics?.customersToday || 0}
+                      </div>
+                      <div className="text-xs text-teal-700">Customers</div>
                     </div>
-                    <div className="text-2xl font-bold text-teal-900" data-testid="text-customers-today">
-                      {analyticsLoading ? "..." : analytics?.customersToday || 0}
+
+                    <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
+                      <div className="flex items-center justify-between mb-2">
+                        <Clock className="h-5 w-5 text-teal-600" />
+                        <span className="text-xs text-teal-500">AVG</span>
+                      </div>
+                      <div className="text-2xl font-bold text-teal-900" data-testid="text-avg-wait">
+                        {analyticsLoading ? "..." : `${Math.round(analytics?.avgWaitTime || 0)}m`}
+                      </div>
+                      <div className="text-xs text-teal-700">Wait Time</div>
                     </div>
-                    <div className="text-xs text-teal-700">Customers</div>
+
+                    <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
+                      <div className="flex items-center justify-between mb-2">
+                        <Star className="h-5 w-5 text-teal-600" />
+                        <span className="text-xs text-teal-500">RATING</span>
+                      </div>
+                      <div className="text-2xl font-bold text-teal-900" data-testid="text-rating">
+                        {analyticsLoading ? "..." : analytics?.rating?.toFixed(1) || "0.0"}
+                      </div>
+                      <div className="text-xs text-teal-700">Stars</div>
+                    </div>
+
+                    <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
+                      <div className="flex items-center justify-between mb-2">
+                        <IndianRupee className="h-5 w-5 text-teal-600" />
+                        <span className="text-xs text-teal-500">REVENUE</span>
+                      </div>
+                      <div className="text-2xl font-bold text-teal-900" data-testid="text-revenue">
+                        {analyticsLoading ? "..." : `${analytics?.revenue?.toFixed(0) || "0"}`}
+                      </div>
+                      <div className="text-xs text-teal-700">Total</div>
+                    </div>
                   </div>
 
-                  <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
-                    <div className="flex items-center justify-between mb-2">
-                      <Clock className="h-5 w-5 text-teal-600" />
-                      <span className="text-xs text-teal-500">AVG</span>
-                    </div>
-                    <div className="text-2xl font-bold text-teal-900" data-testid="text-avg-wait">
-                      {analyticsLoading ? "..." : `${Math.round(analytics?.avgWaitTime || 0)}m`}
-                    </div>
-                    <div className="text-xs text-teal-700">Wait Time</div>
-                  </div>
-
-                  <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
-                    <div className="flex items-center justify-between mb-2">
-                      <Star className="h-5 w-5 text-teal-600" />
-                      <span className="text-xs text-teal-500">RATING</span>
-                    </div>
-                    <div className="text-2xl font-bold text-teal-900" data-testid="text-rating">
-                      {analyticsLoading ? "..." : analytics?.rating?.toFixed(1) || "0.0"}
-                    </div>
-                    <div className="text-xs text-teal-700">Stars</div>
-                  </div>
-
-                  <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
-                    <div className="flex items-center justify-between mb-2">
-                      <IndianRupee className="h-5 w-5 text-teal-600" />
-                      <span className="text-xs text-teal-500">REVENUE</span>
-                    </div>
-                    <div className="text-2xl font-bold text-teal-900" data-testid="text-revenue">
-                      {analyticsLoading ? "..." : `${analytics?.revenue?.toFixed(0) || "0"}`}
-                    </div>
-                    <div className="text-xs text-teal-700">Total</div>
-                  </div>
-                </div>
-
-                {/* Mobile Tab Navigation */}
-                {/* <div className="mb-6">
+                  {/* Mobile Tab Navigation */}
+                  {/* <div className="mb-6">
                   <div className="flex space-x-1 p-1 bg-gray-100 rounded-2xl">
                     {[
                       { id: 'queue', label: 'Queue', icon: Users },
@@ -1039,536 +1039,457 @@ export default function Dashboard() {
                   </div>
                 </div> */}
 
-                {/* Tab Content */}
-                {activeTab === 'queue' && (
-                  <div className="space-y-4">
-                    {/* Arrival Verification Panel - Show when there are pending verifications */}
-                    {hasPendingVerifications && selectedSalonId && (
-                      <ArrivalVerificationPanel
-                        salonId={selectedSalonId}
-                        onVerificationComplete={() => {
-                          queryClient.invalidateQueries({
-                            queryKey: ['/api/salons', selectedSalonId, 'queues']
-                          });
-                        }}
-                      />
-                    )}
+                  {/* Tab Content */}
+                  {activeTab === 'queue' && (
+                    <div className="space-y-4">
+                      {/* Arrival Verification Panel - Show when there are pending verifications */}
+                      {hasPendingVerifications && selectedSalonId && (
+                        <ArrivalVerificationPanel
+                          salonId={selectedSalonId}
+                          onVerificationComplete={() => {
+                            queryClient.invalidateQueries({
+                              queryKey: ['/api/salons', selectedSalonId, 'queues']
+                            });
+                          }}
+                        />
+                      )}
 
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-bold text-black">Current Queue</h2>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setShowCompletedQueues(!showCompletedQueues)}
-                          className="text-xs"
-                        >
-                          {showCompletedQueues ? 'Hide' : 'Show'} Completed
-                        </Button>
-                        <Badge variant="outline" className="border-gray-300 text-gray-600">
-                          {filteredQueues.length} {showCompletedQueues ? 'total' : 'active'}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {queuesLoading ? (
-                      <div className="space-y-3">
-                        {[...Array(3)].map((_, i) => (
-                          <div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse"></div>
-                        ))}
-                      </div>
-                    ) : filteredQueues.length === 0 ? (
-                      <div className="text-center py-12">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <Users className="h-8 w-8 text-gray-400" />
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-lg font-bold text-black">Current Queue</h2>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowCompletedQueues(!showCompletedQueues)}
+                            className="text-xs"
+                          >
+                            {showCompletedQueues ? 'Hide' : 'Show'} Completed
+                          </Button>
+                          <Badge variant="outline" className="border-gray-300 text-gray-600">
+                            {filteredQueues.length} {showCompletedQueues ? 'total' : 'active'}
+                          </Badge>
                         </div>
-                        <p className="text-gray-500 text-sm">No customers in queue</p>
-                        <p className="text-gray-400 text-xs mt-1">New customers will appear here</p>
                       </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {filteredQueues.map((queue) => (
-                          <div key={queue.id} className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm" data-testid={`queue-item-${queue.id}`}>
-                            <div className="flex items-start justify-between mb-3">
-                              <div className="flex items-center space-x-3">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${queue.status === 'in-progress'
-                                  ? 'bg-black text-white'
-                                  : 'border-2 border-dashed border-gray-300 text-gray-500'
-                                  }`}>
-                                  {queue.position}
-                                </div>
-                                <div>
-                                  <div className="font-medium text-black text-sm" data-testid={`text-customer-name-${queue.id}`}>
-                                    {queue.user?.name || 'Customer'}
-                                  </div>
-                                  {queue.user?.phone && (
-                                    <div className="text-xs text-gray-500 mt-0.5">
-                                      {queue.user.phone}
-                                    </div>
-                                  )}
-                                  <div className="mt-1">
-                                    <QueueStatusBadge status={queue.status} />
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
 
-                            {/* Services */}
-                            <div className="mb-4" data-testid={`text-services-${queue.id}`}>
-                              {queue.services && Array.isArray(queue.services) && queue.services.length > 0 ? (
-                                <div className="space-y-2">
-                                  {queue.services.map((service) => (
-                                    <div key={service.id} className="flex justify-between items-center text-sm">
-                                      <span className="text-gray-700">{service.name}</span>
-                                      <span className="text-black font-medium">₹{service.price}</span>
-                                    </div>
-                                  ))}
-                                  <div className="border-t border-gray-100 pt-2 flex justify-between items-center">
-                                    <span className="text-sm font-medium text-black">Total</span>
-                                    <span className="font-bold text-black">₹{queue.totalPrice}</span>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="flex justify-between items-center text-sm">
-                                  <span className="text-gray-700">{queue.service?.name}</span>
-                                  <span className="text-black font-medium">₹{queue.service?.price}</span>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Action Buttons */}
-                            <QueueActionButtons
-                              queue={queue}
-                              onActionComplete={() => {
-                                queryClient.invalidateQueries({
-                                  queryKey: ['/api/salons', selectedSalonId, 'queues']
-                                });
-                              }}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {activeTab === 'services' && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-bold text-black">Services</h2>
-                      <Button
-                        className="bg-teal-600 text-white hover:bg-teal-700 rounded-xl px-4 py-2"
-                        data-testid="button-add-service"
-                        onClick={() => {
-                          const currentSalon = salons.find((s: any) => s.id === selectedSalonId);
-                          console.log('Add Service clicked - Current salon:', {
-                            id: currentSalon?.id,
-                            name: currentSalon?.name,
-                            manualLocation: currentSalon?.manualLocation,
-                            hasManualLocation: !!currentSalon?.manualLocation && currentSalon.manualLocation.trim() !== ''
-                          });
-
-                          if (!currentSalon?.manualLocation || currentSalon.manualLocation.trim() === '') {
-                            console.log('Opening location modal - no manual location set');
-                            setIsLocationModalOpen(true);
-                          } else {
-                            console.log('Opening service dialog - manual location exists:', currentSalon.manualLocation);
-                            setIsServiceDialogOpen(true);
-                          }
-                        }}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add
-                      </Button>
-                      <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
-                        <DialogContent className="mx-2 max-w-[95vw] sm:max-w-md w-full max-h-[90vh] overflow-hidden rounded-3xl p-0">
-                          <div className="max-h-[90vh] overflow-y-auto">
-                            <DialogHeader className="text-center p-6 pb-4 sticky top-0 bg-white z-10 border-b border-gray-100">
-                              <DialogTitle className="text-lg font-bold">Add New Service</DialogTitle>
-                              <DialogDescription className="text-sm text-gray-600">
-                                Create a new service for your salon.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="p-6 pt-4">
-                              <Form {...serviceForm}>
-                                <form onSubmit={serviceForm.handleSubmit(onServiceSubmit)} className="space-y-4">
-                                  <FormField
-                                    control={serviceForm.control}
-                                    name="name"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormLabel className="text-sm font-medium text-teal-900">Service Name</FormLabel>
-                                        <FormControl>
-                                          <Input
-                                            placeholder="e.g., Haircut"
-                                            {...field}
-                                            data-testid="input-service-name"
-                                            className="rounded-xl border-gray-300 focus:border-teal-500 focus:ring-teal-500"
-                                          />
-                                        </FormControl>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <FormField
-                                      control={serviceForm.control}
-                                      name="duration"
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormLabel className="text-sm font-medium text-teal-900">Duration (min)</FormLabel>
-                                          <FormControl>
-                                            <Input
-                                              type="number"
-                                              {...field}
-                                              onChange={(e) => field.onChange(parseInt(e.target.value))}
-                                              data-testid="input-service-duration"
-                                              className="rounded-xl border-gray-300 focus:border-teal-500 focus:ring-teal-500"
-                                            />
-                                          </FormControl>
-                                          <FormMessage />
-                                        </FormItem>
-                                      )}
-                                    />
-                                    <FormField
-                                      control={serviceForm.control}
-                                      name="price"
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormLabel className="text-sm font-medium text-teal-900">Price (₹)</FormLabel>
-                                          <FormControl>
-                                            <Input
-                                              placeholder="0"
-                                              {...field}
-                                              data-testid="input-service-price"
-                                              className="rounded-xl border-gray-300 focus:border-teal-500 focus:ring-teal-500"
-                                            />
-                                          </FormControl>
-                                          <FormMessage />
-                                        </FormItem>
-                                      )}
-                                    />
-                                  </div>
-                                  <FormField
-                                    control={serviceForm.control}
-                                    name="description"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <div className="flex justify-between items-center">
-                                          <FormLabel className="text-sm font-medium text-teal-900">Description</FormLabel>
-                                          <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            className="text-xs flex items-center gap-1 h-7 px-2 text-teal-600 border-teal-300 hover:bg-teal-50"
-                                            onClick={async () => {
-                                              const serviceName = serviceForm.getValues("name");
-                                              if (!serviceName) {
-                                                toast({
-                                                  title: "Service name required",
-                                                  description: "Please enter a service name first",
-                                                  variant: "destructive",
-                                                });
-                                                return;
-                                              }
-
-                                              try {
-                                                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/generate-description`, {
-                                                  method: "POST",
-                                                  headers: {
-                                                    "Content-Type": "application/json",
-                                                  },
-                                                  body: JSON.stringify({ serviceName }),
-                                                });
-
-                                                if (!response.ok) {
-                                                  throw new Error("Failed to generate description");
-                                                }
-
-                                                const data = await response.json();
-                                                field.onChange(data.description);
-
-                                                toast({
-                                                  title: "Description generated",
-                                                  description: "AI has created a description for your service",
-                                                  variant: "default",
-                                                });
-                                              } catch (error) {
-                                                console.error("Error generating description:", error);
-                                                toast({
-                                                  title: "Generation failed",
-                                                  description: "Could not generate description. Please try again.",
-                                                  variant: "destructive",
-                                                });
-                                              }
-                                            }}
-                                            disabled={!serviceForm.getValues("name")}
-                                          >
-                                            <Sparkles className="h-3 w-3" />
-                                            Generate with AI
-                                          </Button>
-                                        </div>
-                                        <FormControl>
-                                          <Textarea
-                                            placeholder="Service description..."
-                                            {...field}
-                                            value={field.value || ""}
-                                            data-testid="textarea-service-description"
-                                            className="rounded-xl border-gray-300 focus:border-black focus:ring-black resize-none"
-                                            rows={3}
-                                          />
-                                        </FormControl>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
-                                  <Button
-                                    type="submit"
-                                    className="w-full bg-teal-600 text-white hover:bg-teal-700 rounded-2xl py-3 font-medium"
-                                    disabled={createServiceMutation.isPending}
-                                    data-testid="button-submit-service"
-                                  >
-                                    {createServiceMutation.isPending ? "Adding..." : "Add Service"}
-                                  </Button>
-                                </form>
-                              </Form>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-
-                    {/* Quick Service Templates */}
-                    {selectedSalonId && salons.find((s: any) => s.id === selectedSalonId) && (
-                      <QuickServiceTemplates
-                        salonType={salons.find((s: any) => s.id === selectedSalonId)?.type || "unisex"}
-                        salonId={selectedSalonId}
-                        onServicesAdded={() => {
-                          queryClient.invalidateQueries({ queryKey: ['salon-services', selectedSalonId] });
-                        }}
-                      />
-                    )}
-
-                    <div className="space-y-3">
-                      {servicesLoading ? (
-                        [...Array(3)].map((_, i) => (
-                          <div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse"></div>
-                        ))
-                      ) : services.length > 0 ? (
-                        services.map((service: any) => (
-                          <div key={service.id} className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm" data-testid={`service-item-${service.id}`}>
-                            <div className="flex justify-between items-start mb-3">
-                              <div className="flex-1">
-                                <h4 className="font-medium text-black" data-testid={`text-service-name-${service.id}`}>
-                                  {service.name}
-                                </h4>
-                                <div className="flex items-center space-x-3 mt-1">
-                                  <span className="text-sm text-gray-600" data-testid={`text-service-details-${service.id}`}>
-                                    {service.duration} min
-                                  </span>
-                                  <span className="text-sm font-medium text-black">
-                                    ₹{service.price}
-                                  </span>
-                                </div>
-                              </div>
-                              <Badge
-                                variant="outline"
-                                className="border-gray-300 text-gray-600"
-                                data-testid={`badge-bookings-${service.id}`}
-                              >
-                                {analytics?.popularServices?.find(s => s.id === service.id)?.bookings || 0} bookings
-                              </Badge>
-                            </div>
-                            {service.description && (
-                              <div className="mb-3">
-                                <p className="text-gray-600 leading-relaxed" data-testid={`text-service-description-${service.id}`}>
-                                  {expandedServices.has(service.id)
-                                    ? service.description
-                                    : service.description.length > 80
-                                      ? `${service.description.slice(0, 80)}...`
-                                      : service.description
-                                  }
-                                </p>
-                                {service.description.length > 80 && (
-                                  <button
-                                    onClick={() => {
-                                      const newExpanded = new Set(expandedServices);
-                                      if (expandedServices.has(service.id)) {
-                                        newExpanded.delete(service.id);
-                                      } else {
-                                        newExpanded.add(service.id);
-                                      }
-                                      setExpandedServices(newExpanded);
-                                    }}
-                                    className="text-teal-600 hover:text-teal-700 font-semibold text-base mt-2 transition-colors inline-block"
-                                  >
-                                    {expandedServices.has(service.id) ? 'Read Less' : 'Read More'}
-                                  </button>
-                                )}
-                              </div>
-                            )}
-                            <div className="flex space-x-2 pt-2 border-t border-gray-100">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => updateServiceMutation.mutate({
-                                  id: service.id,
-                                  updates: { isActive: !service.isActive }
-                                })}
-                                disabled={updateServiceMutation.isPending}
-                                className={`flex-1 rounded-xl ${service.isActive
-                                  ? 'border-orange-300 text-orange-600 hover:bg-orange-50'
-                                  : 'border-green-300 text-green-600 hover:bg-green-50'
-                                  }`}
-                                data-testid={`button-toggle-service-${service.id}`}
-                              >
-                                {service.isActive ? 'Deactivate' : 'Activate'}
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  if (confirm('Are you sure you want to delete this service?')) {
-                                    deleteServiceMutation.mutate(service.id);
-                                  }
-                                }}
-                                disabled={deleteServiceMutation.isPending}
-                                className="flex-1 border-red-300 text-red-600 hover:bg-red-50 rounded-xl"
-                                data-testid={`button-delete-service-${service.id}`}
-                              >
-                                Delete
-                              </Button>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
+                      {queuesLoading ? (
+                        <div className="space-y-3">
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse"></div>
+                          ))}
+                        </div>
+                      ) : filteredQueues.length === 0 ? (
                         <div className="text-center py-12">
                           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Settings className="h-8 w-8 text-gray-400" />
+                            <Users className="h-8 w-8 text-gray-400" />
                           </div>
-                          <p className="text-gray-500 text-sm">No services added yet</p>
-                          <p className="text-gray-400 text-xs mt-1">Add services to start taking bookings</p>
+                          <p className="text-gray-500 text-sm">No customers in queue</p>
+                          <p className="text-gray-400 text-xs mt-1">New customers will appear here</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {filteredQueues.map((queue) => (
+                            <div key={queue.id} className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm" data-testid={`queue-item-${queue.id}`}>
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex items-center space-x-3">
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${queue.status === 'in-progress'
+                                    ? 'bg-black text-white'
+                                    : 'border-2 border-dashed border-gray-300 text-gray-500'
+                                    }`}>
+                                    {queue.position}
+                                  </div>
+                                  <div>
+                                    <div className="font-medium text-black text-sm" data-testid={`text-customer-name-${queue.id}`}>
+                                      {queue.user?.name || 'Customer'}
+                                    </div>
+                                    {queue.user?.phone && (
+                                      <div className="text-xs text-gray-500 mt-0.5">
+                                        {queue.user.phone}
+                                      </div>
+                                    )}
+                                    <div className="mt-1">
+                                      <QueueStatusBadge status={queue.status} />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Services */}
+                              <div className="mb-4" data-testid={`text-services-${queue.id}`}>
+                                {queue.services && Array.isArray(queue.services) && queue.services.length > 0 ? (
+                                  <div className="space-y-2">
+                                    {queue.services.map((service) => (
+                                      <div key={service.id} className="flex justify-between items-center text-sm">
+                                        <span className="text-gray-700">{service.name}</span>
+                                        <span className="text-black font-medium">₹{service.price}</span>
+                                      </div>
+                                    ))}
+                                    <div className="border-t border-gray-100 pt-2 flex justify-between items-center">
+                                      <span className="text-sm font-medium text-black">Total</span>
+                                      <span className="font-bold text-black">₹{queue.totalPrice}</span>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex justify-between items-center text-sm">
+                                    <span className="text-gray-700">{queue.service?.name}</span>
+                                    <span className="text-black font-medium">₹{queue.service?.price}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Action Buttons */}
+                              <QueueActionButtons
+                                queue={queue}
+                                onActionComplete={() => {
+                                  queryClient.invalidateQueries({
+                                    queryKey: ['/api/salons', selectedSalonId, 'queues']
+                                  });
+                                }}
+                              />
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {activeTab === 'offers' && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-bold text-black">Offers & Promotions</h2>
-                      <Dialog open={isOfferDialogOpen} onOpenChange={setIsOfferDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button
-                            className="bg-teal-600 text-white hover:bg-teal-700 rounded-xl px-4 py-2"
-                            data-testid="button-add-offer"
-                          >
-                            <Percent className="h-4 w-4 mr-2" />
-                            Create
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="mx-2 max-w-[95vw] sm:max-w-md w-full max-h-[90vh] overflow-hidden rounded-3xl p-0">
-                          <div className="max-h-[90vh] overflow-y-auto">
-                            <DialogHeader className="text-center p-6 pb-4 sticky top-0 bg-white z-10 border-b border-gray-100">
-                              <DialogTitle className="text-lg font-bold">Create New Offer</DialogTitle>
-                              <DialogDescription className="text-sm text-gray-600">
-                                Create a promotional offer for your customers.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="p-6 pt-4">
-                              <Form {...offerForm}>
-                                <form onSubmit={offerForm.handleSubmit(onOfferSubmit)} className="space-y-4">
-                                  <FormField
-                                    control={offerForm.control}
-                                    name="title"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormLabel className="text-sm font-medium text-black">Offer Title</FormLabel>
-                                        <FormControl>
-                                          <Input
-                                            placeholder="e.g., Summer Special"
-                                            {...field}
-                                            data-testid="input-offer-title"
-                                            className="rounded-xl border-gray-300 focus:border-black focus:ring-black"
-                                          />
-                                        </FormControl>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
-                                  <FormField
-                                    control={offerForm.control}
-                                    name="description"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormLabel className="text-sm font-medium text-black">Description</FormLabel>
-                                        <FormControl>
-                                          <Textarea
-                                            placeholder="Describe your offer..."
-                                            {...field}
-                                            data-testid="textarea-offer-description"
-                                            className="rounded-xl border-gray-300 focus:border-black focus:ring-black resize-none"
-                                            rows={3}
-                                          />
-                                        </FormControl>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
-                                  <div className="grid grid-cols-2 gap-3">
+                  {activeTab === 'services' && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-lg font-bold text-black">Services</h2>
+                        <Button
+                          className="bg-teal-600 text-white hover:bg-teal-700 rounded-xl px-4 py-2"
+                          data-testid="button-add-service"
+                          onClick={() => {
+                            const currentSalon = salons.find((s: any) => s.id === selectedSalonId);
+                            console.log('Add Service clicked - Current salon:', {
+                              id: currentSalon?.id,
+                              name: currentSalon?.name,
+                              manualLocation: currentSalon?.manualLocation,
+                              hasManualLocation: !!currentSalon?.manualLocation && currentSalon.manualLocation.trim() !== ''
+                            });
+
+                            if (!currentSalon?.manualLocation || currentSalon.manualLocation.trim() === '') {
+                              console.log('Opening location modal - no manual location set');
+                              setIsLocationModalOpen(true);
+                            } else {
+                              console.log('Opening service dialog - manual location exists:', currentSalon.manualLocation);
+                              setIsServiceDialogOpen(true);
+                            }
+                          }}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add
+                        </Button>
+                        <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
+                          <DialogContent className="mx-2 max-w-[95vw] sm:max-w-md w-full max-h-[90vh] overflow-hidden rounded-3xl p-0">
+                            <div className="max-h-[90vh] overflow-y-auto">
+                              <DialogHeader className="text-center p-6 pb-4 sticky top-0 bg-white z-10 border-b border-gray-100">
+                                <DialogTitle className="text-lg font-bold">Add New Service</DialogTitle>
+                                <DialogDescription className="text-sm text-gray-600">
+                                  Create a new service for your salon.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="p-6 pt-4">
+                                <Form {...serviceForm}>
+                                  <form onSubmit={serviceForm.handleSubmit(onServiceSubmit)} className="space-y-4">
                                     <FormField
-                                      control={offerForm.control}
-                                      name="discount"
+                                      control={serviceForm.control}
+                                      name="name"
                                       render={({ field }) => (
                                         <FormItem>
-                                          <FormLabel className="text-sm font-medium text-black">Discount (%)</FormLabel>
+                                          <FormLabel className="text-sm font-medium text-teal-900">Service Name</FormLabel>
                                           <FormControl>
                                             <Input
-                                              type="number"
-                                              min="1"
-                                              max="99"
-                                              step="0.01"
-                                              placeholder="10"
+                                              placeholder="e.g., Haircut"
                                               {...field}
-                                              onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                                              data-testid="input-offer-discount"
-                                              className="rounded-xl border-gray-300 focus:border-black focus:ring-black"
+                                              data-testid="input-service-name"
+                                              className="rounded-xl border-gray-300 focus:border-teal-500 focus:ring-teal-500"
                                             />
                                           </FormControl>
                                           <FormMessage />
                                         </FormItem>
                                       )}
                                     />
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <FormField
+                                        control={serviceForm.control}
+                                        name="duration"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel className="text-sm font-medium text-teal-900">Duration (min)</FormLabel>
+                                            <FormControl>
+                                              <Input
+                                                type="number"
+                                                {...field}
+                                                onChange={(e) => field.onChange(parseInt(e.target.value))}
+                                                data-testid="input-service-duration"
+                                                className="rounded-xl border-gray-300 focus:border-teal-500 focus:ring-teal-500"
+                                              />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                      <FormField
+                                        control={serviceForm.control}
+                                        name="price"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel className="text-sm font-medium text-teal-900">Price (₹)</FormLabel>
+                                            <FormControl>
+                                              <Input
+                                                placeholder="0"
+                                                {...field}
+                                                data-testid="input-service-price"
+                                                className="rounded-xl border-gray-300 focus:border-teal-500 focus:ring-teal-500"
+                                              />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                    </div>
                                     <FormField
-                                      control={offerForm.control}
-                                      name="validityPeriod"
+                                      control={serviceForm.control}
+                                      name="description"
                                       render={({ field }) => (
                                         <FormItem>
-                                          <FormLabel className="text-sm font-medium text-black">Valid Until</FormLabel>
-                                          <FormControl>
-                                            <Input
-                                              type="date"
-                                              {...field}
-                                              min={new Date().toISOString().split('T')[0]}
-                                              value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
-                                              onChange={(e) => {
-                                                const selectedDate = new Date(e.target.value);
-                                                const today = new Date();
-                                                today.setHours(0, 0, 0, 0);
-
-                                                if (selectedDate < today) {
+                                          <div className="flex justify-between items-center">
+                                            <FormLabel className="text-sm font-medium text-teal-900">Description</FormLabel>
+                                            <Button
+                                              type="button"
+                                              variant="outline"
+                                              size="sm"
+                                              className="text-xs flex items-center gap-1 h-7 px-2 text-teal-600 border-teal-300 hover:bg-teal-50"
+                                              onClick={async () => {
+                                                const serviceName = serviceForm.getValues("name");
+                                                if (!serviceName) {
                                                   toast({
-                                                    title: "Invalid date",
-                                                    description: "Please select a future date",
-                                                    variant: "destructive"
+                                                    title: "Service name required",
+                                                    description: "Please enter a service name first",
+                                                    variant: "destructive",
                                                   });
                                                   return;
                                                 }
 
-                                                field.onChange(selectedDate);
+                                                try {
+                                                  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/generate-description`, {
+                                                    method: "POST",
+                                                    headers: {
+                                                      "Content-Type": "application/json",
+                                                    },
+                                                    body: JSON.stringify({ serviceName }),
+                                                  });
+
+                                                  if (!response.ok) {
+                                                    throw new Error("Failed to generate description");
+                                                  }
+
+                                                  const data = await response.json();
+                                                  field.onChange(data.description);
+
+                                                  toast({
+                                                    title: "Description generated",
+                                                    description: "AI has created a description for your service",
+                                                    variant: "default",
+                                                  });
+                                                } catch (error) {
+                                                  console.error("Error generating description:", error);
+                                                  toast({
+                                                    title: "Generation failed",
+                                                    description: "Could not generate description. Please try again.",
+                                                    variant: "destructive",
+                                                  });
+                                                }
                                               }}
-                                              data-testid="input-offer-validity"
+                                              disabled={!serviceForm.getValues("name")}
+                                            >
+                                              <Sparkles className="h-3 w-3" />
+                                              Generate with AI
+                                            </Button>
+                                          </div>
+                                          <FormControl>
+                                            <Textarea
+                                              placeholder="Service description..."
+                                              {...field}
+                                              value={field.value || ""}
+                                              data-testid="textarea-service-description"
+                                              className="rounded-xl border-gray-300 focus:border-black focus:ring-black resize-none"
+                                              rows={3}
+                                            />
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                    <Button
+                                      type="submit"
+                                      className="w-full bg-teal-600 text-white hover:bg-teal-700 rounded-2xl py-3 font-medium"
+                                      disabled={createServiceMutation.isPending}
+                                      data-testid="button-submit-service"
+                                    >
+                                      {createServiceMutation.isPending ? "Adding..." : "Add Service"}
+                                    </Button>
+                                  </form>
+                                </Form>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+
+                      {/* Quick Service Templates */}
+                      {selectedSalonId && salons.find((s: any) => s.id === selectedSalonId) && (
+                        <QuickServiceTemplates
+                          salonType={salons.find((s: any) => s.id === selectedSalonId)?.type || "unisex"}
+                          salonId={selectedSalonId}
+                          onServicesAdded={() => {
+                            queryClient.invalidateQueries({ queryKey: ['salon-services', selectedSalonId] });
+                          }}
+                        />
+                      )}
+
+                      <div className="space-y-3">
+                        {servicesLoading ? (
+                          [...Array(3)].map((_, i) => (
+                            <div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse"></div>
+                          ))
+                        ) : services.length > 0 ? (
+                          services.map((service: any) => (
+                            <div key={service.id} className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm" data-testid={`service-item-${service.id}`}>
+                              <div className="flex justify-between items-start mb-3">
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-black" data-testid={`text-service-name-${service.id}`}>
+                                    {service.name}
+                                  </h4>
+                                  <div className="flex items-center space-x-3 mt-1">
+                                    <span className="text-sm text-gray-600" data-testid={`text-service-details-${service.id}`}>
+                                      {service.duration} min
+                                    </span>
+                                    <span className="text-sm font-medium text-black">
+                                      ₹{service.price}
+                                    </span>
+                                  </div>
+                                </div>
+                                <Badge
+                                  variant="outline"
+                                  className="border-gray-300 text-gray-600"
+                                  data-testid={`badge-bookings-${service.id}`}
+                                >
+                                  {analytics?.popularServices?.find(s => s.id === service.id)?.bookings || 0} bookings
+                                </Badge>
+                              </div>
+                              {service.description && (
+                                <div className="mb-3">
+                                  <p className="text-gray-600 leading-relaxed" data-testid={`text-service-description-${service.id}`}>
+                                    {expandedServices.has(service.id)
+                                      ? service.description
+                                      : service.description.length > 80
+                                        ? `${service.description.slice(0, 80)}...`
+                                        : service.description
+                                    }
+                                  </p>
+                                  {service.description.length > 80 && (
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedServices);
+                                        if (expandedServices.has(service.id)) {
+                                          newExpanded.delete(service.id);
+                                        } else {
+                                          newExpanded.add(service.id);
+                                        }
+                                        setExpandedServices(newExpanded);
+                                      }}
+                                      className="text-teal-600 hover:text-teal-700 font-semibold text-base mt-2 transition-colors inline-block"
+                                    >
+                                      {expandedServices.has(service.id) ? 'Read Less' : 'Read More'}
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                              <div className="flex space-x-2 pt-2 border-t border-gray-100">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => updateServiceMutation.mutate({
+                                    id: service.id,
+                                    updates: { isActive: !service.isActive }
+                                  })}
+                                  disabled={updateServiceMutation.isPending}
+                                  className={`flex-1 rounded-xl ${service.isActive
+                                    ? 'border-orange-300 text-orange-600 hover:bg-orange-50'
+                                    : 'border-green-300 text-green-600 hover:bg-green-50'
+                                    }`}
+                                  data-testid={`button-toggle-service-${service.id}`}
+                                >
+                                  {service.isActive ? 'Deactivate' : 'Activate'}
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (confirm('Are you sure you want to delete this service?')) {
+                                      deleteServiceMutation.mutate(service.id);
+                                    }
+                                  }}
+                                  disabled={deleteServiceMutation.isPending}
+                                  className="flex-1 border-red-300 text-red-600 hover:bg-red-50 rounded-xl"
+                                  data-testid={`button-delete-service-${service.id}`}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-12">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <Settings className="h-8 w-8 text-gray-400" />
+                            </div>
+                            <p className="text-gray-500 text-sm">No services added yet</p>
+                            <p className="text-gray-400 text-xs mt-1">Add services to start taking bookings</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === 'offers' && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-lg font-bold text-black">Offers & Promotions</h2>
+                        <Dialog open={isOfferDialogOpen} onOpenChange={setIsOfferDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button
+                              className="bg-teal-600 text-white hover:bg-teal-700 rounded-xl px-4 py-2"
+                              data-testid="button-add-offer"
+                            >
+                              <Percent className="h-4 w-4 mr-2" />
+                              Create
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="mx-2 max-w-[95vw] sm:max-w-md w-full max-h-[90vh] overflow-hidden rounded-3xl p-0">
+                            <div className="max-h-[90vh] overflow-y-auto">
+                              <DialogHeader className="text-center p-6 pb-4 sticky top-0 bg-white z-10 border-b border-gray-100">
+                                <DialogTitle className="text-lg font-bold">Create New Offer</DialogTitle>
+                                <DialogDescription className="text-sm text-gray-600">
+                                  Create a promotional offer for your customers.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="p-6 pt-4">
+                                <Form {...offerForm}>
+                                  <form onSubmit={offerForm.handleSubmit(onOfferSubmit)} className="space-y-4">
+                                    <FormField
+                                      control={offerForm.control}
+                                      name="title"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel className="text-sm font-medium text-black">Offer Title</FormLabel>
+                                          <FormControl>
+                                            <Input
+                                              placeholder="e.g., Summer Special"
+                                              {...field}
+                                              data-testid="input-offer-title"
                                               className="rounded-xl border-gray-300 focus:border-black focus:ring-black"
                                             />
                                           </FormControl>
@@ -1576,239 +1497,318 @@ export default function Dashboard() {
                                         </FormItem>
                                       )}
                                     />
-                                  </div>
-                                  <Button
-                                    type="submit"
-                                    className="w-full bg-teal-600 text-white hover:bg-teal-700 rounded-2xl py-3 font-medium"
-                                    disabled={createOfferMutation.isPending}
-                                    data-testid="button-submit-offer"
-                                  >
-                                    {createOfferMutation.isPending ? "Creating..." : "Create Offer"}
-                                  </Button>
-                                </form>
-                              </Form>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
+                                    <FormField
+                                      control={offerForm.control}
+                                      name="description"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel className="text-sm font-medium text-black">Description</FormLabel>
+                                          <FormControl>
+                                            <Textarea
+                                              placeholder="Describe your offer..."
+                                              {...field}
+                                              data-testid="textarea-offer-description"
+                                              className="rounded-xl border-gray-300 focus:border-black focus:ring-black resize-none"
+                                              rows={3}
+                                            />
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <FormField
+                                        control={offerForm.control}
+                                        name="discount"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel className="text-sm font-medium text-black">Discount (%)</FormLabel>
+                                            <FormControl>
+                                              <Input
+                                                type="number"
+                                                min="1"
+                                                max="99"
+                                                step="0.01"
+                                                placeholder="10"
+                                                {...field}
+                                                onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                                data-testid="input-offer-discount"
+                                                className="rounded-xl border-gray-300 focus:border-black focus:ring-black"
+                                              />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                      <FormField
+                                        control={offerForm.control}
+                                        name="validityPeriod"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel className="text-sm font-medium text-black">Valid Until</FormLabel>
+                                            <FormControl>
+                                              <Input
+                                                type="date"
+                                                {...field}
+                                                min={new Date().toISOString().split('T')[0]}
+                                                value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
+                                                onChange={(e) => {
+                                                  const selectedDate = new Date(e.target.value);
+                                                  const today = new Date();
+                                                  today.setHours(0, 0, 0, 0);
 
-                    {offersLoading ? (
-                      <div className="space-y-3">
-                        {[...Array(2)].map((_, i) => (
-                          <div key={i} className="h-24 bg-gray-100 rounded-2xl animate-pulse"></div>
-                        ))}
-                      </div>
-                    ) : offers.length > 0 ? (
-                      <div className="space-y-3">
-                        {offers.map((offer: any) => (
-                          <div key={offer.id} className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
-                            <div className="flex justify-between items-start mb-3">
-                              <div className="flex-1">
-                                <h3 className="font-medium text-black">{offer.title}</h3>
-                                <div className="mt-1">
-                                  <p className="text-sm text-gray-600">
-                                    {expandedOffers.has(offer.id)
-                                      ? offer.description
-                                      : offer.description.length > 80
-                                        ? `${offer.description.slice(0, 80)}...`
-                                        : offer.description
-                                    }
-                                  </p>
-                                  {offer.description.length > 80 && (
-                                    <button
-                                      onClick={() => {
-                                        const newExpanded = new Set(expandedOffers);
-                                        if (expandedOffers.has(offer.id)) {
-                                          newExpanded.delete(offer.id);
-                                        } else {
-                                          newExpanded.add(offer.id);
-                                        }
-                                        setExpandedOffers(newExpanded);
-                                      }}
-                                      className="text-teal-600 hover:text-teal-700 font-semibold text-sm mt-1 transition-colors inline-block"
+                                                  if (selectedDate < today) {
+                                                    toast({
+                                                      title: "Invalid date",
+                                                      description: "Please select a future date",
+                                                      variant: "destructive"
+                                                    });
+                                                    return;
+                                                  }
+
+                                                  field.onChange(selectedDate);
+                                                }}
+                                                data-testid="input-offer-validity"
+                                                className="rounded-xl border-gray-300 focus:border-black focus:ring-black"
+                                              />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                    </div>
+                                    <Button
+                                      type="submit"
+                                      className="w-full bg-teal-600 text-white hover:bg-teal-700 rounded-2xl py-3 font-medium"
+                                      disabled={createOfferMutation.isPending}
+                                      data-testid="button-submit-offer"
                                     >
-                                      {expandedOffers.has(offer.id) ? 'Read Less' : 'Read More'}
-                                    </button>
-                                  )}
+                                      {createOfferMutation.isPending ? "Creating..." : "Create Offer"}
+                                    </Button>
+                                  </form>
+                                </Form>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+
+                      {offersLoading ? (
+                        <div className="space-y-3">
+                          {[...Array(2)].map((_, i) => (
+                            <div key={i} className="h-24 bg-gray-100 rounded-2xl animate-pulse"></div>
+                          ))}
+                        </div>
+                      ) : offers.length > 0 ? (
+                        <div className="space-y-3">
+                          {offers.map((offer: any) => (
+                            <div key={offer.id} className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
+                              <div className="flex justify-between items-start mb-3">
+                                <div className="flex-1">
+                                  <h3 className="font-medium text-black">{offer.title}</h3>
+                                  <div className="mt-1">
+                                    <p className="text-sm text-gray-600">
+                                      {expandedOffers.has(offer.id)
+                                        ? offer.description
+                                        : offer.description.length > 80
+                                          ? `${offer.description.slice(0, 80)}...`
+                                          : offer.description
+                                      }
+                                    </p>
+                                    {offer.description.length > 80 && (
+                                      <button
+                                        onClick={() => {
+                                          const newExpanded = new Set(expandedOffers);
+                                          if (expandedOffers.has(offer.id)) {
+                                            newExpanded.delete(offer.id);
+                                          } else {
+                                            newExpanded.add(offer.id);
+                                          }
+                                          setExpandedOffers(newExpanded);
+                                        }}
+                                        className="text-teal-600 hover:text-teal-700 font-semibold text-sm mt-1 transition-colors inline-block"
+                                      >
+                                        {expandedOffers.has(offer.id) ? 'Read Less' : 'Read More'}
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <Badge
+                                    className={`${offer.isActive
+                                      ? 'bg-green-100 text-green-700'
+                                      : 'bg-gray-100 text-gray-600'
+                                      }`}
+                                  >
+                                    {offer.isActive ? "Active" : "Inactive"}
+                                  </Badge>
                                 </div>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <Badge
-                                  className={`${offer.isActive
-                                    ? 'bg-green-100 text-green-700'
-                                    : 'bg-gray-100 text-gray-600'
-                                    }`}
+
+                              <div className="flex items-center justify-between mb-3">
+                                <Badge variant="outline" className="border-black text-black font-medium">
+                                  {offer.discount}% OFF
+                                </Badge>
+                                <span className="text-xs text-gray-500">
+                                  Valid until {new Date(offer.validityPeriod).toLocaleDateString()}
+                                </span>
+                              </div>
+
+                              <div className="flex space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => updateOfferMutation.mutate({
+                                    id: offer.id,
+                                    updates: { isActive: !offer.isActive }
+                                  })}
+                                  disabled={updateOfferMutation.isPending}
+                                  className="flex-1 border-gray-300 text-black hover:bg-gray-50 rounded-xl"
                                 >
-                                  {offer.isActive ? "Active" : "Inactive"}
+                                  {offer.isActive ? "Deactivate" : "Activate"}
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (confirm("Are you sure you want to delete this offer?")) {
+                                      deleteOfferMutation.mutate(offer.id);
+                                    }
+                                  }}
+                                  disabled={deleteOfferMutation.isPending}
+                                  className="px-3 border-red-300 text-red-600 hover:bg-red-50 rounded-xl"
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12">
+                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Percent className="h-8 w-8 text-gray-400" />
+                          </div>
+                          <p className="text-gray-500 text-sm">No active offers</p>
+                          <p className="text-gray-400 text-xs mt-1">Create offers to attract more customers</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {activeTab === 'gallery' && (
+                    <div className="space-y-4">
+                      <h2 className="text-lg font-bold text-black">Gallery</h2>
+
+                      {/* Info Banner - Mobile Optimized */}
+                      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-3 sm:p-4">
+                        <div className="flex items-start gap-2 sm:gap-3">
+                          <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1">
+                              Upload Categorized Photos
+                            </h3>
+                            <p className="text-[11px] sm:text-xs text-blue-700 leading-relaxed mb-2">
+                              Add photos in 3 categories to showcase your salon professionally:
+                            </p>
+                            <div className="space-y-1.5 text-[11px] sm:text-xs">
+                              <div className="flex items-start gap-1">
+                                <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                                <div className="flex flex-wrap items-baseline gap-1">
+                                  <span className="text-blue-800 font-medium">Interior</span>
+                                  <span className="text-blue-600">- Main salon area & ambiance</span>
+                                </div>
+                              </div>
+                              <div className="flex items-start gap-1">
+                                <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                                <div className="flex flex-wrap items-baseline gap-1">
+                                  <span className="text-blue-800 font-medium">Services</span>
+                                  <span className="text-blue-600">- Work stations & equipment</span>
+                                </div>
+                              </div>
+                              <div className="flex items-start gap-1">
+                                <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                                <div className="flex flex-wrap items-baseline gap-1">
+                                  <span className="text-blue-800 font-medium">Exterior</span>
+                                  <span className="text-blue-600">- Building facade & entrance</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <GalleryManager salonId={selectedSalonId} />
+                    </div>
+                  )}
+
+                  {activeTab === 'analytics' && (
+                    <div className="space-y-6">
+                      <h2 className="text-lg font-bold text-black">Analytics</h2>
+
+                      <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-medium text-teal-900">Performance Metrics</h3>
+                          <TrendingUp className="h-5 w-5 text-teal-600" />
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                            <span className="text-sm text-gray-600">Show-up Rate</span>
+                            <span className="font-medium text-black" data-testid="text-show-rate">
+                              {analyticsLoading ? "..." : `${Math.round(analytics?.showRate || 0)}%`}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                            <span className="text-sm text-gray-600">Total Customers</span>
+                            <span className="font-medium text-black" data-testid="text-total-customers">
+                              {analyticsLoading ? "..." : analytics?.totalCustomers || 0}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between py-2">
+                            <span className="text-sm text-gray-600">Average Rating</span>
+                            <span className="font-medium text-black" data-testid="text-average-rating">
+                              {analyticsLoading ? "..." : analytics?.rating?.toFixed(1) || "0.0"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-medium text-teal-900">Popular Services</h3>
+                          <BarChart3 className="h-5 w-5 text-teal-600" />
+                        </div>
+                        <div className="space-y-3">
+                          {analyticsLoading ? (
+                            [...Array(3)].map((_, i) => (
+                              <div key={i} className="h-12 bg-gray-100 rounded-xl animate-pulse"></div>
+                            ))
+                          ) : analytics?.popularServices?.length ? (
+                            analytics.popularServices.slice(0, 5).map((service) => (
+                              <div key={service.id} className="flex items-center justify-between p-3 bg-teal-50 rounded-xl" data-testid={`popular-service-${service.id}`}>
+                                <span className="font-medium text-teal-900 text-sm" data-testid={`text-popular-service-name-${service.id}`}>
+                                  {service.name}
+                                </span>
+                                <Badge variant="outline" className="border-gray-300 text-gray-600 text-xs" data-testid={`badge-popular-service-bookings-${service.id}`}>
+                                  {service.bookings} bookings
                                 </Badge>
                               </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-6">
+                              <TrendingDown className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                              <p className="text-gray-500 text-sm">No service data available</p>
                             </div>
-
-                            <div className="flex items-center justify-between mb-3">
-                              <Badge variant="outline" className="border-black text-black font-medium">
-                                {offer.discount}% OFF
-                              </Badge>
-                              <span className="text-xs text-gray-500">
-                                Valid until {new Date(offer.validityPeriod).toLocaleDateString()}
-                              </span>
-                            </div>
-
-                            <div className="flex space-x-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => updateOfferMutation.mutate({
-                                  id: offer.id,
-                                  updates: { isActive: !offer.isActive }
-                                })}
-                                disabled={updateOfferMutation.isPending}
-                                className="flex-1 border-gray-300 text-black hover:bg-gray-50 rounded-xl"
-                              >
-                                {offer.isActive ? "Deactivate" : "Activate"}
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  if (confirm("Are you sure you want to delete this offer?")) {
-                                    deleteOfferMutation.mutate(offer.id);
-                                  }
-                                }}
-                                disabled={deleteOfferMutation.isPending}
-                                className="px-3 border-red-300 text-red-600 hover:bg-red-50 rounded-xl"
-                              >
-                                Delete
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-12">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <Percent className="h-8 w-8 text-gray-400" />
-                        </div>
-                        <p className="text-gray-500 text-sm">No active offers</p>
-                        <p className="text-gray-400 text-xs mt-1">Create offers to attract more customers</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {activeTab === 'gallery' && (
-                  <div className="space-y-4">
-                    <h2 className="text-lg font-bold text-black">Gallery</h2>
-
-                    {/* Info Banner - Mobile Optimized */}
-                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-3 sm:p-4">
-                      <div className="flex items-start gap-2 sm:gap-3">
-                        <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                          <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1">
-                            Upload Categorized Photos
-                          </h3>
-                          <p className="text-[11px] sm:text-xs text-blue-700 leading-relaxed mb-2">
-                            Add photos in 3 categories to showcase your salon professionally:
-                          </p>
-                          <div className="space-y-1.5 text-[11px] sm:text-xs">
-                            <div className="flex items-start gap-1">
-                              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
-                              <div className="flex flex-wrap items-baseline gap-1">
-                                <span className="text-blue-800 font-medium">Interior</span>
-                                <span className="text-blue-600">- Main salon area & ambiance</span>
-                              </div>
-                            </div>
-                            <div className="flex items-start gap-1">
-                              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
-                              <div className="flex flex-wrap items-baseline gap-1">
-                                <span className="text-blue-800 font-medium">Services</span>
-                                <span className="text-blue-600">- Work stations & equipment</span>
-                              </div>
-                            </div>
-                            <div className="flex items-start gap-1">
-                              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
-                              <div className="flex flex-wrap items-baseline gap-1">
-                                <span className="text-blue-800 font-medium">Exterior</span>
-                                <span className="text-blue-600">- Building facade & entrance</span>
-                              </div>
-                            </div>
-                          </div>
+                          )}
                         </div>
                       </div>
                     </div>
-
-                    <GalleryManager salonId={selectedSalonId} />
-                  </div>
-                )}
-
-                {activeTab === 'analytics' && (
-                  <div className="space-y-6">
-                    <h2 className="text-lg font-bold text-black">Analytics</h2>
-
-                    <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-medium text-teal-900">Performance Metrics</h3>
-                        <TrendingUp className="h-5 w-5 text-teal-600" />
-                      </div>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                          <span className="text-sm text-gray-600">Show-up Rate</span>
-                          <span className="font-medium text-black" data-testid="text-show-rate">
-                            {analyticsLoading ? "..." : `${Math.round(analytics?.showRate || 0)}%`}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                          <span className="text-sm text-gray-600">Total Customers</span>
-                          <span className="font-medium text-black" data-testid="text-total-customers">
-                            {analyticsLoading ? "..." : analytics?.totalCustomers || 0}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between py-2">
-                          <span className="text-sm text-gray-600">Average Rating</span>
-                          <span className="font-medium text-black" data-testid="text-average-rating">
-                            {analyticsLoading ? "..." : analytics?.rating?.toFixed(1) || "0.0"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-medium text-teal-900">Popular Services</h3>
-                        <BarChart3 className="h-5 w-5 text-teal-600" />
-                      </div>
-                      <div className="space-y-3">
-                        {analyticsLoading ? (
-                          [...Array(3)].map((_, i) => (
-                            <div key={i} className="h-12 bg-gray-100 rounded-xl animate-pulse"></div>
-                          ))
-                        ) : analytics?.popularServices?.length ? (
-                          analytics.popularServices.slice(0, 5).map((service) => (
-                            <div key={service.id} className="flex items-center justify-between p-3 bg-teal-50 rounded-xl" data-testid={`popular-service-${service.id}`}>
-                              <span className="font-medium text-teal-900 text-sm" data-testid={`text-popular-service-name-${service.id}`}>
-                                {service.name}
-                              </span>
-                              <Badge variant="outline" className="border-gray-300 text-gray-600 text-xs" data-testid={`badge-popular-service-bookings-${service.id}`}>
-                                {service.bookings} bookings
-                              </Badge>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-center py-6">
-                            <TrendingDown className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                            <p className="text-gray-500 text-sm">No service data available</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
+                  )}
+                </div>
+              </>
+            )}
           </div>
           {/* End Scrollable Content Area */}
         </>
