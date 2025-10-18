@@ -128,8 +128,6 @@ class QueueService {
         notifiedAt: queue.notifiedAt
       });
 
-      console.log(`✅ Notified user ${queue.userId} for queue ${queueId}`);
-
       return {
         success: result.success,
         whatsappSent: result.whatsappSent,
@@ -355,8 +353,6 @@ class QueueService {
         });
       }
 
-      console.log(`✅ Updated queue ${queueId} status: ${oldStatus} -> ${newStatus}`);
-
       return queue.toObject() as any as Queue;
     } catch (error) {
       console.error('Error updating queue status:', error);
@@ -386,8 +382,6 @@ class QueueService {
         
         await activeQueues[i].save();
       }
-
-      console.log(`✅ Recalculated ${activeQueues.length} queue positions for salon ${salonId}`);
 
       // Send queue_position_update event to all users in this salon's queue
       wsManager.sendQueuePositionUpdate(
@@ -536,8 +530,6 @@ class QueueService {
         distance,
         requiresConfirmation: !autoApproved
       });
-
-      console.log(`📢 Notified admin of arrival for queue ${queue.id}`);
     } catch (error) {
       console.error('Error notifying admin:', error);
     }
@@ -567,8 +559,6 @@ class QueueService {
         })),
         estimatedTime
       });
-
-      console.log(`📢 Sent service_starting notification for queue ${queue.id}`);
     } catch (error) {
       console.error('Error sending service_starting notification:', error);
     }
@@ -596,8 +586,6 @@ class QueueService {
         })),
         totalPrice: queue.totalPrice || 0
       });
-
-      console.log(`📢 Sent service_completed notification for queue ${queue.id}`);
     } catch (error) {
       console.error('Error sending service_completed notification:', error);
     }
@@ -616,8 +604,6 @@ class QueueService {
         salonName: salon.name,
         reason: queue.noShowReason || 'Did not arrive'
       });
-
-      console.log(`📢 Sent no_show notification for queue ${queue.id}`);
     } catch (error) {
       console.error('Error sending no_show notification:', error);
     }

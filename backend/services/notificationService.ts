@@ -117,13 +117,7 @@ class NotificationService {
       return sent;
     });
 
-    if (result.success) {
-      console.log(`📱 WhatsApp sent to ${phoneNumber}`);
-      return true;
-    } else {
-      console.log(`❌ WhatsApp failed for ${phoneNumber}: ${result.error}`);
-      return false;
-    }
+    return result.success;
   }
 
   /**
@@ -138,7 +132,6 @@ class NotificationService {
       if (!wsManager.isUserConnected(userId)) {
         // Queue message for delivery when user reconnects
         websocketMessageQueue.enqueue(userId, notification);
-        console.log(`⚠️ User ${userId} not connected, message queued`);
         return false;
       }
 
@@ -151,13 +144,7 @@ class NotificationService {
       return true;
     });
 
-    if (result.success && result.result) {
-      console.log(`🔔 WebSocket notification sent to user ${userId}`);
-      return true;
-    } else {
-      console.log(`❌ WebSocket failed for user ${userId}: ${result.error}`);
-      return false;
-    }
+    return result.success && result.result;
   }
 
   /**
@@ -239,13 +226,11 @@ class NotificationService {
           await subscription.save();
 
           sentCount++;
-          console.log(`📲 Push notification sent to subscription ${subscription.endpoint.substring(0, 50)}...`);
         } catch (error: any) {
           console.error('Push notification send error:', error);
 
           // Handle expired or invalid subscriptions
           if (error.statusCode === 410 || error.statusCode === 404) {
-            console.log(`🗑️ Removing expired subscription ${subscription.endpoint.substring(0, 50)}...`);
             failedSubscriptions.push(subscription.id);
           } else {
             // Rethrow other errors for retry logic
@@ -262,13 +247,7 @@ class NotificationService {
       return sentCount > 0;
     });
 
-    if (result.success && result.result) {
-      console.log(`📲 Push notifications sent to user ${userId}`);
-      return true;
-    } else {
-      console.log(`❌ Push notification failed for user ${userId}: ${result.error}`);
-      return false;
-    }
+    return result.success && result.result;
   }
 
   /**
@@ -358,8 +337,6 @@ class NotificationService {
     if (queuedMessages.length === 0) {
       return;
     }
-
-    console.log(`📬 Delivering ${queuedMessages.length} queued messages to user ${userId}`);
 
     for (const notification of queuedMessages) {
       try {

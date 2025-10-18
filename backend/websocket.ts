@@ -25,8 +25,6 @@ class WebSocketManager {
     });
 
     this.wss.on('connection', (ws: AuthenticatedWebSocket, request) => {
-      console.log('🔌 New WebSocket connection');
-
       ws.on('message', (data) => {
         try {
           const message: WebSocketMessage = JSON.parse(data.toString());
@@ -43,7 +41,6 @@ class WebSocketManager {
       ws.on('close', () => {
         if (ws.userId) {
           this.clients.delete(ws.userId);
-          console.log(`🔌 WebSocket disconnected for user: ${ws.userId}`);
         }
       });
 
@@ -90,8 +87,6 @@ class WebSocketManager {
       ws.userId = message.userId;
       ws.isAuthenticated = true;
       this.clients.set(message.userId, ws);
-
-      console.log(`✅ WebSocket authenticated for user: ${message.userId}`);
       
       ws.send(JSON.stringify({ 
         type: 'authenticated', 
@@ -120,8 +115,6 @@ class WebSocketManager {
         client.send(message);
       }
     });
-
-    console.log(`📢 Broadcasted queue update for salon: ${salonId}`);
   }
 
   // Broadcast when a new customer joins the queue
@@ -133,19 +126,11 @@ class WebSocketManager {
       timestamp: new Date().toISOString()
     });
 
-    console.log(`📡 Broadcasting queue_join to ${this.clients.size} connected clients`);
-    
-    let sentCount = 0;
     this.clients.forEach((client, userId) => {
-      console.log(`  Client ${userId}: readyState=${client.readyState}, authenticated=${client.isAuthenticated}`);
       if (client.readyState === WebSocket.OPEN && client.isAuthenticated) {
         client.send(message);
-        sentCount++;
-        console.log(`  ✅ Sent to ${userId}`);
       }
     });
-
-    console.log(`🔔 Broadcasted queue_join event to ${sentCount} clients for salon: ${salonId}`, queueData);
   }
 
   // Send notification to specific user
@@ -158,8 +143,6 @@ class WebSocketManager {
         data: { title, description },
         timestamp: new Date().toISOString()
       }));
-      
-      console.log(`🔔 Sent notification to user: ${userId}`);
     }
   }
 
@@ -177,8 +160,6 @@ class WebSocketManager {
         client.send(message);
       }
     });
-
-    console.log(`📢 Sent notification to salon: ${salonId}`);
   }
 
   // Get connected clients count
@@ -215,11 +196,9 @@ class WebSocketManager {
         timestamp: new Date().toISOString()
       }));
       
-      console.log(`🔔 Sent queue_notification to user: ${userId}`);
       return true;
     }
     
-    console.log(`⚠️ User ${userId} not connected for queue_notification`);
     return false;
   }
 
@@ -249,8 +228,6 @@ class WebSocketManager {
         client.send(message);
       }
     });
-
-    console.log(`📢 Sent customer_arrived event for salon: ${salonId}`);
   }
 
   // Send queue_position_update event to all users in a salon's queue
@@ -277,8 +254,6 @@ class WebSocketManager {
         client.send(message);
       }
     });
-
-    console.log(`📢 Sent queue_position_update for salon: ${salonId}`);
   }
 
   // Send service_starting event to specific user
@@ -301,11 +276,9 @@ class WebSocketManager {
         timestamp: new Date().toISOString()
       }));
       
-      console.log(`🔔 Sent service_starting to user: ${userId}`);
       return true;
     }
     
-    console.log(`⚠️ User ${userId} not connected for service_starting`);
     return false;
   }
 
@@ -329,11 +302,9 @@ class WebSocketManager {
         timestamp: new Date().toISOString()
       }));
       
-      console.log(`🔔 Sent service_completed to user: ${userId}`);
       return true;
     }
     
-    console.log(`⚠️ User ${userId} not connected for service_completed`);
     return false;
   }
 
@@ -356,11 +327,9 @@ class WebSocketManager {
         timestamp: new Date().toISOString()
       }));
       
-      console.log(`🔔 Sent no_show to user: ${userId}`);
       return true;
     }
     
-    console.log(`⚠️ User ${userId} not connected for no_show`);
     return false;
   }
 
