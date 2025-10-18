@@ -1569,19 +1569,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const services = await storage.getServicesBySalon(req.params.salonId);
       const reviews = await storage.getReviewsBySalon(req.params.salonId);
 
-      // Calculate analytics
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      // Define business day hours (9 AM to 11 PM)
+      const businessDayStart = new Date();
+      businessDayStart.setHours(9, 0, 0, 0); // 9 AM today
 
-      // Get today's completed customers (not all queues from today)
-      const todayCompletedQueues = queues.filter(q =>
-        q.status === 'completed' &&
-        new Date(q.timestamp).setHours(0, 0, 0, 0) >= today.getTime()
-      );
+      const businessDayEnd = new Date();
+      businessDayEnd.setHours(23, 0, 0, 0); // 11 PM today
 
+      // Get today's completed customers (by completion time within business hours)
+      const todayCompletedQueues = queues.filter(q => {
+        if (q.status !== 'completed') return false;
+        
+        // Use serviceCompletedAt if available, otherwise fall back to timestamp
+        const completionTime = q.serviceCompletedAt 
+          ? new Date(q.serviceCompletedAt) 
+          : new Date(q.timestamp);
+        
+        // Check if completion time is within today's business hours
+        return completionTime >= businessDayStart && completionTime <= businessDayEnd;
+      });
+
+      // Get all completed queues for historical data
       const completedQueues = queues.filter(q => q.status === 'completed');
 
-      // Calculate revenue from completed queues using totalPrice
+      // Calculate TODAY'S revenue from completed queues within business hours
+      const todayRevenue = todayCompletedQueues.reduce((sum, queue) => {
+        const price = typeof queue.totalPrice === 'number' ? queue.totalPrice : parseFloat(queue.totalPrice || '0');
+        return sum + (isNaN(price) ? 0 : price);
+      }, 0);
+
+      // Calculate ALL-TIME revenue for reference (optional)
       const totalRevenue = completedQueues.reduce((sum, queue) => {
         const price = typeof queue.totalPrice === 'number' ? queue.totalPrice : parseFloat(queue.totalPrice || '0');
         return sum + (isNaN(price) ? 0 : price);
@@ -1598,24 +1615,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const analytics = {
-        customersToday: todayCompletedQueues.length, // Only completed customers from today
-        totalCustomers: completedQueues.length, // Total completed customers (not all queues)
+        customersToday: todayCompletedQueues.length, // Only completed customers from today's business hours
+        totalCustomers: completedQueues.length, // Total completed customers (all time)
         avgWaitTime: queues.length > 0 ? queues.reduce((sum, q) => sum + (q.estimatedWaitTime || 15), 0) / queues.length : 0,
         rating: reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0,
         showRate: queues.length > 0 ? (completedQueues.length / queues.length) * 100 : 100,
-        revenue: totalRevenue,
+        revenue: todayRevenue, // TODAY'S revenue only (resets after 11 PM)
+        totalRevenue: totalRevenue, // All-time revenue for reference
         popularServices: services.map(service => ({
           ...service,
           bookings: serviceBookingCounts[service.id] || 0,
         })).sort((a, b) => b.bookings - a.bookings),
+        businessHours: {
+          start: '09:00',
+          end: '23:00',
+          timezone: 'Asia/Kolkata'
+        }
       };
 
       // Debug logging
       console.log('Analytics calculation for salon:', req.params.salonId);
+      console.log('Business day range:', businessDayStart.toISOString(), 'to', businessDayEnd.toISOString());
       console.log('Total queues:', queues.length);
-      console.log('Completed queues:', completedQueues.length);
-      console.log('Today completed queues:', todayCompletedQueues.length);
-      console.log('Total revenue:', totalRevenue);
+      console.log('Completed queues (all time):', completedQueues.length);
+      console.log('Today completed queues (9 AM - 11 PM):', todayCompletedQueues.length);
+      console.log('Today revenue:', todayRevenue);
+      console.log('Total revenue (all time):', totalRevenue);
       console.log('Analytics result:', analytics);
 
       res.json(analytics);
