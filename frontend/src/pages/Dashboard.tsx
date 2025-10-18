@@ -1063,30 +1063,13 @@ export default function Dashboard() {
                           onClick={() => setShowCompletedQueues(!showCompletedQueues)}
                           className="text-xs px-2 h-7"
                         >
-                          {showCompletedQueues ? 'Hide' : 'Show'}
+                          {showCompletedQueues ? 'Hide' : 'Show'} Completed
                         </Button>
                         <Badge variant="outline" className="border-gray-300 text-gray-600 text-xs px-2">
-                          {filteredQueues.length}
+                          {filteredQueues.length} {showCompletedQueues ? 'total' : 'active'}
                         </Badge>
                       </div>
                     </div>
-
-                      <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-bold text-black">Current Queue</h2>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowCompletedQueues(!showCompletedQueues)}
-                            className="text-xs"
-                          >
-                            {showCompletedQueues ? 'Hide' : 'Show'} Completed
-                          </Button>
-                          <Badge variant="outline" className="border-gray-300 text-gray-600">
-                            {filteredQueues.length} {showCompletedQueues ? 'total' : 'active'}
-                          </Badge>
-                        </div>
-                      </div>
 
                       {queuesLoading ? (
                         <div className="space-y-3">
@@ -1108,11 +1091,19 @@ export default function Dashboard() {
                             <div key={queue.id} className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm" data-testid={`queue-item-${queue.id}`}>
                               <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center space-x-3">
-                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${queue.status === 'in-progress'
-                                    ? 'bg-black text-white'
-                                    : 'border-2 border-dashed border-gray-300 text-gray-500'
-                                    }`}>
-                                    {queue.position}
+                                  {/* Profile Picture */}
+                                  <div className="flex-shrink-0">
+                                    {queue.user?.profileImage ? (
+                                      <img
+                                        src={queue.user.profileImage}
+                                        alt={queue.user.name || 'Customer'}
+                                        className="w-12 h-12 rounded-full object-cover border-2 border-teal-200"
+                                      />
+                                    ) : (
+                                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-lg border-2 border-teal-200">
+                                        {(queue.user?.name || 'C').charAt(0).toUpperCase()}
+                                      </div>
+                                    )}
                                   </div>
                                   <div>
                                     <div className="font-medium text-black text-sm" data-testid={`text-customer-name-${queue.id}`}>
@@ -1123,6 +1114,15 @@ export default function Dashboard() {
                                         {queue.user.phone}
                                       </div>
                                     )}
+                                    {/* Join Time */}
+                                    <div className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                                      <Clock className="w-3 h-3" />
+                                      Joined at {new Date(queue.timestamp).toLocaleTimeString('en-US', { 
+                                        hour: '2-digit', 
+                                        minute: '2-digit',
+                                        hour12: true 
+                                      })}
+                                    </div>
                                     <div className="mt-1">
                                       <QueueStatusBadge status={queue.status} />
                                     </div>
