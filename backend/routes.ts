@@ -1210,6 +1210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Ensure we have a valid services array
           const queueWithDetails = {
             ...queue,
+            salon, // Include salon information
             user: user ? { ...user, password: undefined } : null,
             service, // Keep for backward compatibility
             services: services.length > 0 ? services : undefined, // Add all services if available
