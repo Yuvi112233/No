@@ -1039,20 +1039,6 @@ export default function Dashboard() {
                   </div>
                 </div> */}
 
-                  {/* Tab Content */}
-                  {activeTab === 'queue' && (
-                    <div className="space-y-4">
-                      {/* Arrival Verification Panel - Show when there are pending verifications */}
-                      {hasPendingVerifications && selectedSalonId && (
-                        <ArrivalVerificationPanel
-                          salonId={selectedSalonId}
-                          onVerificationComplete={() => {
-                            queryClient.invalidateQueries({
-                              queryKey: ['/api/salons', selectedSalonId, 'queues']
-                            });
-                          }}
-                        />
-                      )}
                 {/* Tab Content */}
                 {activeTab === 'queue' && (
                   <div className="space-y-4">
