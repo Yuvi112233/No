@@ -35,6 +35,22 @@ export const api = {
       return response.json();
     },
 
+    // Email OTP endpoints
+    sendEmailOTP: async (userId: string) => {
+      const response = await apiRequest('POST', '/api/auth/send-email-otp', { userId });
+      return response.json();
+    },
+
+    verifyEmailOTP: async (userId: string, otp: string) => {
+      const response = await apiRequest('POST', '/api/auth/verify-email-otp', { userId, otp });
+      return response.json();
+    },
+
+    resendEmailOTP: async (userId: string) => {
+      const response = await apiRequest('POST', '/api/auth/resend-email-otp', { userId });
+      return response.json();
+    },
+
     updateProfile: async (profileData: { name?: string; phone?: string; email?: string }) => {
       const response = await apiRequest('PUT', '/api/user/profile', profileData);
       return response.json();
