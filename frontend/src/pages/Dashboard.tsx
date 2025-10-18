@@ -1050,19 +1050,19 @@ export default function Dashboard() {
                       />
                     )}
 
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-bold text-black">Current Queue</h2>
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <h2 className="text-lg font-bold text-black flex-shrink-0">Current Queue</h2>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => setShowCompletedQueues(!showCompletedQueues)}
-                          className="text-xs"
+                          className="text-xs px-2 h-7"
                         >
-                          {showCompletedQueues ? 'Hide' : 'Show'} Completed
+                          {showCompletedQueues ? 'Hide' : 'Show'}
                         </Button>
-                        <Badge variant="outline" className="border-gray-300 text-gray-600">
-                          {filteredQueues.length} {showCompletedQueues ? 'total' : 'active'}
+                        <Badge variant="outline" className="border-gray-300 text-gray-600 text-xs px-2">
+                          {filteredQueues.length}
                         </Badge>
                       </div>
                     </div>
