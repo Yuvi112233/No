@@ -622,9 +622,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 relative">
+    <div className="fixed inset-0 flex flex-col bg-gray-50 overflow-hidden">
       {/* Background Logo */}
-      <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
         <img
           src="/loadlogo.png"
           alt="Background Logo"
@@ -632,8 +632,8 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Mobile Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-100 z-50 relative">
+      {/* Mobile Header - Fixed at top */}
+      <div className="flex-shrink-0 bg-white border-b border-gray-100 z-50 relative">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-3">
             {/* Logo */}
@@ -723,7 +723,8 @@ export default function Dashboard() {
       </div>
 
       {salons.length === 0 ? (
-        <div className="p-4 pb-24 relative z-10">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden relative z-10" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="p-4 pb-24">
           <div className="bg-white border border-teal-200 rounded-3xl p-8 text-center mt-8 shadow-sm">
             <div className="w-20 h-20 bg-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
               <Settings className="h-10 w-10 text-white" />
@@ -955,13 +956,16 @@ export default function Dashboard() {
               </DialogContent>
             </Dialog>
           </div>
+          </div>
         </div>
       ) : (
         <>
-          {selectedSalonId && (
-            <>
-              {/* Analytics Cards - Mobile Grid */}
-              <div className="p-4 pb-24 relative z-10">
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden relative z-10" style={{ WebkitOverflowScrolling: 'touch' }}>
+            {selectedSalonId && (
+              <>
+                {/* Analytics Cards - Mobile Grid */}
+                <div className="p-4 pb-24">
                 <div className="grid grid-cols-2 gap-3 mb-6">
                   <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
                     <div className="flex items-center justify-between mb-2">
@@ -1805,11 +1809,13 @@ export default function Dashboard() {
               </div>
             </>
           )}
+          </div>
+          {/* End Scrollable Content Area */}
         </>
       )}
 
-      {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-pb shadow-lg">
+      {/* Mobile Bottom Navigation - Fixed */}
+      <div className="flex-shrink-0 bg-white border-t border-gray-200 z-50 shadow-lg">
         <div className="grid grid-cols-5 py-3">
           {[
             { id: 'queue', label: 'Queue', icon: Users, active: activeTab === 'queue' },

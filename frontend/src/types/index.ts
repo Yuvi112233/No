@@ -146,8 +146,14 @@ export interface Analytics {
   avgWaitTime: number;
   rating: number;
   showRate: number;
-  revenue: number;
+  revenue: number; // Today's revenue (9 AM - 11 PM)
+  totalRevenue?: number; // All-time revenue (optional)
   popularServices: (Service & { bookings: number })[];
+  businessHours?: {
+    start: string;
+    end: string;
+    timezone: string;
+  };
 }
 
 export interface WebSocketMessage {
