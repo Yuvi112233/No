@@ -5,6 +5,10 @@
   "license": "MIT",
   "description": "Backend API for SMART-Q application",
   "main": "index.ts",
+  "engines": {
+    "node": "18.x",
+    "npm": "9.x"
+  },
   "scripts": {
     "dev": "nodemon index.ts",
     "build": "esbuild index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/server.js",
