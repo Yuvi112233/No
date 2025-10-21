@@ -63,14 +63,134 @@ export default function Profile() {
 
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+
+        // Validate name field - no numbers or special characters
+        if (name === 'name') {
+            const nameRegex = /^[a-zA-Z\s]*$/;
+            if (!nameRegex.test(value)) {
+                toast({
+                    title: "Invalid Name",
+                    description: "Name cannot contain numbers or special characters",
+                    variant: "destructive",
+                });
+                return;
+            }
+        }
+
+        // Validate phone field - allow + prefix and digits
+        if (name === 'phone') {
+            const phoneRegex = /^[\+]?[0-9]*$/;
+            if (!phoneRegex.test(value)) {
+                toast({
+                    title: "Invalid phone number",
+                    description: "Phone number can only contain digits and optional + prefix",
+                    variant: "destructive",
+                });
+                return;
+            }
+            if (value.length > 14) {
+                toast({
+                    title: "Invalid phone number",
+                    description: "Phone number is too long",
+                    variant: "destructive",
+                });
+                return;
+            }
+        }
+
+        // Validate bio length - max 50 characters
+        if (name === 'bio' && value.length > 50) {
+            toast({
+                title: "Bio too long",
+                description: "Bio cannot exceed 50 characters",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        // Note: Location validation is only done on save, not during typing
+        // This allows users to type "10 Downing Street" without being blocked at "10"
+
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
+            [name]: value
         });
     };
 
     const handleSave = async () => {
         try {
+            // Validate name field
+            if (!formData.name || formData.name.trim() === '') {
+                toast({
+                    title: "Name cannot be blank",
+                    description: "Please enter your name",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            // Validate name - no numbers or special characters
+            const nameRegex = /^[a-zA-Z\s]+$/;
+            if (!nameRegex.test(formData.name)) {
+                toast({
+                    title: "Invalid Name",
+                    description: "Name cannot contain numbers or special characters",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            // Validate phone if provided
+            if (formData.phone && formData.phone.trim() !== '') {
+                // Allow phone numbers with or without + prefix, 10-13 digits
+                const phoneRegex = /^[\+]?[0-9]{10,13}$/;
+                if (!phoneRegex.test(formData.phone.trim())) {
+                    toast({
+                        title: "Invalid phone number",
+                        description: "Phone number must be 10-13 digits (with optional + prefix)",
+                        variant: "destructive",
+                    });
+                    return;
+                }
+            }
+
+            // Validate location field
+            if (!formData.location || formData.location.trim() === '') {
+                toast({
+                    title: "Location cannot be blank",
+                    description: "Please enter your location",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            // Validate location - must contain text, not just numbers
+            const onlyNumbers = /^[0-9]+$/;
+            if (onlyNumbers.test(formData.location.trim())) {
+                toast({
+                    title: "Invalid location",
+                    description: "Location must contain text, not only numbers",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            // Validate bio length
+            if (formData.bio && formData.bio.length > 50) {
+                toast({
+                    title: "Bio too long",
+                    description: "Bio cannot exceed 50 characters",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            // Sanitize bio to prevent script injection
+            const sanitizedBio = formData.bio
+                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/<[^>]*>/g, '');
+
             // Update profile via API with all fields
             const token = localStorage.getItem('smartq_token');
 
@@ -85,10 +205,10 @@ export default function Profile() {
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    name: formData.name,
+                    name: formData.name.trim(),
                     email: formData.email || undefined,
                     location: formData.location || undefined,
-                    bio: formData.bio || undefined
+                    bio: sanitizedBio || undefined
                 })
             });
 
@@ -97,7 +217,7 @@ export default function Profile() {
                 throw new Error(error.message || 'Failed to update profile');
             }
 
-            const data = await response.json();
+            await response.json();
 
             // Save category preference
             setUserCategory(selectedCategory);
@@ -106,10 +226,10 @@ export default function Profile() {
             if (user) {
                 const updatedUser = {
                     ...user,
-                    name: formData.name,
+                    name: formData.name.trim(),
                     email: formData.email || user.email,
                     location: formData.location,
-                    bio: formData.bio,
+                    bio: sanitizedBio,
                 } as any;
                 updateUser(updatedUser);
             }
@@ -326,6 +446,17 @@ export default function Profile() {
             return;
         }
 
+        // Validate filename length (max 20 characters excluding extension)
+        const fileNameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+        if (fileNameWithoutExt.length > 20) {
+            toast({
+                title: "Filename too long",
+                description: "Filename cannot exceed 20 characters (excluding extension)",
+                variant: "destructive",
+            });
+            return;
+        }
+
         // Read file and show crop modal
         const reader = new FileReader();
         reader.onload = () => {
@@ -336,6 +467,63 @@ export default function Profile() {
 
         // Reset input
         event.target.value = '';
+    };
+
+    // Handle profile image removal
+    const handleRemoveProfileImage = async () => {
+        try {
+            console.log('Starting profile image removal...');
+            const token = localStorage.getItem('smartq_token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            console.log('Sending DELETE request to backend...');
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://no-production-d4fc.up.railway.app'}/api/user/profile-image`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            console.log('Response status:', response.status);
+
+            if (!response.ok) {
+                const error = await response.json();
+                console.error('Backend error:', error);
+                throw new Error(error.message || 'Failed to remove image');
+            }
+
+            const result = await response.json();
+            console.log('Backend response:', result);
+
+            // Update user context to remove profile image
+            if (user) {
+                const updatedUser = {
+                    ...user,
+                    profileImage: null,
+                } as any;
+                updateUser(updatedUser);
+                console.log('Updated user context');
+            }
+
+            // Refetch user data to ensure it's synced with backend
+            console.log('Refetching user data...');
+            await refetchUser();
+            console.log('User data refetched');
+
+            toast({
+                title: "Profile picture removed",
+                description: "Your profile picture has been removed successfully.",
+            });
+        } catch (error: any) {
+            console.error('Profile image removal error:', error);
+            toast({
+                title: "Removal failed",
+                description: error.message || "Failed to remove profile picture",
+                variant: "destructive",
+            });
+        }
     };
 
     // Handle cropped image upload
@@ -527,6 +715,15 @@ export default function Profile() {
                                                 >
                                                     <Camera className="w-4 h-4" />
                                                 </label>
+                                                {user?.profileImage && (
+                                                    <button
+                                                        onClick={handleRemoveProfileImage}
+                                                        className="absolute bottom-2 left-2 w-10 h-10 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white shadow-lg transition-colors group-hover:scale-110 transform duration-300"
+                                                        title="Remove profile picture"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -628,11 +825,15 @@ export default function Profile() {
                                                         type="email"
                                                         value={formData.email}
                                                         onChange={handleInputChange}
-                                                        disabled={!isEditing}
-                                                        className="pl-12 h-12 border-2 border-gray-200 focus:border-teal-500 rounded-xl"
+                                                        disabled={true}
+                                                        className="pl-12 h-12 border-2 border-gray-200 focus:border-teal-500 rounded-xl bg-gray-100"
                                                         placeholder="Enter your email"
+                                                        title="Email cannot be changed"
                                                     />
                                                 </div>
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    Email cannot be changed
+                                                </p>
                                             </div>
                                         </div>
 
@@ -647,11 +848,15 @@ export default function Profile() {
                                                         name="phone"
                                                         value={formData.phone}
                                                         onChange={handleInputChange}
-                                                        disabled={!isEditing}
-                                                        className="pl-12 h-12 border-2 border-gray-200 focus:border-teal-500 rounded-xl"
+                                                        disabled={true}
+                                                        className="pl-12 h-12 border-2 border-gray-200 focus:border-teal-500 rounded-xl bg-gray-100"
                                                         placeholder="Enter your phone number"
+                                                        title="Phone number cannot be changed"
                                                     />
                                                 </div>
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    Phone number cannot be changed
+                                                </p>
                                             </div>
 
                                             <div>
@@ -723,9 +928,13 @@ export default function Profile() {
                                                 onChange={handleInputChange}
                                                 disabled={!isEditing}
                                                 rows={4}
+                                                maxLength={50}
                                                 className="border-2 border-gray-200 focus:border-teal-500 rounded-xl resize-none"
                                                 placeholder="Tell us about yourself..."
                                             />
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                {formData.bio.length}/50 characters
+                                            </p>
                                         </div>
                                     </CardContent>
                                 </Card>
