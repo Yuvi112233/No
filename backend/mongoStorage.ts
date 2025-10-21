@@ -94,9 +94,29 @@ export class MongoStorage implements IStorage {
       updates.password = await bcrypt.hash(updates.password, 10);
     }
 
+    // Separate fields to unset (null values) from fields to set
+    const fieldsToSet: any = {};
+    const fieldsToUnset: any = {};
+    
+    for (const [key, value] of Object.entries(updates)) {
+      if (value === null || value === undefined) {
+        fieldsToUnset[key] = "";
+      } else {
+        fieldsToSet[key] = value;
+      }
+    }
+
+    const updateOperation: any = {};
+    if (Object.keys(fieldsToSet).length > 0) {
+      updateOperation.$set = fieldsToSet;
+    }
+    if (Object.keys(fieldsToUnset).length > 0) {
+      updateOperation.$unset = fieldsToUnset;
+    }
+
     const updatedUser = await UserModel.findOneAndUpdate(
       { id },
-      { $set: updates },
+      updateOperation,
       { new: true }
     ).lean();
 

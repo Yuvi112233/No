@@ -712,6 +712,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Remove profile image endpoint
+  app.delete('/api/user/profile-image', authenticateToken, async (req, res) => {
+    try {
+      // Get current user
+      const currentUser = await storage.getUser(req.user!.userId);
+
+      if (!currentUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Delete profile image from Cloudinary if exists
+      if (currentUser.profileImage) {
+        try {
+          // Extract public_id from Cloudinary URL
+          const urlParts = currentUser.profileImage.split('/');
+          const uploadIndex = urlParts.indexOf('upload');
+          if (uploadIndex !== -1 && uploadIndex + 2 < urlParts.length) {
+            const pathAfterUpload = urlParts.slice(uploadIndex + 2).join('/');
+            const publicId = pathAfterUpload.replace(/\.[^/.]+$/, '');
+            await deleteImageFromCloudinary(publicId);
+          }
+        } catch (error) {
+          console.error('Error deleting profile image from Cloudinary:', error);
+          // Continue even if deletion fails
+        }
+      }
+
+      // Update user profile to remove image URL (set to null to explicitly remove it)
+      const updatedUser = await storage.updateUser(req.user!.userId, {
+        profileImage: null,
+      } as any);
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      res.json({
+        message: 'Profile image removed successfully'
+      });
+
+    } catch (error) {
+      console.error('Profile image removal error:', error);
+      res.status(500).json({ message: 'Failed to remove profile image', error });
+    }
+  });
+
   // Delete account endpoint
   app.delete('/api/user/account', authenticateToken, async (req, res) => {
     try {
