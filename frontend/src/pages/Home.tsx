@@ -102,7 +102,7 @@ export default function Home() {
     // Trim spaces and sanitize input
     const trimmedQuery = searchQuery.trim();
     setSearchQuery(trimmedQuery);
-    
+
     if ((trimmedQuery || location) && allSalonsRef.current) {
       allSalonsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -119,7 +119,7 @@ export default function Home() {
 
     // Sanitize search query: trim spaces and remove special characters
     const sanitizedQuery = searchQuery.trim().replace(/[^a-zA-Z0-9\s]/g, '');
-    
+
     // If search is empty after sanitization, show all salons (TC59)
     const matchesSearch = !sanitizedQuery ||
       salon.name.toLowerCase().includes(sanitizedQuery.toLowerCase()) ||
@@ -449,7 +449,7 @@ export default function Home() {
           {/* Background Image Layer - Covers header and carousel area */}
           <div className="absolute inset-0 h-[420px] md:h-[480px]">
             <img
-              src="/5.png"
+              src="/4.png"
               alt="Salon Background"
               className="w-full h-full object-cover"
             />
@@ -457,22 +457,28 @@ export default function Home() {
           </div>
 
           {/* Content Layer */}
-          <div className="relative z-10 px-4 pt-4 pb-5">
+          <div className="relative z-10 px-4 pt-6 pb-5">
             <div className="max-w-7xl mx-auto">
-              {/* Header with Greeting */}
-              <div className="flex items-center justify-between mb-6">
-                {/* Left: Greeting */}
-                <div className="space-y-1">
-                  <p className="text-white text-base font-bricolage tracking-wide">
-                    Hello, {user.name?.split(' ')[0] || 'User'}! 👋
-                  </p>
-                  <h1 className="text-xl md:text-3xl  text-yellow-200 font-bricolage ">
+              {/* Header with Greeting - Enhanced */}
+              <div className="flex items-center justify-between mb-8">
+                {/* Left: Greeting with gradient text */}
+                <div className="space-y-2 animate-fade-in">
+                  <div className="flex items-center gap-2">
+                    <p className="text-white text-lg md:text-xl font-bricolage tracking-wide drop-shadow-lg">
+                      Hello, {user.name?.split(' ')[0] || 'User'}!
+                    </p>
+                    <span className="text-2xl animate-wave inline-block">👋</span>
+                  </div>
+                  <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-yellow-200 via-yellow-100 to-white bg-clip-text text-transparent font-bricolage drop-shadow-2xl">
                     Discover Your Perfect Salon
                   </h1>
+                  <p className="text-white/80 text-sm md:text-base font-light">
+                    Book appointments instantly, skip the wait ✨
+                  </p>
                 </div>
 
                 {/* Right: Animation - Peeking from edge */}
-                <div className="absolute -right-6 top-2 w-20 h-20 pointer-events-none">
+                <div className="absolute -right-6 top-2 w-24 h-24 md:w-28 md:h-28 pointer-events-none animate-float">
                   <DotLottieReact
                     src="https://lottie.host/dfb2ab5d-ecdc-4aa4-ab64-181def37bd11/DWB1LXlcDu.lottie"
                     loop
@@ -481,71 +487,102 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Search Bar */}
-              <div className="mb-4">
-                <div className="relative w-full max-w-sm flex gap-2">
-                  <Input
-                    type="text"
-                    placeholder="Search salons or services..."
-                    className="pl-4 pr-4 py-2.5 text-sm border-2 border-white/20 focus-visible:ring-2 focus-visible:ring-white/50 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg flex-1"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      // TC60: Limit input to 50 characters
-                      const value = e.target.value;
-                      if (value.length <= 50) {
-                        setSearchQuery(value);
-                      }
-                    }}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    maxLength={50}
-                  />
+              {/* Search Bar - Enhanced with glow effect */}
+              <div className="mb-6">
+                <div className="relative w-full max-w-md flex gap-3 group">
+                  {/* Glow effect on focus */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-teal-400 to-teal-500 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-30 transition-opacity duration-300"></div>
+
+                  <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                    <Input
+                      type="text"
+                      placeholder="Search salons or services..."
+                      className="pl-12 pr-4 py-3.5 text-sm border-2 border-white/30 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:border-white/50 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 w-full placeholder:text-gray-400"
+                      value={searchQuery}
+                      onChange={(e) => {
+                        // TC60: Limit input to 50 characters
+                        const value = e.target.value;
+                        if (value.length <= 50) {
+                          setSearchQuery(value);
+                        }
+                      }}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                      maxLength={50}
+                    />
+                  </div>
+
                   <Button
                     onClick={handleSearch}
-                    className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-xl shadow-lg flex-shrink-0"
+                    className="relative bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-6 py-3.5 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 flex-shrink-0 group"
                   >
-                    <Search className="h-5 w-5" />
+                    <Search className="h-5 w-5 group-hover:rotate-12 transition-transform duration-300" />
                   </Button>
                 </div>
               </div>
 
-              {/* Promotional Banner - Seamlessly Integrated */}
-              <div className="relative rounded-2xl overflow-hidden h-44 md:h-56  ">
-                {/* Gradient background */}
-                <div className="absolute inset-0 bg-transparent"></div>
+              {/* Promotional Banner - Enhanced with modern design */}
+              <div className="relative rounded-3xl overflow-hidden h-48 md:h-64 shadow-2xl group">
+                {/* Animated gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-teal-600/95 via-teal-500/95 to-teal-700/95 animate-gradient-shift"></div>
 
+                {/* Decorative elements */}
+                <div className="absolute inset-0 opacity-20">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full blur-3xl animate-pulse"></div>
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-yellow-300 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                </div>
 
-                {/* Subtle pattern overlay */}
-                <div className="absolute inset-0 opacity-10">
-                  <div className="absolute top-5 right-10 w-32 h-32 bg-white rounded-full blur-2xl animate-pulse"></div>
-                  <div className="absolute bottom-5 left-10 w-40 h-40 bg-white rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                {/* Geometric pattern overlay */}
+                <div className="absolute inset-0 opacity-5">
+                  <div className="absolute inset-0" style={{
+                    backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+                    backgroundSize: '40px 40px'
+                  }}></div>
                 </div>
 
                 {/* Content with smooth text transitions */}
-                <div className="relative h-full flex items-center px-5 md:px-8">
+                <div className="relative h-full flex items-center px-6 md:px-10">
                   {promoSlides.map((slide, index) => (
                     <div
                       key={slide.id}
-                      className={`absolute inset-0 flex items-center px-5 md:px-8 transition-all duration-700 ${index === currentSlide
+                      className={`absolute inset-0 flex items-center px-6 md:px-10 transition-all duration-700 ${index === currentSlide
                         ? 'opacity-100 translate-x-0'
-                        : 'opacity-0 -translate-x-4 pointer-events-none'
+                        : 'opacity-0 -translate-x-8 pointer-events-none'
                         }`}
                     >
-                      <div className="flex-1 pr-20 md:pr-24">
-                        <h2 className="text-xl md:text-3xl font-bold text-white mb-1.5 leading-tight">
+                      <div className="flex-1 pr-24 md:pr-32">
+                        <div className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs text-white font-semibold mb-3 border border-white/30">
+                          🎉 Limited Time Offer
+                        </div>
+                        <h2 className="text-2xl md:text-4xl font-black text-white mb-2 leading-tight drop-shadow-lg">
                           {slide.title}
                         </h2>
-                        <p className="text-xs md:text-sm text-white/90 mb-3">
+                        <p className="text-sm md:text-base text-white/95 mb-4 font-medium drop-shadow">
                           {slide.subtitle}
                         </p>
-                        <Button className="bg-white hover:bg-gray-50 text-teal-600 font-semibold px-5 py-2 rounded-full text-xs md:text-sm shadow-lg hover:shadow-xl transition-all duration-200">
+                        <Button className="bg-white hover:bg-white/90 text-teal-600 font-bold px-6 py-2.5 rounded-full text-sm md:text-base shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5">
                           {slide.buttonText}
+                          <span className="ml-2">→</span>
                         </Button>
                       </div>
 
-                      {/* Discount Badge */}
-                      <div className="absolute right-5 md:right-8 top-1/2 -translate-y-1/2 bg-yellow-300 rounded-full w-16 h-16 md:w-24 md:h-24 flex flex-col items-center justify-center shadow-xl border-3 border-white/40">
-                        <p className="text-[9px] md:text-xs text-yellow-900 font-medium">Up to</p>
-                        <p className="text-xl md:text-3xl font-black text-yellow-900">{slide.discount}</p>
+                      {/* Enhanced Discount Badge with animation */}
+                      <div className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2">
+                        <div className="relative">
+                          {/* Glow effect */}
+                          <div className="absolute inset-0 bg-yellow-400 rounded-full blur-xl opacity-50 animate-pulse"></div>
+
+                          {/* Badge */}
+                          <div className="relative bg-gradient-to-br from-yellow-300 via-yellow-400 to-orange-400 rounded-full w-20 h-20 md:w-28 md:h-28 flex flex-col items-center justify-center shadow-2xl border-4 border-white/50 transform group-hover:rotate-12 transition-transform duration-500">
+                            <p className="text-[10px] md:text-xs text-yellow-900 font-bold uppercase tracking-wide">Up to</p>
+                            <p className="text-2xl md:text-4xl font-black text-yellow-900 leading-none">{slide.discount}</p>
+                            <p className="text-[10px] md:text-xs text-yellow-900 font-bold uppercase">OFF</p>
+                          </div>
+
+                          {/* Sparkle effect */}
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping"></div>
+                        </div>
                       </div>
                     </div>
                   ))}
