@@ -1,10 +1,13 @@
 [build]
 builder = "nixpacks"
-buildCommand = "cd backend && npm install --include=dev && npm run build"
-watchPatterns = ["backend/**"]
+buildCommand = "npm install --include=dev && npm run build"
+watchPatterns = ["**"]
+
+[service]
+rootDirectory = "backend"
 
 [deploy]
-startCommand = "cd backend && npm start"
+startCommand = "npm start"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
 restartPolicyType = "on_failure"
