@@ -58,16 +58,15 @@ export default function NewAuthPage({ onComplete }: NewAuthPageProps) {
   }, [user, setLocation, onComplete]);
 
   const handleLoadingComplete = () => {
-    // After loading screen, call onComplete to show IntroScreen
-    if (onComplete) {
+    // Check if admin flow - if so, skip intro and go directly to admin login
+    if (authFlow === 'admin') {
+      setCurrentStep('admin-login');
+    } else if (onComplete) {
+      // For customer flow, call onComplete to show IntroScreen
       onComplete();
     } else {
       // Fallback to original behavior if no onComplete callback
-      if (authFlow === 'admin') {
-        setCurrentStep('admin-login');
-      } else {
-        setCurrentStep('phone-input');
-      }
+      setCurrentStep('phone-input');
     }
   };
 

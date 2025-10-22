@@ -70,6 +70,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ====================
   // AUTH ROUTES
   // ====================
+  
+  // Send OTP to email (for both new and existing users - Zomato style)
+  app.post('/api/auth/send-email-otp-login', async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: 'Invalid email format' });
+      }
+
+      let user = await storage.getUserByEmail(email);
+      let isNewUser = false;
+
+      // If user doesn't exist, create a new one
+      if (!user) {
+        isNewUser = true;
+        user = await storage.createUser({
+          name: '', // Will be filled later if needed
+          email: email.trim().toLowerCase(),
+          password: null, // Passwordless auth
+          role: 'customer',
+        });
+
+        // Update with verification fields
+        await storage.updateUser(user.id, {
+          emailVerified: false,
+          phoneVerified: false,
+          isVerified: false,
+        });
+      }
+
+      // Generate and send OTP (for both new and existing users)
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+      // Store OTP in user record
+      await storage.updateUser(user.id, {
+        emailOTP: otp,
+        otpExpiry: expiry,
+      });
+
+      // Send OTP via email
+      try {
+        const emailSent = await otpService.sendEmailOTP(user.id, user.email, user.name || 'User');
+        if (!emailSent) {
+          console.warn('Failed to send verification email');
+        }
+      } catch (emailError) {
+        console.error('Email sending error:', emailError);
+      }
+
+      console.log(`📧 Email OTP for ${email}: ${otp}`);
+
+      res.json({
+        success: true,
+        isNewUser,
+        userId: user.id,
+        message: 'OTP sent successfully',
+        // For testing only - remove in production
+        debug: process.env.NODE_ENV === 'development' ? { otp } : undefined
+      });
+
+    } catch (error) {
+      console.error('Send email OTP error:', error);
+      res.status(500).json({ message: 'Failed to send OTP', error });
+    }
+  });
+
   app.post('/api/auth/register', async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
@@ -81,6 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'User already exists with this email' });
       }
 
+      // Password hashing is handled in storage.createUser()
       // Create user
       const user = await storage.createUser(userData);
 
@@ -88,14 +163,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateUser(user.id, {
         emailVerified: false,
         phoneVerified: false,
-        isVerified: false,
+        isVerified: false, // Require email verification
       });
 
-      // Return user data without token (no auto-login)
+      // Generate and send email OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+      // Store OTP in user record
+      await storage.updateUser(user.id, {
+        emailOTP: otp,
+        otpExpiry: expiry,
+      });
+
+      // Send OTP via email
+      try {
+        const emailSent = await otpService.sendEmailOTP(user.id, user.email, user.name || 'User');
+        if (!emailSent) {
+          console.warn('Failed to send verification email, but continuing with registration');
+        }
+      } catch (emailError) {
+        console.error('Email sending error:', emailError);
+        // Continue with registration even if email fails
+      }
+
+      // Return user data without token (require verification first)
       const { password, ...userWithoutPassword } = user;
       res.json({
-        user: userWithoutPassword,
-        message: 'Account created successfully. Please verify your email and phone number.'
+        user: { ...userWithoutPassword, emailVerified: false, isVerified: false },
+        requiresVerification: true,
+        message: 'Account created successfully. Please verify your email.',
+        // For testing only - remove in production
+        debug: process.env.NODE_ENV === 'development' ? { otp } : undefined
       });
     } catch (error) {
       console.error('Registration error:', error);
@@ -117,18 +216,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
+      // Check if user has a password (email/password auth)
+      if (!user.password) {
+        return res.status(401).json({ message: 'Invalid credentials. Please use phone or Google sign-in.' });
+      }
+
       const isValidPassword = await bcrypt.compare(password, user.password);
       if (!isValidPassword) return res.status(401).json({ message: 'Invalid credentials' });
 
-      // Check if user is verified
-      if (!user.isVerified) {
-        return res.status(403).json({
-          message: 'Account not verified. Please complete email and phone verification.',
-          requiresVerification: true,
-          userId: user.id
-        });
-      }
-
+      // For email/password auth, allow login even if not fully verified
+      // They can verify email/phone later if needed
       const token = jwt.sign(
         { userId: user.id, email: user.email, role: user.role },
         JWT_SECRET,
@@ -1924,7 +2021,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const success = await otpService.verifyEmailOTP(userId, otp);
 
       if (success) {
-        res.json({ message: 'Email verified successfully' });
+        // Get updated user
+        const user = await storage.getUser(userId);
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Generate JWT token for auto-login after verification
+        const token = jwt.sign(
+          { userId: user.id, email: user.email, role: user.role },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+
+        // Return user data with token
+        const { password, emailOTP, phoneOTP, otpExpiry, ...userWithoutSensitiveData } = user;
+        res.json({ 
+          message: 'Email verified successfully',
+          user: userWithoutSensitiveData,
+          token
+        });
       } else {
         res.status(400).json({ message: 'Invalid or expired OTP' });
       }

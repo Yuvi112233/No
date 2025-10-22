@@ -136,6 +136,12 @@ export interface QueueWithDetails extends Queue {
 export interface AuthResponse {
   user: User;
   token: string;
+  requiresVerification?: boolean;
+  isNewUser?: boolean;
+  message?: string;
+  debug?: {
+    otp?: string;
+  };
   isNewUser?: boolean;
   message?: string;
 }

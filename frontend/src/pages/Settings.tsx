@@ -3,10 +3,8 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+
 import {
-    Bell,
-    Shield,
     Lock,
     Eye,
     EyeOff,
@@ -40,20 +38,6 @@ export default function Settings() {
         currentPassword: "",
         newPassword: "",
         confirmPassword: ""
-    });
-
-    const [notifications, setNotifications] = useState({
-        queueUpdates: true,
-        promotions: false,
-        reminders: true,
-        newsletter: false
-    });
-
-    const [privacy, setPrivacy] = useState({
-        profileVisible: true,
-        showLocation: false,
-        showPhone: false,
-        allowMessages: true
     });
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,74 +198,6 @@ export default function Settings() {
                 </div>
 
                 <div className="space-y-6 sm:space-y-8">
-                    {/* Notifications */}
-                    <Card className="border-0 bg-white/90 backdrop-blur-sm shadow-xl mx-1">
-                        <CardHeader>
-                            <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center">
-                                <Bell className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-teal-600" />
-                                Notification Preferences
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4 sm:space-y-6">
-                            {Object.entries(notifications).map(([key, value]) => (
-                                <div key={key} className="flex items-start sm:items-center justify-between gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl">
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="font-semibold text-sm sm:text-base text-gray-900 capitalize">
-                                            {key.replace(/([A-Z])/g, ' $1').trim()}
-                                        </h4>
-                                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                                            {key === 'queueUpdates' && 'Get notified about queue status changes'}
-                                            {key === 'promotions' && 'Receive promotional offers and deals'}
-                                            {key === 'reminders' && 'Get reminders about upcoming appointments'}
-                                            {key === 'newsletter' && 'Receive our weekly newsletter'}
-                                        </p>
-                                    </div>
-                                    <Switch
-                                        checked={value}
-                                        onCheckedChange={(checked) =>
-                                            setNotifications({ ...notifications, [key]: checked })
-                                        }
-                                        className="flex-shrink-0"
-                                    />
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-
-                    {/* Privacy Settings */}
-                    <Card className="border-0 bg-white/90 backdrop-blur-sm shadow-xl mx-1">
-                        <CardHeader>
-                            <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center">
-                                <Shield className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-purple-600" />
-                                Privacy Settings
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4 sm:space-y-6">
-                            {Object.entries(privacy).map(([key, value]) => (
-                                <div key={key} className="flex items-start sm:items-center justify-between gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl">
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="font-semibold text-sm sm:text-base text-gray-900 capitalize">
-                                            {key.replace(/([A-Z])/g, ' $1').trim()}
-                                        </h4>
-                                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                                            {key === 'profileVisible' && 'Make your profile visible to other users'}
-                                            {key === 'showLocation' && 'Display your location on your profile'}
-                                            {key === 'showPhone' && 'Show your phone number to salons'}
-                                            {key === 'allowMessages' && 'Allow other users to send you messages'}
-                                        </p>
-                                    </div>
-                                    <Switch
-                                        checked={value}
-                                        onCheckedChange={(checked) =>
-                                            setPrivacy({ ...privacy, [key]: checked })
-                                        }
-                                        className="flex-shrink-0"
-                                    />
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-
                     {/* Password Change */}
                     <Card className="border-0 bg-white/90 backdrop-blur-sm shadow-xl mx-1">
                         <CardHeader>

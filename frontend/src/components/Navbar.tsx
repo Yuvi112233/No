@@ -6,7 +6,7 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Clock, Bell, User, Settings, Home } from "lucide-react";
+import { Bell, User, Settings, Home } from "lucide-react";
 import { useState } from "react";
 import ProfileSheet from "./ProfileSheet";
 
@@ -27,19 +27,20 @@ export default function Navbar() {
           <div className="flex items-center justify-end md:justify-between">
             {/* Logo */}
             <div className="hidden md:flex items-center space-x-3">
-              <Link href="/" className="flex items-center space-x-2" data-testid="link-home">
-                <div className="w-8 h-8 bg-gradient-to-r from-teal-600 to-teal-700 rounded-lg flex items-center justify-center shadow-md">
-                  <Clock className="h-4 w-4 text-white" />
+              <Link href="/" className="flex items-center space-x-2 hover:opacity-90 transition-opacity" data-testid="link-home">
+                <div className="bg-teal-600 rounded-xl p-1.5 shadow-sm">
+                  <img
+                    src="/loadlogo.png"
+                    alt="AltQ Logo"
+                    className="h-8 w-auto object-contain"
+                  />
                 </div>
-                <span className="text-lg font-bold bg-gradient-to-r from-teal-600 to-teal-700 bg-clip-text text-transparent md:text-2xl">
-                  AltQ
-                </span>
               </Link>
             </div>
 
-            {/* Right Section - Sign In Button (Desktop Only) */}
+            {/* Right Section - Sign In/Sign Out Button (Desktop Only) */}
             <div className="flex items-center space-x-2">
-              {!user && (
+              {!user ? (
                 <Link href="/auth" data-testid="link-auth">
                   <Button
                     className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-medium px-4 py-2 text-sm rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
@@ -48,6 +49,14 @@ export default function Navbar() {
                     Sign In
                   </Button>
                 </Link>
+              ) : (
+                <Button
+                  onClick={logout}
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-medium px-4 py-2 text-sm rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                  data-testid="button-signout"
+                >
+                  Sign Out
+                </Button>
               )}
             </div>
           </div>
@@ -82,6 +91,16 @@ export default function Navbar() {
                       My Queue
                       <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                     </Link>
+                    <Link
+                      href="/settings"
+                      className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${location === '/settings'
+                        ? 'text-teal-600 bg-teal-50'
+                        : 'text-gray-600 hover:text-teal-600 hover:bg-teal-50'
+                        }`}
+                      data-testid="link-settings"
+                    >
+                      Settings
+                    </Link>
                     {user.role === 'salon_owner' && (
                       <Link
                         href="/dashboard"
@@ -98,7 +117,7 @@ export default function Navbar() {
                 )}
               </nav>
 
-              {/* Desktop User Section (Simplified) */}
+              {/* Desktop User Section */}
               {user && (
                 <div className="flex items-center space-x-4 ml-8">
                   <Link href="/profile">

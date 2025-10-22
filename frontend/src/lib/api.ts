@@ -41,6 +41,12 @@ export const api = {
       return response.json();
     },
 
+    // Send OTP to email for login (Zomato-style passwordless)
+    sendEmailOTPLogin: async (email: string) => {
+      const response = await apiRequest('POST', '/api/auth/send-email-otp-login', { email });
+      return response.json();
+    },
+
     verifyEmailOTP: async (userId: string, otp: string) => {
       const response = await apiRequest('POST', '/api/auth/verify-email-otp', { userId, otp });
       return response.json();
