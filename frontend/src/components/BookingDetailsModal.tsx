@@ -9,13 +9,21 @@ import { User, Mail, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 
-const profileCompletionSchema = z.object({
+// Schema for users without email authentication
+const fullProfileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name is too long"),
   email: z.string().min(1, "Email is required").email("Please enter a valid email"),
   phone: z.string().min(10, "Phone number must be 10 digits").max(10, "Phone number must be 10 digits"),
 });
 
-type ProfileCompletionForm = z.infer<typeof profileCompletionSchema>;
+// Schema for email-authenticated users (no email field needed)
+const phoneOnlySchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name is too long"),
+  email: z.string().optional(),
+  phone: z.string().min(10, "Phone number must be 10 digits").max(10, "Phone number must be 10 digits"),
+});
+
+type ProfileCompletionForm = z.infer<typeof fullProfileSchema>;
 
 interface BookingDetailsModalProps {
   isOpen: boolean;
@@ -39,11 +47,14 @@ export default function BookingDetailsModal({
   const { toast } = useToast();
   const { user } = useAuth();
 
+  // Check if user is already authenticated with email
+  const isEmailAuthenticated = !!user?.email;
+
   const form = useForm<ProfileCompletionForm>({
-    resolver: zodResolver(profileCompletionSchema),
+    resolver: zodResolver(isEmailAuthenticated ? phoneOnlySchema : fullProfileSchema),
     defaultValues: {
       name: "",
-      email: "",
+      email: user?.email || "",
       phone: "",
     },
     mode: "onChange",
@@ -62,9 +73,14 @@ export default function BookingDetailsModal({
 
     try {
       const { api } = await import("../lib/api");
-      
-      // First, update the profile with name and email
-      await api.auth.completeProfile(data.name, data.email);
+
+      // Update profile with name (and email if not authenticated)
+      if (!isEmailAuthenticated) {
+        await api.auth.completeProfile(data.name, data.email);
+      } else {
+        // For email-authenticated users, just update the name
+        await api.auth.completeProfile(data.name, user?.email || "");
+      }
 
       // Format phone number with country code
       const fullPhoneNumber = `+91${data.phone}`;
@@ -116,7 +132,7 @@ export default function BookingDetailsModal({
 
     try {
       const { api } = await import("../lib/api");
-      
+
       // Verify the phone OTP
       await api.auth.verifyOTP(phoneNumber, otp);
 
@@ -184,6 +200,7 @@ export default function BookingDetailsModal({
   const handleBack = () => {
     setStep('details');
     setOtp('');
+    setDebugOTP('');
   };
 
   return (
@@ -198,12 +215,14 @@ export default function BookingDetailsModal({
             />
           </div>
           <DialogTitle className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 px-2">
-            {step === 'details' ? 'Complete Your Booking' : 'Verify Your Email'}
+            {step === 'details' ? 'Complete Your Booking' : 'Verify Your Phone'}
           </DialogTitle>
           <p className="text-xs sm:text-sm md:text-base text-gray-600 mt-2 px-2">
-            {step === 'details' 
-              ? `We need a few details to confirm your booking at ${salonName}`
-              : `Enter the 6-digit code sent to ${form.getValues('email')}`
+            {step === 'details'
+              ? isEmailAuthenticated
+                ? `Just one more step! Verify your phone number to complete booking at ${salonName}`
+                : `We need a few details to confirm your booking at ${salonName}`
+              : `Enter the 6-digit code sent to ${phoneNumber}`
             }
           </p>
         </DialogHeader>
@@ -228,25 +247,59 @@ export default function BookingDetailsModal({
               )}
             </div>
 
-            {/* Email Input */}
+            {/* Email Input - Only show if NOT email authenticated */}
+            {!isEmailAuthenticated && (
+              <div className="space-y-1.5 sm:space-y-2">
+                <label className="text-xs sm:text-sm font-semibold text-gray-700 flex items-center gap-1.5 sm:gap-2">
+                  <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span>Email Address <span className="text-red-500">*</span></span>
+                </label>
+                <Input
+                  type="email"
+                  placeholder="Enter your email address"
+                  className="h-10 sm:h-11 text-sm rounded-xl border-2 border-gray-200 focus:border-teal-500 focus:ring-0 bg-gray-50/50 transition-all duration-300 w-full"
+                  {...form.register("email")}
+                />
+                {form.formState.errors.email && (
+                  <p className="text-xs text-red-500">
+                    {form.formState.errors.email.message}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500">
+                  We'll send a verification code to this email
+                </p>
+              </div>
+            )}
+
+            {/* Phone Input */}
             <div className="space-y-1.5 sm:space-y-2">
               <label className="text-xs sm:text-sm font-semibold text-gray-700 flex items-center gap-1.5 sm:gap-2">
-                <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                <span>Email Address <span className="text-red-500">*</span></span>
+                <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span>Phone Number <span className="text-red-500">*</span></span>
               </label>
-              <Input
-                type="email"
-                placeholder="Enter your email address"
-                className="h-10 sm:h-11 text-sm rounded-xl border-2 border-gray-200 focus:border-teal-500 focus:ring-0 bg-gray-50/50 transition-all duration-300 w-full"
-                {...form.register("email")}
-              />
-              {form.formState.errors.email && (
+              <div className="flex gap-2">
+                <div className="w-16 h-10 sm:h-11 bg-gray-100 border-2 border-gray-200 rounded-xl flex items-center justify-center text-sm font-semibold text-gray-700">
+                  +91
+                </div>
+                <Input
+                  type="tel"
+                  placeholder="10-digit phone number"
+                  maxLength={10}
+                  className="flex-1 h-10 sm:h-11 text-sm rounded-xl border-2 border-gray-200 focus:border-teal-500 focus:ring-0 bg-gray-50/50 transition-all duration-300"
+                  {...form.register("phone")}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    form.setValue('phone', value);
+                  }}
+                />
+              </div>
+              {form.formState.errors.phone && (
                 <p className="text-xs text-red-500">
-                  {form.formState.errors.email.message}
+                  {form.formState.errors.phone.message}
                 </p>
               )}
               <p className="text-xs text-gray-500">
-                We'll send a verification code to this email
+                We'll send a verification code to this number
               </p>
             </div>
 
@@ -258,10 +311,13 @@ export default function BookingDetailsModal({
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-semibold text-teal-900 text-xs mb-0.5">
-                    Email Verification Required
+                    {isEmailAuthenticated ? 'Phone Verification Required' : 'Email Verification Required'}
                   </h4>
                   <p className="text-teal-700 text-xs leading-relaxed">
-                    To ensure booking confirmations reach you, we'll verify your email with a one-time code.
+                    {isEmailAuthenticated
+                      ? 'To ensure booking confirmations reach you, we need to verify your phone number with a one-time code.'
+                      : 'To ensure booking confirmations reach you, we\'ll verify your email with a one-time code.'
+                    }
                   </p>
                 </div>
               </div>
@@ -303,6 +359,30 @@ export default function BookingDetailsModal({
           </form>
         ) : (
           <div className="space-y-4 pt-3 sm:pt-4">
+            {/* Debug OTP Display - For Testing Only */}
+            {debugOTP && (
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-3 sm:p-4">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                  <p className="text-xs font-bold text-amber-900 uppercase tracking-wide">
+                    Testing Mode
+                  </p>
+                  <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-amber-700 mb-2">Your OTP Code:</p>
+                  <div className="bg-white rounded-lg p-3 border-2 border-amber-200">
+                    <p className="text-3xl font-black text-amber-900 tracking-[0.5em] font-mono">
+                      {debugOTP}
+                    </p>
+                  </div>
+                  <p className="text-xs text-amber-600 mt-2">
+                    Copy this code to verify your phone number
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* OTP Input */}
             <div className="space-y-2">
               <label className="text-xs sm:text-sm font-semibold text-gray-700 flex items-center gap-2">
@@ -340,7 +420,7 @@ export default function BookingDetailsModal({
             {/* Info Box */}
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
               <p className="text-blue-700 text-xs leading-relaxed text-center">
-                Check your email inbox (and spam folder) for the verification code. The code expires in 5 minutes.
+                Check your phone for the verification code. The code expires in 5 minutes.
               </p>
             </div>
 
@@ -361,7 +441,7 @@ export default function BookingDetailsModal({
                   "Verify & Complete Booking"
                 )}
               </Button>
-              
+
               <Button
                 type="button"
                 variant="outline"
