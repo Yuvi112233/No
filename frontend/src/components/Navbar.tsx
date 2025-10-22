@@ -91,6 +91,16 @@ export default function Navbar() {
                       My Queue
                       <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                     </Link>
+                    <Link
+                      href="/settings"
+                      className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${location === '/settings'
+                        ? 'text-teal-600 bg-teal-50'
+                        : 'text-gray-600 hover:text-teal-600 hover:bg-teal-50'
+                        }`}
+                      data-testid="link-settings"
+                    >
+                      Settings
+                    </Link>
                     {user.role === 'salon_owner' && (
                       <Link
                         href="/dashboard"
@@ -107,7 +117,7 @@ export default function Navbar() {
                 )}
               </nav>
 
-              {/* Desktop User Section (Simplified) */}
+              {/* Desktop User Section */}
               {user && (
                 <div className="flex items-center space-x-4 ml-8">
                   <Link href="/profile">
