@@ -29,9 +29,13 @@ export default function LocationPicker({ onLocationSelect, initialLocation }: Lo
   const [isOpen, setIsOpen] = useState(false);
   const [accuracy, setAccuracy] = useState<number | null>(null);
   const [hasAutoLocated, setHasAutoLocated] = useState(false);
+  const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([]);
+  const [showPredictions, setShowPredictions] = useState(false);
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const geocoderRef = useRef<google.maps.Geocoder | null>(null);
+  const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
+  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
 
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -58,16 +62,22 @@ export default function LocationPicker({ onLocationSelect, initialLocation }: Lo
     mapRef.current = map;
     try {
       geocoderRef.current = new google.maps.Geocoder();
-      console.log('Google Maps loaded successfully, Geocoder initialized');
+      autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
+      placesServiceRef.current = new google.maps.places.PlacesService(map);
+      console.log('Google Maps loaded successfully, Geocoder and Places services initialized');
     } catch (error) {
-      console.error('Error initializing Geocoder:', error);
+      console.error('Error initializing Google services:', error);
       geocoderRef.current = null;
+      autocompleteServiceRef.current = null;
+      placesServiceRef.current = null;
     }
   }, []);
 
   const onMapUnmount = useCallback(() => {
     mapRef.current = null;
     geocoderRef.current = null;
+    autocompleteServiceRef.current = null;
+    placesServiceRef.current = null;
   }, []);
 
   const reverseGeocode = async (lat: number, lng: number) => {
@@ -111,10 +121,85 @@ export default function LocationPicker({ onLocationSelect, initialLocation }: Lo
     }
   };
 
+  // Fetch autocomplete predictions
+  const fetchPredictions = useCallback(async (input: string) => {
+    if (!input.trim() || !autocompleteServiceRef.current) {
+      setPredictions([]);
+      setShowPredictions(false);
+      return;
+    }
+
+    try {
+      const response = await autocompleteServiceRef.current.getPlacePredictions({
+        input,
+        componentRestrictions: { country: 'in' }, // Restrict to India
+      });
+
+      if (response && response.predictions) {
+        setPredictions(response.predictions);
+        setShowPredictions(true);
+      }
+    } catch (error) {
+      console.error('Error fetching predictions:', error);
+      setPredictions([]);
+    }
+  }, []);
+
+  // Handle search query change with debouncing
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery.length >= 3) {
+        fetchPredictions(searchQuery);
+      } else {
+        setPredictions([]);
+        setShowPredictions(false);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, fetchPredictions]);
+
+  // Select a prediction
+  const selectPrediction = async (placeId: string, description: string) => {
+    if (!placesServiceRef.current) return;
+
+    setIsLoading(true);
+    setShowPredictions(false);
+    setSearchQuery(description);
+
+    try {
+      placesServiceRef.current.getDetails(
+        { placeId },
+        (place, status) => {
+          if (status === google.maps.places.PlacesServiceStatus.OK && place?.geometry?.location) {
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+            const newCoords = { latitude: lat, longitude: lng };
+            setCoordinates(newCoords);
+            setAddress(place.formatted_address || description);
+            onLocationSelect({
+              latitude: lat,
+              longitude: lng,
+              address: place.formatted_address || description
+            });
+            mapRef.current?.panTo({ lat, lng });
+            mapRef.current?.setZoom(17);
+          }
+          setIsLoading(false);
+        }
+      );
+    } catch (error) {
+      console.error('Error getting place details:', error);
+      setIsLoading(false);
+    }
+  };
+
   const searchLocation = async () => {
     if (!searchQuery.trim() || !geocoderRef.current) return;
 
     setIsLoading(true);
+    setShowPredictions(false);
+
     try {
       const response = await geocoderRef.current.geocode({ address: searchQuery });
 
@@ -268,6 +353,21 @@ export default function LocationPicker({ onLocationSelect, initialLocation }: Lo
     }
   }, [isOpen, address, hasAutoLocated, isLoaded, getCurrentLocation]);
 
+  // Close predictions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.predictions-container') && !target.closest('input')) {
+        setShowPredictions(false);
+      }
+    };
+
+    if (showPredictions) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showPredictions]);
+
   // Open in Google Maps for verification
   const openInGoogleMaps = () => {
     const url = `https://www.google.com/maps?q=${coordinates.latitude},${coordinates.longitude}`;
@@ -328,15 +428,53 @@ export default function LocationPicker({ onLocationSelect, initialLocation }: Lo
             <div className="p-6 pt-4 space-y-4">
               {/* Search and Current Location */}
               <div className="space-y-2">
-                <div className="flex gap-2">
+                <div className="flex gap-2 relative">
                   <div className="flex-1 flex gap-2">
-                    <Input
-                      placeholder="Search address..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && searchLocation()}
-                      className="h-12"
-                    />
+                    <div className="flex-1 relative">
+                      <Input
+                        placeholder="Search address..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            searchLocation();
+                          } else if (e.key === 'Escape') {
+                            setShowPredictions(false);
+                          }
+                        }}
+                        onFocus={() => {
+                          if (predictions.length > 0) {
+                            setShowPredictions(true);
+                          }
+                        }}
+                        className="h-12"
+                      />
+
+                      {/* Autocomplete Predictions Dropdown */}
+                      {showPredictions && predictions.length > 0 && (
+                        <div className="predictions-container absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+                          {predictions.map((prediction) => (
+                            <button
+                              key={prediction.place_id}
+                              onClick={() => selectPrediction(prediction.place_id, prediction.description)}
+                              className="w-full text-left px-4 py-3 hover:bg-teal-50 transition-colors border-b border-gray-100 last:border-b-0"
+                            >
+                              <div className="flex items-start gap-3">
+                                <MapPin className="h-4 w-4 text-teal-600 mt-1 flex-shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 truncate">
+                                    {prediction.structured_formatting.main_text}
+                                  </p>
+                                  <p className="text-xs text-gray-500 truncate">
+                                    {prediction.structured_formatting.secondary_text}
+                                  </p>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                     <Button
                       onClick={searchLocation}
                       disabled={isLoading}
