@@ -52,8 +52,8 @@ export default function AuthFlow() {
   };
 
   const handleSwitchToAdmin = () => {
-    // Redirect to admin login page
-    window.location.href = '/admin-login';
+    // Redirect to auth page with admin flow parameter
+    window.location.href = '/auth?flow=admin';
   };
 
   // Render current step
