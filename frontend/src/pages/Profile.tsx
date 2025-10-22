@@ -65,8 +65,18 @@ export default function Profile() {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
 
-        // Validate name field - no numbers or special characters
+        // Validate name field - no numbers or special characters, max 20 chars
         if (name === 'name') {
+            // Check length first
+            if (value.length > 20) {
+                toast({
+                    title: "Name too long",
+                    description: "Name cannot exceed 20 characters",
+                    variant: "destructive",
+                });
+                return;
+            }
+
             const nameRegex = /^[a-zA-Z\s]*$/;
             if (!nameRegex.test(value)) {
                 toast({
@@ -125,6 +135,16 @@ export default function Profile() {
                 toast({
                     title: "Name cannot be blank",
                     description: "Please enter your name",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            // Validate name length
+            if (formData.name.length > 20) {
+                toast({
+                    title: "Name too long",
+                    description: "Name cannot exceed 20 characters",
                     variant: "destructive",
                 });
                 return;
@@ -808,10 +828,14 @@ export default function Profile() {
                                                         value={formData.name}
                                                         onChange={handleInputChange}
                                                         disabled={!isEditing}
+                                                        maxLength={20}
                                                         className="pl-12 h-12 border-2 border-gray-200 focus:border-teal-500 rounded-xl"
                                                         placeholder="Enter your full name"
                                                     />
                                                 </div>
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    {formData.name.length}/20 characters
+                                                </p>
                                             </div>
 
                                             <div>
