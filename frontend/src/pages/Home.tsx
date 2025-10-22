@@ -99,7 +99,11 @@ export default function Home() {
 
 
   const handleSearch = () => {
-    if ((searchQuery || location) && allSalonsRef.current) {
+    // Trim spaces and sanitize input
+    const trimmedQuery = searchQuery.trim();
+    setSearchQuery(trimmedQuery);
+    
+    if ((trimmedQuery || location) && allSalonsRef.current) {
       allSalonsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
@@ -110,21 +114,17 @@ export default function Home() {
   }
 
   const filteredSalons = salons.filter(salon => {
-    // Ensure salon has required properties
-    // if (!salon.name || !salon.location) {
-    //   console.warn('Salon missing required properties:', salon);
-    //   return false;
-    // }
-
-
     // Filter by salon type first
     const matchesType = salon.type === selectedSalonType;
 
-    // Search in salon name OR services
-    const matchesSearch = !searchQuery ||
-      salon.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    // Sanitize search query: trim spaces and remove special characters
+    const sanitizedQuery = searchQuery.trim().replace(/[^a-zA-Z0-9\s]/g, '');
+    
+    // If search is empty after sanitization, show all salons (TC59)
+    const matchesSearch = !sanitizedQuery ||
+      salon.name.toLowerCase().includes(sanitizedQuery.toLowerCase()) ||
       salon.services?.some(service =>
-        service.name.toLowerCase().includes(searchQuery.toLowerCase())
+        service.name.toLowerCase().includes(sanitizedQuery.toLowerCase())
       );
 
     const matchesLocation = !location || salon.location.toLowerCase().includes(location.toLowerCase());
@@ -489,8 +489,15 @@ export default function Home() {
                     placeholder="Search salons or services..."
                     className="pl-4 pr-4 py-2.5 text-sm border-2 border-white/20 focus-visible:ring-2 focus-visible:ring-white/50 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg flex-1"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      // TC60: Limit input to 50 characters
+                      const value = e.target.value;
+                      if (value.length <= 50) {
+                        setSearchQuery(value);
+                      }
+                    }}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    maxLength={50}
                   />
                   <Button
                     onClick={handleSearch}
@@ -601,7 +608,15 @@ export default function Home() {
                   placeholder="Search salons or services..."
                   className="pl-12 pr-4 py-4 text-lg border-2 border-gray-200 focus-visible:ring-2 focus-visible:ring-purple-400 bg-white rounded-2xl shadow-lg"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    // TC60: Limit input to 50 characters
+                    const value = e.target.value;
+                    if (value.length <= 50) {
+                      setSearchQuery(value);
+                    }
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  maxLength={50}
                   data-testid="input-search"
                 />
               </div>
