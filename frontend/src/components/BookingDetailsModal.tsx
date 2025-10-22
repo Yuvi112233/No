@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 const profileCompletionSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name is too long"),
   email: z.string().min(1, "Email is required").email("Please enter a valid email"),
+  phone: z.string().min(10, "Phone number must be 10 digits").max(10, "Phone number must be 10 digits"),
 });
 
 type ProfileCompletionForm = z.infer<typeof profileCompletionSchema>;
@@ -30,10 +31,11 @@ export default function BookingDetailsModal({
   salonName = "the salon"
 }: BookingDetailsModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState<'details' | 'verify'>('details');
+  const [step, setStep] = useState<'details' | 'phone-verify'>('details');
   const [otp, setOtp] = useState('');
   const [countdown, setCountdown] = useState(0);
-  const [userId, setUserId] = useState<string>('');
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [debugOTP, setDebugOTP] = useState<string>('');
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -42,6 +44,7 @@ export default function BookingDetailsModal({
     defaultValues: {
       name: "",
       email: "",
+      phone: "",
     },
     mode: "onChange",
   });
@@ -63,25 +66,31 @@ export default function BookingDetailsModal({
       // First, update the profile with name and email
       await api.auth.completeProfile(data.name, data.email);
 
-      // Get user ID (assuming it's available from user context)
-      const currentUserId = user?.id;
-      if (!currentUserId) {
-        throw new Error("User ID not found");
+      // Format phone number with country code
+      const fullPhoneNumber = `+91${data.phone}`;
+      setPhoneNumber(fullPhoneNumber);
+
+      // Send phone OTP
+      const response = await api.auth.sendOTP(fullPhoneNumber);
+
+      // Store debug OTP for testing
+      if (response.debug?.otp) {
+        setDebugOTP(response.debug.otp);
+        toast({
+          title: "OTP Sent!",
+          description: `Your verification code is: ${response.debug.otp}`,
+          duration: 10000,
+        });
+      } else {
+        toast({
+          title: "Verification Code Sent",
+          description: "Please check your phone for the verification code.",
+        });
       }
 
-      setUserId(currentUserId);
-
-      // Send email OTP
-      await api.auth.sendEmailOTP(currentUserId);
-
-      toast({
-        title: "Verification Code Sent",
-        description: "Please check your email for the verification code.",
-      });
-
-      // Move to verification step
-      setStep('verify');
-      setCountdown(60); // 60 seconds countdown
+      // Move to phone verification step
+      setStep('phone-verify');
+      setCountdown(30); // 30 seconds countdown
     } catch (error: any) {
       toast({
         title: "Error",
@@ -108,12 +117,15 @@ export default function BookingDetailsModal({
     try {
       const { api } = await import("../lib/api");
       
-      // Verify the OTP
-      await api.auth.verifyEmailOTP(userId, otp);
+      // Verify the phone OTP
+      await api.auth.verifyOTP(phoneNumber, otp);
+
+      // Update phone number in profile
+      await api.auth.updatePhone(phoneNumber);
 
       toast({
-        title: "Email Verified!",
-        description: "Your email has been successfully verified.",
+        title: "Phone Verified!",
+        description: "Your phone number has been successfully verified.",
       });
 
       const formData = form.getValues();
@@ -139,14 +151,24 @@ export default function BookingDetailsModal({
 
     try {
       const { api } = await import("../lib/api");
-      await api.auth.resendEmailOTP(userId);
+      const response = await api.auth.sendOTP(phoneNumber);
 
-      toast({
-        title: "Code Resent",
-        description: "A new verification code has been sent to your email.",
-      });
+      // Store debug OTP for testing
+      if (response.debug?.otp) {
+        setDebugOTP(response.debug.otp);
+        toast({
+          title: "OTP Resent!",
+          description: `Your verification code is: ${response.debug.otp}`,
+          duration: 10000,
+        });
+      } else {
+        toast({
+          title: "Code Resent",
+          description: "A new verification code has been sent to your phone.",
+        });
+      }
 
-      setCountdown(60);
+      setCountdown(30);
       setOtp('');
     } catch (error: any) {
       toast({

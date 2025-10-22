@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import AuthLoadingScreen from "./AuthLoadingScreen";
-import PhoneAuth from "./PhoneAuth";
-import PhoneOTPVerification from "./PhoneOTPVerification";
-import WelcomeLoading from "./WelcomeLoading";
+import AuthFlow from "./AuthFlow";
 import MinimalUserDashboard from "./MinimalUserDashboard";
 import AdminLoginFlow from "./AdminLoginFlow";
 import BookingDetailsModal from "./BookingDetailsModal";
@@ -11,9 +9,7 @@ import { Toaster } from "@/components/ui/toaster";
 
 type AuthStep = 
   | 'loading'
-  | 'phone-input'
-  | 'otp-verification'
-  | 'welcome-loading'
+  | 'auth-input'
   | 'dashboard'
   | 'admin-login';
 
@@ -23,7 +19,6 @@ interface AuthRouterProps {
 
 export default function AuthRouter({ defaultFlow = 'customer' }: AuthRouterProps) {
   const [currentStep, setCurrentStep] = useState<AuthStep>('loading');
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedSalonId, setSelectedSalonId] = useState<string>('');
   
@@ -54,7 +49,7 @@ export default function AuthRouter({ defaultFlow = 'customer' }: AuthRouterProps
         if (authFlow === 'admin') {
           setCurrentStep('admin-login');
         } else {
-          setCurrentStep('phone-input');
+          setCurrentStep('auth-input');
         }
       }, 100); // Small delay to show loading
       
@@ -66,23 +61,8 @@ export default function AuthRouter({ defaultFlow = 'customer' }: AuthRouterProps
     if (authFlow === 'admin') {
       setCurrentStep('admin-login');
     } else {
-      setCurrentStep('phone-input');
+      setCurrentStep('auth-input');
     }
-  };
-
-  const handleOTPSent = (phone: string) => {
-    setPhoneNumber(phone);
-    setCurrentStep('otp-verification');
-  };
-
-  const handleOTPVerificationSuccess = (userData: any, token: string) => {
-    login(userData, token);
-    setCurrentStep('welcome-loading');
-  };
-
-  const handleWelcomeComplete = () => {
-    // Redirect to home page after welcome
-    window.location.href = '/';
   };
 
   const handleAdminAuthSuccess = (userData: any, token: string) => {
@@ -93,12 +73,7 @@ export default function AuthRouter({ defaultFlow = 'customer' }: AuthRouterProps
 
   const handleSwitchToCustomer = () => {
     setAuthFlow('customer');
-    setCurrentStep('phone-input');
-  };
-
-  const handleSwitchToAdmin = () => {
-    setAuthFlow('admin');
-    setCurrentStep('admin-login');
+    setCurrentStep('auth-input');
   };
 
   const handleBookSalon = (salonId: string) => {
@@ -148,30 +123,8 @@ export default function AuthRouter({ defaultFlow = 'customer' }: AuthRouterProps
           case 'loading':
             return <AuthLoadingScreen onComplete={handleLoadingComplete} />;
           
-          case 'phone-input':
-            return (
-              <PhoneAuth 
-                onOTPSent={handleOTPSent}
-                onBack={() => setCurrentStep('loading')}
-              />
-            );
-          
-          case 'otp-verification':
-            return (
-              <PhoneOTPVerification
-                phoneNumber={phoneNumber}
-                onVerificationSuccess={handleOTPVerificationSuccess}
-                onBack={() => setCurrentStep('phone-input')}
-              />
-            );
-          
-          case 'welcome-loading':
-            return (
-              <WelcomeLoading
-                onComplete={handleWelcomeComplete}
-                userName={user?.name}
-              />
-            );
+          case 'auth-input':
+            return <AuthFlow />;
           
           case 'dashboard':
             if (!user) {
