@@ -90,10 +90,13 @@
 }
 
 @keyframes pulse-pink {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
     background-color: hsl(342 95% 62%);
   }
+
   50% {
     opacity: .8;
     background-color: hsl(342 95% 72%);
@@ -109,9 +112,46 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-wave {
+  animation: wave 2s ease-in-out infinite;
+}
+
+@keyframes wave {
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(20deg);
+  }
+
+  75% {
+    transform: rotate(-20deg);
   }
 }
 
@@ -124,6 +164,7 @@
     opacity: 0;
     transform: translateY(100%);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -137,8 +178,10 @@
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 @layer base {
@@ -152,7 +195,8 @@
 }
 
 /* Mobile App Styles - Allow scrolling with smooth behavior */
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
   -webkit-overflow-scrolling: touch;
@@ -171,7 +215,8 @@ body {
 }
 
 /* Allow text selection in inputs */
-input, textarea {
+input,
+textarea {
   -webkit-user-select: text;
   user-select: text;
 }
@@ -193,18 +238,25 @@ input, textarea {
 
 /* Custom animations for Home page */
 @keyframes wave {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: rotate(0deg);
   }
-  10%, 30% {
+
+  10%,
+  30% {
     transform: rotate(14deg);
   }
+
   20% {
     transform: rotate(-8deg);
   }
+
   40% {
     transform: rotate(-4deg);
   }
+
   50% {
     transform: rotate(10deg);
   }
@@ -217,9 +269,12 @@ input, textarea {
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-10px);
   }
@@ -230,9 +285,12 @@ input, textarea {
 }
 
 @keyframes gradient-shift {
-  0%, 100% {
+
+  0%,
+  100% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
@@ -241,4 +299,117 @@ input, textarea {
 .animate-gradient-shift {
   background-size: 200% 200%;
   animation: gradient-shift 8s ease infinite;
+}
+
+/* Hero Section Background Effects */
+.hero-bg-effect {
+  position: relative;
+}
+
+.hero-bg-effect::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.hero-bg-effect::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -5%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: float-slow 10s ease-in-out infinite reverse;
+}
+
+@keyframes float-slow {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(20px, -20px) scale(1.05);
+  }
+}
+
+/* Decorative geometric shapes */
+.hero-shapes {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-shapes::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  right: 15%;
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 100%);
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  animation: morph 15s ease-in-out infinite;
+}
+
+.hero-shapes::after {
+  content: '';
+  position: absolute;
+  bottom: 15%;
+  left: 10%;
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(225deg, rgba(255, 255, 255, 0.06) 0%, transparent 100%);
+  border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+  animation: morph 12s ease-in-out infinite reverse;
+}
+
+@keyframes morph {
+
+  0%,
+  100% {
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    transform: rotate(0deg) scale(1);
+  }
+
+  50% {
+    border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%;
+    transform: rotate(180deg) scale(1.1);
+  }
+}
+
+/* Subtle light rays effect */
+.hero-light-rays {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.03) 50%, transparent 70%),
+    linear-gradient(-45deg, transparent 30%, rgba(255, 255, 255, 0.03) 50%, transparent 70%);
+  background-size: 200% 200%;
+  animation: light-sweep 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes light-sweep {
+
+  0%,
+  100% {
+    background-position: 0% 0%, 100% 100%;
+  }
+
+  50% {
+    background-position: 100% 100%, 0% 0%;
+  }
 }

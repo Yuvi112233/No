@@ -40,8 +40,8 @@ export default function Home() {
   const promoSlides = [
     {
       id: 1,
-      title: "Look more stylish and earn more discount",
-      subtitle: "Premium salon services at unbeatable prices",
+      title: "Premium salon services",
+      subtitle: "Book now and save big",
       discount: "50%",
       buttonText: "Get Offer Now !",
       image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=400",
@@ -49,8 +49,8 @@ export default function Home() {
     },
     {
       id: 2,
-      title: "Transform your look with expert stylists",
-      subtitle: "Book now and save big on premium services",
+      title: "Transform your look",
+      subtitle: "Expert stylists await you",
       discount: "30%",
       buttonText: "Book Now !",
       image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=400",
@@ -59,7 +59,7 @@ export default function Home() {
     {
       id: 3,
       title: "Weekend special offers",
-      subtitle: "Relax and rejuvenate with our spa treatments",
+      subtitle: "Relax with spa treatments",
       discount: "40%",
       buttonText: "Explore Deals !",
       image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=400",
@@ -211,49 +211,49 @@ export default function Home() {
         {
           id: 1,
           name: "Haircut",
-          image: "/haircut.png",
+          image: "/haircut.jpg",
           searchQuery: "haircut"
         },
         {
           id: 2,
           name: "Beard Trim",
-          image: "/beard-trimming.png",
+          image: "/beard-trimming.jpg",
           searchQuery: "beard"
         },
         {
           id: 3,
           name: "Shave",
-          image: "/shave.png",
+          image: "/shave.jpg",
           searchQuery: "shave"
         },
         {
           id: 4,
           name: "Hair Styling",
-          image: "/hairstyling.png",
+          image: "/hairstyling.jpg",
           searchQuery: "styling"
         },
         {
           id: 5,
           name: "Massage",
-          image: "/body-massage.png",
+          image: "/body-massage.jpg",
           searchQuery: "massage"
         },
         {
           id: 6,
           name: "Facial",
-          image: "/facial-massage.png",
+          image: "/facial-massage.jpg",
           searchQuery: "facial"
         },
         {
           id: 7,
           name: "Hair Color",
-          image: "/hair-color.png",
+          image: "/hair-color.jpg",
           searchQuery: "hair color"
         },
         {
           id: 8,
           name: "Manicure",
-          image: "/manicure.png",
+          image: "/manicure.jpg",
           searchQuery: "manicure"
         }
       ],
@@ -261,49 +261,49 @@ export default function Home() {
         {
           id: 1,
           name: "Haircut",
-          image: "/haircut.png",
+          image: "/haircut.jpg",
           searchQuery: "haircut"
         },
         {
           id: 2,
           name: "Hair Color",
-          image: "/hair-color.png",
+          image: "/hair-color.jpg",
           searchQuery: "hair color"
         },
         {
           id: 3,
           name: "Facial",
-          image: "/facial-massage.png",
+          image: "/facial-massage.jpg",
           searchQuery: "facial"
         },
         {
           id: 4,
           name: "Manicure",
-          image: "/manicure.png",
+          image: "/manicure.jpg",
           searchQuery: "manicure"
         },
         {
           id: 5,
           name: "Pedicure",
-          image: "/pedicure.png",
+          image: "/pedicure.jpg",
           searchQuery: "pedicure"
         },
         {
           id: 6,
           name: "Makeup",
-          image: "/makeup.png",
+          image: "/makeup.jpg",
           searchQuery: "makeup"
         },
         {
           id: 7,
           name: "Eyebrow",
-          image: "/eyebrow.png",
+          image: "/eyebrow.jpg",
           searchQuery: "eyebrow"
         },
         {
           id: 8,
           name: "Massage",
-          image: "/body-massage.png",
+          image: "/body-massage.jpg",
           searchQuery: "massage"
         }
       ],
@@ -311,49 +311,49 @@ export default function Home() {
         {
           id: 1,
           name: "Haircut",
-          image: "/haircut.png",
+          image: "/haircut.jpg",
           searchQuery: "haircut"
         },
         {
           id: 2,
           name: "Hair Color",
-          image: "/hair-color.png",
+          image: "/hair-color.jpg",
           searchQuery: "hair color"
         },
         {
           id: 3,
           name: "Facial",
-          image: "/facial-massage.png",
+          image: "/facial-massage.jpg",
           searchQuery: "facial"
         },
         {
           id: 4,
           name: "Massage",
-          image: "/body-massage.png",
+          image: "/body-massage.jpg",
           searchQuery: "massage"
         },
         {
           id: 5,
           name: "Hair Styling",
-          image: "/hairstyling.png",
+          image: "/hairstyling.jpg",
           searchQuery: "styling"
         },
         {
           id: 6,
           name: "Manicure",
-          image: "/manicure.png",
+          image: "/manicure.jpg",
           searchQuery: "manicure"
         },
         {
           id: 7,
           name: "Pedicure",
-          image: "/pedicure.png",
+          image: "/pedicure.jpg",
           searchQuery: "pedicure"
         },
         {
           id: 8,
           name: "Beard Trim",
-          image: "/beard-trimming.png",
+          image: "/beard-trimming.jpg",
           searchQuery: "beard"
         }
       ]
@@ -444,41 +444,39 @@ export default function Home() {
 
       {/* Hero Section - Different for logged in/out users */}
       {user ? (
-        /* Logged In User - Seamless Header with Background Image */
-        <section className="relative overflow-hidden">
-          {/* Background Image Layer - Covers header and carousel area */}
-          <div className="absolute inset-0 h-[420px] md:h-[480px]">
-            <img
-              src="/4.png"
-              alt="Salon Background"
-              className="w-full h-full object-cover"
-            />
-
+        /* Logged In User - Professional Mobile-First Hero */
+        <section className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-teal-500 to-teal-700 hero-bg-effect">
+          {/* Decorative Shapes */}
+          <div className="hero-shapes"></div>
+          
+          {/* Light Rays Effect */}
+          <div className="hero-light-rays"></div>
+          
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+              backgroundSize: '30px 30px'
+            }}></div>
           </div>
 
           {/* Content Layer */}
-          <div className="relative z-10 px-4 pt-6 pb-5">
+          <div className="relative z-10 px-4 pt-4 pb-6">
             <div className="max-w-7xl mx-auto">
-              {/* Header with Greeting - Enhanced */}
-              <div className="flex items-center justify-between mb-8">
-                {/* Left: Greeting with gradient text */}
-                <div className="space-y-2 animate-fade-in">
-                  <div className="flex items-center gap-2">
-                    <p className="text-white text-lg md:text-xl font-bricolage tracking-wide drop-shadow-lg">
-                      Hello, {user.name?.split(' ')[0] || 'User'}!
-                    </p>
-                    <span className="text-2xl animate-wave inline-block">👋</span>
-                  </div>
-                  <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-yellow-200 via-yellow-100 to-white bg-clip-text text-transparent font-bricolage drop-shadow-2xl">
+              {/* Header with Greeting - Compact & Clean */}
+              <div className="flex items-start justify-between mb-5">
+                {/* Left: Greeting */}
+                <div className="space-y-1 pr-4">
+                  <p className="text-white/90 text-base font-medium">
+                    Hello, {user.name?.split(' ')[0] || 'User'}! 👋
+                  </p>
+                  <h1 className="text-xl md:text-2xl font-bold text-white leading-tight max-w-[200px]">
                     Discover Your Perfect Salon
                   </h1>
-                  <p className="text-white/80 text-sm md:text-base font-light">
-                    Book appointments instantly, skip the wait ✨
-                  </p>
                 </div>
 
-                {/* Right: Animation - Peeking from edge */}
-                <div className="absolute -right-6 top-2 w-24 h-24 md:w-28 md:h-28 pointer-events-none animate-float">
+                {/* Right: Animation - Smaller, non-intrusive */}
+                <div className="w-24 h-24 flex-shrink-0 -mr-10">
                   <DotLottieReact
                     src="https://lottie.host/dfb2ab5d-ecdc-4aa4-ab64-181def37bd11/DWB1LXlcDu.lottie"
                     loop
@@ -487,21 +485,17 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Search Bar - Enhanced with glow effect */}
-              <div className="mb-6">
-                <div className="relative w-full max-w-md flex gap-3 group">
-                  {/* Glow effect on focus */}
-                  <div className="absolute -inset-1 bg-gradient-to-r from-teal-400 to-teal-500 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-30 transition-opacity duration-300"></div>
-
+              {/* Search Bar - Compact */}
+              <div className="mb-4">
+                <div className="relative flex gap-2">
                   <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                       type="text"
                       placeholder="Search salons or services..."
-                      className="pl-12 pr-4 py-3.5 text-sm border-2 border-white/30 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:border-white/50 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 w-full placeholder:text-gray-400"
+                      className="pl-10 pr-3 py-2.5 text-sm border-0 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg w-full"
                       value={searchQuery}
                       onChange={(e) => {
-                        // TC60: Limit input to 50 characters
                         const value = e.target.value;
                         if (value.length <= 50) {
                           setSearchQuery(value);
@@ -511,80 +505,75 @@ export default function Home() {
                       maxLength={50}
                     />
                   </div>
-
                   <Button
                     onClick={handleSearch}
-                    className="relative bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-6 py-3.5 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 flex-shrink-0 group"
+                    className="bg-white hover:bg-gray-50 text-teal-600 px-4 py-2.5 rounded-xl shadow-lg flex-shrink-0"
                   >
-                    <Search className="h-5 w-5 group-hover:rotate-12 transition-transform duration-300" />
+                    <Search className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
 
-              {/* Promotional Banner - Enhanced with modern design */}
-              <div className="relative rounded-3xl overflow-hidden h-48 md:h-64 shadow-2xl group">
-                {/* Animated gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-teal-600/95 via-teal-500/95 to-teal-700/95 animate-gradient-shift"></div>
-
-                {/* Decorative elements */}
-                <div className="absolute inset-0 opacity-20">
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full blur-3xl animate-pulse"></div>
-                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-yellow-300 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                </div>
-
-                {/* Geometric pattern overlay */}
-                <div className="absolute inset-0 opacity-5">
-                  <div className="absolute inset-0" style={{
-                    backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-                    backgroundSize: '40px 40px'
-                  }}></div>
-                </div>
-
-                {/* Content with smooth text transitions */}
-                <div className="relative h-full flex items-center px-6 md:px-10">
+              {/* Promotional Banner - Fixed Layout */}
+              <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-sm border border-white/30 shadow-xl">
+                {/* Content */}
+                <div className="p-5">
                   {promoSlides.map((slide, index) => (
                     <div
                       key={slide.id}
-                      className={`absolute inset-0 flex items-center px-6 md:px-10 transition-all duration-700 ${index === currentSlide
-                        ? 'opacity-100 translate-x-0'
-                        : 'opacity-0 -translate-x-8 pointer-events-none'
+                      className={`transition-all duration-500 ${index === currentSlide
+                        ? 'opacity-100 block'
+                        : 'opacity-0 hidden'
                         }`}
                     >
-                      <div className="flex-1 pr-24 md:pr-32">
-                        <div className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs text-white font-semibold mb-3 border border-white/30">
-                          🎉 Limited Time Offer
-                        </div>
-                        <h2 className="text-2xl md:text-4xl font-black text-white mb-2 leading-tight drop-shadow-lg">
-                          {slide.title}
-                        </h2>
-                        <p className="text-sm md:text-base text-white/95 mb-4 font-medium drop-shadow">
-                          {slide.subtitle}
-                        </p>
-                        <Button className="bg-white hover:bg-white/90 text-teal-600 font-bold px-6 py-2.5 rounded-full text-sm md:text-base shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5">
-                          {slide.buttonText}
-                          <span className="ml-2">→</span>
-                        </Button>
-                      </div>
-
-                      {/* Enhanced Discount Badge with animation */}
-                      <div className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2">
-                        <div className="relative">
-                          {/* Glow effect */}
-                          <div className="absolute inset-0 bg-yellow-400 rounded-full blur-xl opacity-50 animate-pulse"></div>
-
-                          {/* Badge */}
-                          <div className="relative bg-gradient-to-br from-yellow-300 via-yellow-400 to-orange-400 rounded-full w-20 h-20 md:w-28 md:h-28 flex flex-col items-center justify-center shadow-2xl border-4 border-white/50 transform group-hover:rotate-12 transition-transform duration-500">
-                            <p className="text-[10px] md:text-xs text-yellow-900 font-bold uppercase tracking-wide">Up to</p>
-                            <p className="text-2xl md:text-4xl font-black text-yellow-900 leading-none">{slide.discount}</p>
-                            <p className="text-[10px] md:text-xs text-yellow-900 font-bold uppercase">OFF</p>
+                      <div className="flex items-center justify-between gap-4">
+                        {/* Left: Text Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="inline-block px-2 py-0.5 bg-yellow-400/90 rounded-full text-[10px] font-bold text-gray-900 mb-2">
+                            LIMITED OFFER
                           </div>
+                          <h2 className="text-base md:text-lg font-bold text-white mb-1 leading-snug">
+                            {slide.title}
+                          </h2>
+                          <p className="text-xs text-white/80 mb-3">
+                            {slide.subtitle}
+                          </p>
+                          <Button
+                            onClick={handleSearch}
+                            className="bg-white hover:bg-gray-50 text-teal-600 font-semibold px-4 py-1.5 rounded-full text-xs shadow-lg h-auto"
+                          >
+                            {slide.buttonText}
+                          </Button>
+                        </div>
 
-                          {/* Sparkle effect */}
-                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping"></div>
+                        {/* Right: Discount Badge */}
+                        <div className="flex-shrink-0">
+                          <div className="relative w-20 h-20 md:w-24 md:h-24">
+                            <div className="absolute inset-0 bg-yellow-400 rounded-full animate-ping opacity-20"></div>
+                            <div className="relative w-full h-full bg-gradient-to-br from-yellow-300 to-yellow-400 rounded-full flex flex-col items-center justify-center shadow-2xl border-4 border-white/40">
+                              <span className="text-[10px] font-semibold text-gray-800">UP TO</span>
+                              <span className="text-2xl md:text-3xl font-black text-gray-900">{slide.discount}</span>
+                              <span className="text-[10px] font-semibold text-gray-800">OFF</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+
+                {/* Carousel Indicators */}
+                <div className="flex justify-center gap-1.5 pb-3">
+                  {promoSlides.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index)}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${index === currentSlide
+                        ? 'w-6 bg-white'
+                        : 'w-1.5 bg-white/40'
+                        }`}
+                      aria-label={`Go to slide ${index + 1}`}
+                    />
                   ))}
                 </div>
               </div>
@@ -663,8 +652,14 @@ export default function Home() {
       )}
 
       {/* Service Categories - What are you looking for today */}
-      <section className="px-4 py-6 bg-white">
-        <div className="max-w-7xl mx-auto">
+      <section className="relative px-4 py-6 bg-gradient-to-b from-white via-gray-50/30 to-white overflow-hidden">
+        {/* Subtle background effects */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-10 right-10 w-32 h-32 bg-cyan-100 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 left-10 w-40 h-40 bg-teal-100 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">What are you looking for today ?</h2>
 
           {/* Dynamic Service Categories Grid - Same as "What's on your mind" */}
@@ -675,11 +670,11 @@ export default function Home() {
                 className="flex flex-col items-center cursor-pointer group"
                 onClick={() => setSearchQuery(category.searchQuery)}
               >
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 border-2 border-cyan-100 bg-white flex items-center justify-center p-2">
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 border-2 border-cyan-100 bg-gradient-to-br from-cyan-50 to-white flex items-center justify-center">
                   <img
                     src={category.image}
                     alt={category.name}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain scale-110"
                   />
                 </div>
                 <span className="text-xs font-medium text-gray-700 mt-2 text-center group-hover:text-cyan-600 transition-colors">
