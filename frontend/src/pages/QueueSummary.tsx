@@ -2,16 +2,10 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ArrowLeft, Trash2, Tag, ShoppingCart, Clock, CheckCircle2, Star, Wallet, CreditCard } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Tag, ShoppingCart, Clock, Star, Wallet, ChevronRight, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -30,11 +24,14 @@ export default function QueueSummary() {
     window.scrollTo(0, 0);
   }, []);
   const { user } = useAuth();
-  const { items, removeItem, clearCart, getTotalPrice } = useCart();
+  const { items, clearCart, getTotalPrice } = useCart();
   const { toast } = useToast();
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('pay-at-salon');
+  const [showCouponModal, setShowCouponModal] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<string>('cash-at-salon');
   const {
     isModalOpen,
     isPhoneModalOpen,
@@ -95,13 +92,7 @@ export default function QueueSummary() {
     },
   });
 
-  const handleApplyOffer = (offer: Offer) => {
-    if (selectedOffer?.id === offer.id) {
-      setSelectedOffer(null);
-    } else {
-      setSelectedOffer(offer);
-    }
-  };
+
 
   const handleSuccessAnimationComplete = () => {
     toast({
@@ -157,364 +148,175 @@ export default function QueueSummary() {
         />
       )}
 
-      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 py-6 md:py-8 pb-32 md:pb-8">
-        <div className="max-w-3xl mx-auto px-4">
-          {/* Header */}
-          <div className="flex items-center mb-8">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setLocation(`/salon/${items[0]?.salonId}`)}
-              className="mr-3 hover:bg-teal-100 rounded-xl"
-            >
-              <ArrowLeft className="w-6 h-6 text-teal-600" />
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                Checkout
-              </h1>
-              <p className="text-gray-600 text-sm mt-1">Review your booking details</p>
+      <div className="min-h-screen bg-gray-50 pb-48 md:pb-8">
+        {/* Header - Sticky */}
+        <div className="sticky top-0 z-40 bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg">
+          <div className="max-w-3xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setLocation(`/salon/${items[0]?.salonId}`)}
+                  className="hover:bg-white/20 text-white rounded-lg h-10 w-10"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <div>
+                  <h1 className="text-lg font-bold">
+                    {items.length} Service{items.length > 1 ? 's' : ''} in Cart
+                  </h1>
+                  <p className="text-sm text-white/90">You Pay : ₹{Math.round(finalTotal)}</p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLocation(`/salon/${items[0]?.salonId}`)}
+                className="border-2 border-white bg-transparent text-white hover:bg-white hover:text-teal-600 font-semibold rounded-lg px-4"
+              >
+                EDIT
+              </Button>
             </div>
           </div>
+        </div>
+
+        <div className="max-w-3xl mx-auto px-4 py-4">
 
           {/* Selected Services */}
-          <Card className="mb-6 border border-teal-100">
-            <CardHeader className="border-b border-teal-100 bg-gray-50/50">
-              <CardTitle className="text-xl text-gray-900">
-                Your Services
-              </CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
-                {items.length} service{items.length > 1 ? 's' : ''} at {items[0]?.salonName}
-              </p>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <div className="space-y-3">
-                {items.map((item) => (
-                  <div
-                    key={item.service.id}
-                    className="flex items-start justify-between py-3 border-b border-gray-100 last:border-0"
-                  >
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 mb-1 capitalize">
-                        {item.service.name}
-                      </h3>
-                      <div className="flex items-center gap-1 text-xs text-gray-600">
-                        <Clock className="w-3 h-3" />
-                        <span>{item.service.duration} min</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg font-bold text-teal-600">
-                        ₹{item.service.price}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeItem(item.service.id)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+          <div className="bg-white rounded-lg shadow-sm mb-3">
+            {items.map((item, index) => (
+              <div
+                key={item.service.id}
+                className={`p-4 ${index !== items.length - 1 ? 'border-b border-gray-100' : ''}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <h3 className="font-bold text-gray-900 text-base mb-1 capitalize">
+                      {item.service.name}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                      <Clock className="w-3 h-3" />
+                      <span>{item.service.duration} min</span>
                     </div>
                   </div>
-                ))}
+                  <div className="text-right">
+                    <span className="text-lg font-bold text-gray-900">
+                      ₹{item.service.price}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </CardContent>
-          </Card>
+            ))}
+          </div>
 
-          {/* Available Offers */}
-          <Card className="mb-6 border border-teal-100">
-            <CardHeader className="border-b border-teal-100 bg-gray-50/50">
-              <CardTitle className="text-xl text-gray-900">
-                Special Offers
-              </CardTitle>
-              <p className="text-sm text-gray-600 mt-1">Save more on your booking</p>
-            </CardHeader>
-            <CardContent className="pt-4">
-              {offersLoading ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-500 text-sm">Loading offers...</p>
-                </div>
-              ) : availableOffers.length > 0 ? (
-                <div className="space-y-3">
-                  {availableOffers.map((offer: Offer) => (
-                    <div
-                      key={offer.id}
-                      className={`relative rounded-lg transition-all p-4 border ${selectedOffer?.id === offer.id
-                        ? 'bg-teal-50 border-teal-300 border-2'
-                        : 'bg-white border-teal-100 hover:border-teal-200'
-                        }`}
-                    >
-                      {selectedOffer?.id === offer.id && (
-                        <div className="absolute -top-2 -right-2">
-                          <div className="bg-green-600 rounded-full p-1">
-                            <CheckCircle2 className="w-4 h-4 text-white" />
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="flex items-start justify-between gap-3 mb-2">
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-teal-600 text-white font-semibold px-2 py-0.5 text-sm">
-                            {offer.discount}% OFF
-                          </Badge>
-                          <h4 className="font-semibold text-gray-900">{offer.title}</h4>
-                        </div>
-                      </div>
-
-                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">
-                        {offer.description}
-                      </p>
-
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs text-gray-500 flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          Valid until {new Date(offer.validityPeriod).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </p>
-
-                        <Button
-                          size="sm"
-                          variant={selectedOffer?.id === offer.id ? "default" : "outline"}
-                          onClick={() => handleApplyOffer(offer)}
-                          className={`h-7 text-xs ${selectedOffer?.id === offer.id
-                            ? 'bg-teal-600 hover:bg-teal-700 text-white'
-                            : 'border-teal-600 text-teal-600 hover:bg-teal-50'
-                            }`}
-                        >
-                          {selectedOffer?.id === offer.id ? 'Applied' : 'Apply'}
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Tag className="w-6 h-6 text-teal-600" />
-                  </div>
-                  <p className="text-gray-600 text-sm">No offers available</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Payment Method */}
-          <Card className="mb-6 border border-teal-100">
-            <CardHeader className="border-b border-teal-100 bg-gray-50/50">
-              <CardTitle className="text-xl text-gray-900 flex items-center gap-2">
-                <Wallet className="w-5 h-5 text-teal-600" />
-                Payment Method
-              </CardTitle>
-              <p className="text-sm text-gray-600 mt-1">Choose your preferred payment option</p>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <Select value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod}>
-                <SelectTrigger className="w-full h-12 border-2 border-gray-200 focus:border-teal-500 rounded-xl">
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pay-at-salon">
-                    <div className="flex items-center gap-3 py-1">
-                      <Wallet className="w-5 h-5 text-teal-600" />
-                      <div>
-                        <div className="font-semibold text-gray-900">Pay at Salon</div>
-                        <div className="text-xs text-gray-600">Pay after service completion</div>
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="upi" disabled>
-                    <div className="flex items-center gap-3 py-1 opacity-60">
-                      <div className="w-8 h-8 flex items-center justify-center bg-white rounded border border-gray-200">
-                        <img
-                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/2560px-UPI-Logo-vector.svg.png"
-                          alt="Paytm"
-                          className="w-6 h-6 object-contain"
-                        />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-700 flex items-center gap-2">
-                          UPI
-                          <Badge className="bg-amber-500 text-white text-xs px-1.5 py-0">Coming Soon</Badge>
-                        </div>
-                        <div className="text-xs text-gray-500">Google Pay, PhonePe, Paytm & more</div>
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="paytm" disabled>
-                    <div className="flex items-center gap-3 py-1 opacity-60">
-                      <div className="w-8 h-8 flex items-center justify-center bg-white rounded border border-gray-200">
-                        <img
-                          src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg"
-                          alt="Paytm"
-                          className="w-6 h-6 object-contain"
-                        />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-700 flex items-center gap-2">
-                          Paytm
-                          <Badge className="bg-amber-500 text-white text-xs px-1.5 py-0">Coming Soon</Badge>
-                        </div>
-                        <div className="text-xs text-gray-500">Pay using Paytm wallet</div>
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="googlepay" disabled>
-                    <div className="flex items-center gap-3 py-1 opacity-60">
-                      <div className="w-8 h-8 flex items-center justify-center bg-white rounded border border-gray-200">
-                        <img
-                          src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg"
-                          alt="Google Pay"
-                          className="w-6 h-6 object-contain"
-                        />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-700 flex items-center gap-2">
-                          Google Pay
-                          <Badge className="bg-amber-500 text-white text-xs px-1.5 py-0">Coming Soon</Badge>
-                        </div>
-                        <div className="text-xs text-gray-500">Quick & secure payments</div>
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="phonepe" disabled>
-                    <div className="flex items-center gap-3 py-1 opacity-60">
-                      <div className="w-8 h-8 flex items-center justify-center bg-white rounded border border-gray-200">
-                        <img
-                          src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/phonepe-icon.png"
-                          alt="PhonePe"
-                          className="w-6 h-6 object-contain"
-                        />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-700 flex items-center gap-2">
-                          PhonePe
-                          <Badge className="bg-amber-500 text-white text-xs px-1.5 py-0">Coming Soon</Badge>
-                        </div>
-                        <div className="text-xs text-gray-500">Fast & easy payments</div>
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="card" disabled>
-                    <div className="flex items-center gap-3 py-1 opacity-60">
-                      <CreditCard className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <div className="font-semibold text-gray-700 flex items-center gap-2">
-                          Credit/Debit Card
-                          <Badge className="bg-amber-500 text-white text-xs px-1.5 py-0">Coming Soon</Badge>
-                        </div>
-                        <div className="text-xs text-gray-500">Visa, Mastercard, Rupay & more</div>
-                      </div>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </CardContent>
-          </Card>
+          {/* Apply Coupon Button */}
+          <button
+            onClick={() => setShowCouponModal(true)}
+            className="w-full bg-white rounded-lg shadow-sm p-4 mb-3 flex items-center justify-between hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center">
+                <Tag className="w-5 h-5 text-red-500" />
+              </div>
+              <div className="text-left">
+                <p className="font-bold text-gray-900">Apply Coupon</p>
+                {selectedOffer && (
+                  <p className="text-xs text-green-600 font-medium">
+                    {selectedOffer.title} applied • Save ₹{Math.round(discountAmount)}
+                  </p>
+                )}
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </button>
 
           {/* Bill Summary */}
-          <Card className="mb-6 border border-teal-100">
-            <CardHeader className="border-b border-teal-100 bg-gray-50/50">
-              <CardTitle className="text-xl text-gray-900">
-                Payment Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                {/* Subtotal */}
-                <div className="flex justify-between items-center text-gray-700">
-                  <span className="font-medium">
-                    Subtotal ({items.length} service{items.length > 1 ? 's' : ''})
-                  </span>
-                  <span className="text-lg font-semibold">₹{Math.round(subtotal)}</span>
-                </div>
-
-                {/* Offer Discount */}
-                {selectedOffer && (
-                  <div className="flex justify-between items-center p-3 bg-green-50 border-2 border-green-200 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-5 h-5 text-green-600" />
-                      <div>
-                        <span className="font-semibold text-green-700 block">
-                          {selectedOffer.title}
-                        </span>
-                        <span className="text-xs text-green-600">
-                          {selectedOffer.discount}% discount applied
-                        </span>
-                      </div>
-                    </div>
-                    <span className="text-lg font-bold text-green-600">
-                      -₹{Math.round(discountAmount)}
-                    </span>
-                  </div>
-                )}
-
-                {/* Loyalty Discount */}
-                {loyaltyDiscount > 0 && (
-                  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                      <div>
-                        <span className="font-semibold text-amber-700 block">
-                          Loyalty Rewards
-                        </span>
-                        <span className="text-xs text-amber-600">
-                          {loyaltyDiscount}% OFF • {salonPoints} points
-                        </span>
-                      </div>
-                    </div>
-                    <span className="text-lg font-bold text-amber-600">
-                      -₹{Math.round(loyaltyDiscountAmount)}
-                    </span>
-                  </div>
-                )}
-
-                {/* Divider */}
-                <div className="border-t-2 border-dashed border-teal-200 my-4"></div>
-
-                {/* Total */}
-                <div className="flex justify-between items-center p-3 bg-teal-50 rounded-lg border border-teal-200">
-                  <span className="text-base font-semibold text-gray-900">Total Amount</span>
-                  <span className="text-xl font-bold text-teal-600">
-                    ₹{Math.round(finalTotal)}
-                  </span>
-                </div>
+          <div className="bg-white rounded-lg shadow-sm p-4 mb-3">
+            <div className="space-y-3">
+              {/* Subtotal */}
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Sub Total</span>
+                <span className="text-sm font-semibold text-gray-900">₹ {Math.round(subtotal)}</span>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Confirm Button */}
-          <div className="mt-6 mb-4">
-            <Button
-              onClick={handleConfirmAndJoin}
-              disabled={joinQueueMutation.isPending}
-              className="w-full h-11 text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white rounded-lg shadow-sm transition-all"
-            >
-              {joinQueueMutation.isPending ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Processing...</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Confirm & Join Queue</span>
+              {/* Discount */}
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Discount</span>
+                <span className="text-sm font-semibold text-green-600">
+                  {selectedOffer || loyaltyDiscount > 0 ? `-₹ ${Math.round(discountAmount + loyaltyDiscountAmount)}` : '0.00'}
+                </span>
+              </div>
+
+              {/* Loyalty Discount */}
+              {loyaltyDiscount > 0 && (
+                <div className="flex items-center justify-between text-xs text-amber-600 bg-amber-50 -mx-4 px-4 py-2">
+                  <div className="flex items-center gap-1">
+                    <Star className="w-3 h-3 fill-amber-500" />
+                    <span>Loyalty Rewards ({loyaltyDiscount}%)</span>
+                  </div>
+                  <span className="font-semibold">-₹{Math.round(loyaltyDiscountAmount)}</span>
                 </div>
               )}
-            </Button>
 
-            {/* Trust Badge */}
-            <div className="flex items-center justify-center gap-2 mt-3 text-xs text-gray-500">
-              <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="w-2.5 h-2.5 text-green-600" />
+              {/* Divider */}
+              <div className="border-t border-gray-200 my-2"></div>
+
+              {/* Grand Total */}
+              <div className="flex justify-between items-center">
+                <span className="text-base font-bold text-gray-900">Grand Total</span>
+                <span className="text-base font-bold text-gray-900">₹ {Math.round(finalTotal)}</span>
               </div>
-              <span className="text-center">Secure booking • No payment required</span>
             </div>
           </div>
+
+          {/* Sticky Bottom Section - Payment & Total */}
+          {!showSuccessAnimation && (
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 pb-safe md:pb-0">
+            <div className="max-w-3xl mx-auto">
+              {/* Payment Method */}
+              <div className="px-4 pt-3 pb-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Wallet className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-bold text-gray-900">Pay ₹{Math.round(finalTotal)}</h3>
+                        <p className="text-xs text-gray-500">via Cash / UPI at Salon</p>
+                      </div>
+                      <button
+                        onClick={() => setShowPaymentModal(true)}
+                        className="text-teal-600 font-semibold text-sm hover:underline"
+                      >
+                        CHANGE
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Place Order Button */}
+              <div className="px-4 pb-4 pt-2">
+                <Button
+                  onClick={handleConfirmAndJoin}
+                  disabled={joinQueueMutation.isPending}
+                  className="w-full h-12 text-base font-bold bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md uppercase tracking-wide"
+                >
+                  {joinQueueMutation.isPending ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Processing...</span>
+                    </div>
+                  ) : (
+                    <span>Confirm and Join </span>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+          )}
 
           {/* Profile Completion Modal */}
           <BookingDetailsModal
@@ -530,6 +332,308 @@ export default function QueueSummary() {
             onClose={cancelProfileCompletion}
             onVerified={completePhoneVerification}
           />
+
+          {/* Coupon Modal */}
+          <Dialog open={showCouponModal} onOpenChange={setShowCouponModal}>
+            <DialogContent className="max-w-md h-[95vh] sm:h-[90vh] p-0 flex flex-col overflow-hidden">
+              {/* Header - Fixed */}
+              <div className="flex-shrink-0 bg-gradient-to-r from-teal-600 to-teal-700 text-white p-4 flex items-center gap-3 shadow-md">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowCouponModal(false)}
+                  className="hover:bg-white/20 text-white rounded-lg h-10 w-10 flex-shrink-0"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <DialogTitle className="text-lg font-bold">Offers</DialogTitle>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto">
+                {/* Coupon Code Input */}
+                <div className="p-4 bg-white sticky top-0 z-10 shadow-sm">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Input
+                        placeholder="ENTER COUPON CODE HERE"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        className="pr-8 uppercase text-sm h-11 border-gray-300 focus:border-teal-500"
+                      />
+                      {couponCode && (
+                        <button
+                          onClick={() => setCouponCode("")}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full p-1"
+                        >
+                       
+                        </button>
+                      )}
+                    </div>
+                    <Button
+                      onClick={() => {
+                        toast({
+                          title: "Coupon Applied",
+                          description: `Code ${couponCode} applied successfully!`,
+                        });
+                      }}
+                      className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 h-11 rounded-lg"
+                    >
+                      APPLY
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Info Message */}
+                <div className="mx-4 mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <div className="flex gap-2">
+                    <Tag className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-gray-700 leading-relaxed">
+                      This section is for Coupons only. To redeem Gift Cards & e-Vouchers, choose Payment Mode as 'Gift Cards / eVouchers' at checkout.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Available Offers */}
+                <div className="p-4">
+                  <h3 className="font-bold text-gray-900 mb-1 text-base">Offers for you</h3>
+                  <p className="text-xs text-gray-500 mb-4">Coupons made just for you</p>
+
+                  {offersLoading ? (
+                    <div className="text-center py-12">
+                      <div className="w-12 h-12 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin mx-auto mb-3"></div>
+                      <p className="text-gray-500 text-sm">Loading offers...</p>
+                    </div>
+                  ) : availableOffers.length > 0 ? (
+                    <div className="space-y-3 pb-4">
+                      {availableOffers.map((offer: Offer) => (
+                        <div
+                          key={offer.id}
+                          className={`border-2 rounded-xl p-4 transition-all ${selectedOffer?.id === offer.id
+                            ? 'border-green-500 bg-green-50 shadow-md'
+                            : 'border-gray-200 bg-white shadow-sm'
+                            }`}
+                        >
+                          <div className="flex gap-3 mb-3">
+                            <div className="bg-blue-100 px-3 py-2 rounded-lg text-center flex-shrink-0 min-w-[80px]">
+                              <p className="text-xs font-bold text-blue-700 uppercase leading-tight">
+                                SALON{offer.discount}
+                              </p>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-bold text-gray-900 mb-1 text-sm">
+                                Get ₹{Math.round((subtotal * offer.discount) / 100)} Off
+                              </h4>
+                              <p className="text-xs text-gray-600 leading-relaxed line-clamp-3">
+                                {offer.description}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                            <button className="text-xs text-teal-600 font-semibold hover:underline">
+                              T & Cs
+                            </button>
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setSelectedOffer(selectedOffer?.id === offer.id ? null : offer);
+                                setShowCouponModal(false);
+                                toast({
+                                  title: selectedOffer?.id === offer.id ? "Coupon Removed" : "Coupon Applied",
+                                  description: selectedOffer?.id === offer.id
+                                    ? "Coupon has been removed"
+                                    : `${offer.title} applied successfully!`,
+                                });
+                              }}
+                              className={`font-bold text-xs px-6 h-8 rounded-lg transition-colors ${selectedOffer?.id === offer.id
+                                ? 'bg-red-600 hover:bg-red-700'
+                                : 'bg-green-600 hover:bg-green-700'
+                                } text-white`}
+                            >
+                              {selectedOffer?.id === offer.id ? 'REMOVE' : 'APPLY'}
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Tag className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <p className="text-gray-600 text-sm">No offers available</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Payment Method Modal */}
+          <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
+            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto p-0">
+              {/* Header */}
+              <div className="sticky top-0 bg-white border-b p-4 flex items-center justify-between z-10">
+                <DialogTitle className="text-lg font-bold text-gray-900">Select Payment Mode</DialogTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowPaymentModal(false)}
+                  className="hover:bg-gray-100 rounded-lg h-8 w-8"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+
+              {/* Payment Options */}
+              <div className="p-4 space-y-3">
+                {/* Cash / UPI at Salon - Active (Default - Top) */}
+                <div
+                  className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer ${selectedPayment === 'cash-at-salon'
+                    ? 'border-teal-600 bg-teal-50'
+                    : 'border-gray-200'
+                    }`}
+                  onClick={() => setSelectedPayment('cash-at-salon')}
+                >
+                  <input
+                    type="radio"
+                    checked={selectedPayment === 'cash-at-salon'}
+                    onChange={() => setSelectedPayment('cash-at-salon')}
+                    className="w-5 h-5 accent-teal-600"
+                  />
+                  <div className="w-10 h-10 bg-blue-50 rounded flex items-center justify-center">
+                    <Wallet className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900">Cash / UPI at Salon</h4>
+                    <p className="text-xs text-gray-600">Pay via Cash or UPI at the salon</p>
+                  </div>
+                </div>
+
+                {/* Amazon Pay - Coming Soon */}
+                <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg opacity-60">
+                  <input type="radio" disabled className="w-5 h-5" />
+                  <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                    <Wallet className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-700">Amazon Pay Balance</h4>
+                    <p className="text-xs text-gray-500">Link Your Wallet</p>
+                    <p className="text-xs text-red-400 mt-1">Coming Soon</p>
+                  </div>
+                </div>
+
+                {/* Pay by any UPI - Coming Soon */}
+                <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg opacity-60">
+                  <input type="radio" disabled className="w-5 h-5" />
+                  <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/2560px-UPI-Logo-vector.svg.png"
+                      alt="UPI"
+                      className="w-8 h-8 object-contain"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-700">Pay by any UPI App</h4>
+                    <p className="text-xs text-red-400 mt-1">Coming Soon</p>
+                  </div>
+                </div>
+
+                {/* Paytm UPI - Coming Soon */}
+                <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg opacity-60">
+                  <input type="radio" disabled className="w-5 h-5" />
+                  <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg"
+                      alt="Paytm"
+                      className="w-8 h-8 object-contain"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-700">Paytm UPI</h4>
+                    <p className="text-xs text-red-400 mt-1">Coming Soon</p>
+                  </div>
+                </div>
+
+                {/* Credit Card - Coming Soon */}
+                <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg opacity-60">
+                  <input type="radio" disabled className="w-5 h-5" />
+                  <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                    <Wallet className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-700">Credit Card</h4>
+                    <p className="text-xs text-red-400 mt-1">Coming Soon</p>
+                  </div>
+                </div>
+
+                {/* Debit Card - Coming Soon */}
+                <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg opacity-60">
+                  <input type="radio" disabled className="w-5 h-5" />
+                  <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                    <Wallet className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-700">Debit Card</h4>
+                    <p className="text-xs text-red-400 mt-1">Coming Soon</p>
+                  </div>
+                </div>
+
+                {/* Net Banking - Coming Soon */}
+                <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg opacity-60">
+                  <input type="radio" disabled className="w-5 h-5" />
+                  <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                    <Wallet className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-700">Net Banking</h4>
+                    <p className="text-xs text-red-400 mt-1">Coming Soon</p>
+                  </div>
+                </div>
+
+                {/* Other Wallets - Coming Soon */}
+                <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg opacity-60">
+                  <input type="radio" disabled className="w-5 h-5" />
+                  <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                    <Wallet className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-700">Other Wallets</h4>
+                    <p className="text-xs text-red-400 mt-1">Coming Soon</p>
+                  </div>
+                </div>
+
+                {/* Gift Cards - Coming Soon */}
+                <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg opacity-60">
+                  <input type="radio" disabled className="w-5 h-5" />
+                  <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                    <Tag className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-700">Gift Cards / e-Voucher</h4>
+                    <p className="text-xs text-red-400 mt-1">Coming Soon</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Continue Button */}
+              <div className="sticky bottom-0 bg-white border-t p-4">
+                <Button
+                  onClick={() => {
+                    setShowPaymentModal(false);
+                    toast({
+                      title: "Payment Method Selected",
+                      description: "Cash / UPI at Salon",
+                    });
+                  }}
+                  className="w-full h-12 text-base font-bold bg-green-600 hover:bg-green-700 text-white rounded-lg uppercase"
+                >
+                  SELECT & CONTINUE
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </>

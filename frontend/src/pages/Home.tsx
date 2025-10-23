@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Star, Users, Gift, Heart, Scissors, Palette, Sparkles, Zap, Crown, Flame, User as UserIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import SalonCard from "../components/SalonCard";
@@ -22,6 +21,7 @@ export default function Home() {
   const { user } = useAuth();
   const allSalonsRef = useRef<HTMLElement>(null);
   const favoritesRef = useRef<HTMLElement>(null);
+  const trendingSalonsRef = useRef<HTMLElement>(null);
   const [showFavoritesSection, setShowFavoritesSection] = useState(false);
   const [exploreFilter, setExploreFilter] = useState<'highly-rated' | 'nearest'>('highly-rated');
   const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null);
@@ -113,23 +113,36 @@ export default function Home() {
     console.error('Error loading salons:', error);
   }
 
-  const filteredSalons = salons.filter(salon => {
-    // Filter by salon type first
-    const matchesType = salon.type === selectedSalonType;
+  const filteredSalons = useMemo(() => {
+    const filtered = salons.filter(salon => {
+      // Filter by salon type first
+      const matchesType = salon.type === selectedSalonType;
 
-    // Sanitize search query: trim spaces and remove special characters
-    const sanitizedQuery = searchQuery.trim().replace(/[^a-zA-Z0-9\s]/g, '');
+      // Sanitize search query: trim spaces and remove special characters
+      const sanitizedQuery = searchQuery.trim().replace(/[^a-zA-Z0-9\s]/g, '');
 
-    // If search is empty after sanitization, show all salons (TC59)
-    const matchesSearch = !sanitizedQuery ||
-      salon.name.toLowerCase().includes(sanitizedQuery.toLowerCase()) ||
-      salon.services?.some(service =>
-        service.name.toLowerCase().includes(sanitizedQuery.toLowerCase())
-      );
+      // If search is empty after sanitization, show all salons (TC59)
+      const matchesSearch = !sanitizedQuery ||
+        salon.name.toLowerCase().includes(sanitizedQuery.toLowerCase()) ||
+        salon.services?.some(service =>
+          service.name.toLowerCase().includes(sanitizedQuery.toLowerCase())
+        );
 
-    const matchesLocation = !location || salon.location.toLowerCase().includes(location.toLowerCase());
-    return matchesType && matchesSearch && matchesLocation;
-  });
+      const matchesLocation = !location || salon.location.toLowerCase().includes(location.toLowerCase());
+      return matchesType && matchesSearch && matchesLocation;
+    });
+
+    // Sort by offers when there's a search query (prioritize high offers)
+    if (searchQuery.trim()) {
+      return [...filtered].sort((a, b) => {
+        const maxOfferA = Math.max(...(a.offers?.map(offer => Number(offer.discount) || 0) || [0]));
+        const maxOfferB = Math.max(...(b.offers?.map(offer => Number(offer.discount) || 0) || [0]));
+        return maxOfferB - maxOfferA;
+      });
+    }
+
+    return filtered;
+  }, [salons, selectedSalonType, searchQuery, location]);
 
   // Calculate distance between two points using Haversine formula
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -448,10 +461,10 @@ export default function Home() {
         <section className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-teal-500 to-teal-700 hero-bg-effect">
           {/* Decorative Shapes */}
           <div className="hero-shapes"></div>
-          
+
           {/* Light Rays Effect */}
           <div className="hero-light-rays"></div>
-          
+
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
@@ -539,7 +552,11 @@ export default function Home() {
                             {slide.subtitle}
                           </p>
                           <Button
-                            onClick={handleSearch}
+                            onClick={() => {
+                              if (trendingSalonsRef.current) {
+                                trendingSalonsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              }
+                            }}
                             className="bg-white hover:bg-gray-50 text-teal-600 font-semibold px-4 py-1.5 rounded-full text-xs shadow-lg h-auto"
                           >
                             {slide.buttonText}
@@ -668,7 +685,15 @@ export default function Home() {
               <div
                 key={category.id}
                 className="flex flex-col items-center cursor-pointer group"
-                onClick={() => setSearchQuery(category.searchQuery)}
+                onClick={() => {
+                  setSearchQuery(category.searchQuery);
+                  // Scroll to All Salons section after a brief delay to allow state update
+                  setTimeout(() => {
+                    if (allSalonsRef.current) {
+                      allSalonsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }, 100);
+                }}
               >
                 <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 border-2 border-cyan-100 bg-gradient-to-br from-cyan-50 to-white flex items-center justify-center">
                   <img
@@ -687,7 +712,7 @@ export default function Home() {
       </section>
 
       {/* Top Salons / Favorites Section */}
-      <section className="py-8 bg-gradient-to-b from-gray-50 to-white">
+      <section ref={trendingSalonsRef} className="py-8 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="mb-6 flex items-center justify-between">
             <div>

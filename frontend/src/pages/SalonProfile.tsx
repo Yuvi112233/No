@@ -31,7 +31,7 @@ export default function SalonProfile() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const { user, updateUser } = useAuth();
-  const { addItem, items, getItemCount } = useCart();
+  const { addItem, removeItem, items, getItemCount } = useCart();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const reviewsScrollRef = useRef<HTMLDivElement>(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
@@ -184,7 +184,7 @@ export default function SalonProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 pb-24 md:pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 pb-32 md:pb-8">
       {/* Hero Banner - Main Photo with Category Thumbnails */}
       {/* Hero Banner Container with Overlapping Thumbnails */}
       <div className="relative">
@@ -259,7 +259,7 @@ export default function SalonProfile() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-6 sm:px-6 lg:px-8">
         {/* Salon Header - positioned below hero banner with extra top margin for overlapping thumbnails */}
         <div className="mb-8 mt-12">
           <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-teal-100">
@@ -338,7 +338,7 @@ export default function SalonProfile() {
 
         {/* Services Section - Card Layout with Teal Theme */}
         <div className="mb-8">
-          <div className="mb-6">
+          <div className="mb-6 px-4 sm:px-0">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Our Services</h2>
             <p className="text-gray-600">Choose from our range of professional services</p>
           </div>
@@ -396,17 +396,29 @@ export default function SalonProfile() {
                     {/* Action Buttons - Compact */}
                     <div className="flex gap-2">
                       <Button
-                        onClick={() => handleAddToCart(service)}
-                        disabled={isServiceInCart(service.id)}
+                        onClick={() => {
+                          if (isServiceInCart(service.id)) {
+                            removeItem(service.id);
+                            toast({
+                              title: "Service removed",
+                              description: `${service.name} has been removed from your cart.`,
+                            });
+                          } else {
+                            handleAddToCart(service);
+                          }
+                        }}
                         size="sm"
                         className={`flex-1 h-8 text-xs ${isServiceInCart(service.id)
-                          ? 'bg-green-600 hover:bg-green-700'
+                          ? 'bg-red-600 hover:bg-red-700'
                           : 'bg-teal-600 hover:bg-teal-700'
                           } text-white`}
                         data-testid={`button-add-service-${service.id}`}
                       >
                         {isServiceInCart(service.id) ? (
-                          <>✓ Added</>
+                          <>
+                            <X className="w-3 h-3 mr-1" />
+                            Remove
+                          </>
                         ) : (
                           <>
                             <ShoppingCart className="w-3 h-3 mr-1" />
@@ -436,24 +448,26 @@ export default function SalonProfile() {
             })}
           </div>
 
-          {/* Cart Summary */}
+          {/* Cart Summary - Sticky at bottom */}
           {getItemCount() > 0 && (
-            <Card className="mt-6 bg-gradient-to-r from-teal-50 to-cyan-50 border-2 border-teal-200">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-gray-700 font-medium mb-4">
-                    {getItemCount()} service{getItemCount() > 1 ? 's' : ''} selected • Ready to book
-                  </p>
-                  <Button
-                    onClick={() => setLocation('/queue-summary')}
-                    className="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-semibold rounded-lg shadow-lg"
-                  >
-                    <ShoppingCart className="w-5 h-5 mr-2" />
-                    Proceed to Checkout
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe md:pb-0">
+              <Card className="rounded-none md:rounded-t-2xl bg-gradient-to-r from-teal-50 to-cyan-50 border-t-2 border-teal-200 shadow-2xl">
+                <CardContent className="py-4 px-4">
+                  <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+                    <p className="text-gray-700 font-medium text-sm md:text-base">
+                      {getItemCount()} service{getItemCount() > 1 ? 's' : ''} selected • Ready to book
+                    </p>
+                    <Button
+                      onClick={() => setLocation('/queue-summary')}
+                      className="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-semibold rounded-lg shadow-lg"
+                    >
+                      <ShoppingCart className="w-5 h-5 mr-2" />
+                      Proceed to Checkout
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           )}
         </div>
 
