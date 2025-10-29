@@ -12,6 +12,383 @@ import OTPVerification from "./OTPVerification";
 import AdminProfileCompletion from "./AdminProfileCompletion";
 import type { User as UserType } from "../types";
 import { GoogleLogin } from "@react-oauth/google";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+
+const termsAndConditionsContent = `# Terms and Conditions for Salon Registration on AltQ
+
+
+
+**Last Updated:** October 27, 2025
+
+
+
+Welcome to AltQ!
+
+
+
+These Terms and Conditions ("Terms") govern your registration and use of the AltQ platform (the "Platform") as a salon owner or authorized representative ("Salon," "You," or "Your"). By registering your salon on the Platform, you enter into a legally binding agreement with AltQ, operated by [Your Full Name], a proprietorship business with its principal place of business in Ludhiana, Punjab, India.
+
+
+
+**Note:** AltQ is currently an unregistered proprietorship. These Terms are valid and enforceable under Indian law for non-corporate entities.
+
+
+
+---
+
+
+
+## 1. Eligibility and Representations
+
+
+
+By registering, you represent and warrant that:
+
+
+
+*   You are at least 18 years of age and possess the legal capacity to enter into this agreement.
+
+*   You are duly authorized to operate the salon and to bind the salon to these Terms.
+
+*   Your salon operates in full compliance with all applicable local, state, and national laws, including but not limited to business licenses, tax registrations (e.g., GST, if applicable), and municipal permissions.
+
+*   You are registering as a proprietor, partner, or an authorized individual representing the salon.
+
+
+
+---
+
+
+
+## 2. Account and Data Accuracy
+
+
+
+### 2.1. Account Information
+
+
+
+You agree to provide accurate, complete, and truthful information during registration and throughout your use of the Platform, including but not limited to salon name, address, contact details, photographs, services offered, and pricing.
+
+
+
+### 2.2. Account Security
+
+
+
+You are solely responsible for maintaining the confidentiality of your account login credentials and for all activities that occur under your account. You must notify AltQ immediately of any unauthorized use of your account.
+
+
+
+### 2.3. Suspension/Termination
+
+
+
+AltQ reserves the right to suspend or terminate your account, without prior notice, if any information provided is found to be false, misleading, or incomplete, or in cases of spamming, misuse, or violation of these Terms.
+
+
+
+---
+
+
+
+## 3. Permitted Use of AltQ
+
+
+
+### 3.1. Allowed Activities
+
+
+
+You are permitted to use the Platform to:
+
+
+
+*   Manage digital queues, appointments, and customer bookings.
+
+*   Showcase your salon and its services to potential customers.
+
+*   Utilize customer relationship management features.
+
+*   Access basic analytics (under the free plan) or advanced insights (under paid plans).
+
+
+
+### 3.2. Prohibited Activities
+
+
+
+You shall not:
+
+
+
+*   Upload, post, or transmit any content that is unlawful, harmful, defamatory, obscene, or otherwise objectionable.
+
+*   Engage in unsolicited commercial communications (spam) or misuse customer data.
+
+*   Attempt to copy, modify, reverse-engineer, decompile, or otherwise exploit any part of the Platform.
+
+*   Use the Platform to compete with AltQ or offer similar services.
+
+
+
+---
+
+
+
+## 4. Customer Data and Privacy
+
+
+
+### 4.1. Data Collection
+
+
+
+You acknowledge that you will collect customer data (e.g., name, phone number, booking details) through the Platform.
+
+
+
+### 4.2. Your Responsibilities
+
+
+
+You are solely responsible for:
+
+
+
+*   Obtaining all necessary consents from customers for the collection, storage, and use of their personal data.
+
+*   Ensuring full compliance with all applicable Indian privacy laws, including the Information Technology Act, 2000, and the Digital Personal Data Protection Act, 2023.
+
+*   Any unauthorized access, misuse, or breach of customer data under your control.
+
+
+
+### 4.3. AltQ's Role
+
+
+
+AltQ processes customer data solely for the purpose of providing the Platform's services. AltQ shall not be liable for your actions or omissions regarding customer data.
+
+
+
+---
+
+
+
+## 5. Fees and Payments
+
+
+
+### 5.1. Plans
+
+
+
+AltQ offers various plans, including a free plan with basic features and paid plans with enhanced functionalities. Details of paid plans, including pricing, will be clearly presented prior to subscription.
+
+
+
+### 5.2. Payment Processing
+
+
+
+All payments will be processed through secure and compliant payment gateways (e.g., Razorpay/UPI).
+
+
+
+### 5.3. Taxes
+
+
+
+Applicable taxes (e.g., GST, if applicable) will be added to the stated fees.
+
+
+
+### 5.4. Refunds
+
+
+
+All fees are non-refundable unless explicitly stated otherwise in AltQ's Refund Policy.
+
+
+
+---
+
+
+
+## 6. Intellectual Property
+
+
+
+### 6.1. AltQ's Intellectual Property
+
+
+
+All intellectual property rights related to the AltQ Platform, including its logo, software code, design, trademarks, and name, are exclusively owned by AltQ.
+
+
+
+### 6.2. Salon's Content
+
+
+
+You retain ownership of your salon's content, including photographs, name, and descriptions. By registering, you grant AltQ a non-exclusive, royalty-free, worldwide license to display, reproduce, and distribute your content on the Platform for promotional and operational purposes.
+
+
+
+---
+
+
+
+## 7. Disclaimers and Limitation of Liability
+
+
+
+### 7.1. "As Is" Basis
+
+
+
+The Platform is provided on an "as is" and "as available" basis, without any warranties, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement. AltQ does not guarantee uninterrupted availability, error-free operation, or the accuracy of any information provided through the Platform.
+
+
+
+### 7.2. No Liability for Indirect Damages
+
+
+
+AltQ shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, business, or goodwill, arising out of or in connection with your use of the Platform.
+
+
+
+### 7.3. Specific Exclusions
+
+
+
+AltQ is not responsible for:
+
+
+
+*   Loss of customers due to Platform downtime or technical issues.
+
+
+
+*   Inaccurate queue timings or booking errors caused by your actions or customer input.
+
+
+
+*   Any indirect losses, including loss of revenue or business opportunities.
+
+
+
+### 7.4. Maximum Liability
+
+
+
+In no event shall AltQ's total liability to you for all damages, losses, and causes of action exceed the total fees paid by you to AltQ in the six (6) months preceding the claim.
+
+
+
+---
+
+
+
+## 8. Termination
+
+
+
+### 8.1. Termination by You
+
+
+
+You may terminate your account at any time by navigating to Settings → Delete Account within the Platform.
+
+
+
+### 8.2. Termination by AltQ
+
+
+
+AltQ reserves the right to suspend or terminate your access to the Platform, without prior notice, if you breach any of these Terms.
+
+
+
+### 8.3. Data Deletion
+
+
+
+Upon termination, your data will be deleted from the Platform within 30 days, subject to legal and regulatory requirements.
+
+
+
+---
+
+
+
+## 9. Governing Law and Dispute Resolution
+
+
+
+These Terms shall be governed by and construed in accordance with the laws of India. Any dispute arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts in Ludhiana, Punjab, India.
+
+
+
+---
+
+
+
+## 10. Changes to Terms
+
+
+
+AltQ reserves the right to modify these Terms at any time. We will notify you of any material changes via email or through an in-app notification. Your continued use of the Platform after such modifications constitutes your acceptance of the revised Terms.
+
+
+
+---
+
+
+
+## 11. Contact Us
+
+
+
+For any questions or concerns regarding these Terms, please contact us:
+
+
+
+**Email:** support@altq.in
+
+`;
+
+
+
+const markdownToHtml = (markdown: string): string => {
+  let html = markdown;
+
+  // Convert headers
+  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+  // Convert bold text
+  html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+
+  // Convert lists
+  html = html.replace(/^\* (.*$)/gim, '<li>$1</li>');
+  html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+
+  // Convert horizontal rules
+  html = html.replace(/^---$/gim, '<hr />');
+
+  // Convert paragraphs (handle newlines)
+  html = html.replace(/(\r\n|\r|\n){2,}/g, '</p><p>');
+  html = `<p>${html}</p>`; // Wrap the whole thing in a paragraph
+
+  return html;
+};
+
+
 
 type AdminLoginForm = z.infer<typeof loginSchema>;
 type AdminRegisterForm = z.infer<typeof insertUserSchema>;
@@ -31,6 +408,7 @@ export default function AdminLoginFlow({
   const [showProfileCompletion, setShowProfileCompletion] = useState(false);
   const [registeredUser, setRegisteredUser] = useState<(UserType & { password?: string }) | null>(null);
   const [googleAuthUser, setGoogleAuthUser] = useState<UserType | null>(null);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const { toast } = useToast();
 
   // Google authentication handlers
@@ -113,6 +491,7 @@ export default function AdminLoginFlow({
       phone: "",
       password: "",
       role: "salon_owner",
+      termsAccepted: false,
     },
     mode: "onChange",
   });
@@ -563,10 +942,40 @@ export default function AdminLoginFlow({
                       )}
                     </div>
 
+                    {/* Terms and Conditions Checkbox */}
+                    <div className="flex items-center space-x-2 mt-4">
+                      <Checkbox
+                        id="terms"
+                        {...registerForm.register("termsAccepted")}
+                        checked={registerForm.watch("termsAccepted")}
+                        onCheckedChange={(checked) => {
+                          registerForm.setValue("termsAccepted", checked as boolean, { shouldValidate: true });
+                        }}
+                      />
+                      <label
+                        htmlFor="terms"
+                        className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-700"
+                      >
+                        I agree to the{" "}
+                        <button
+                          type="button"
+                          onClick={() => setShowTermsModal(true)}
+                          className="text-teal-600 hover:underline"
+                        >
+                          Terms and Conditions
+                        </button>
+                      </label>
+                    </div>
+                    {registerForm.formState.errors.termsAccepted && (
+                      <p className="text-xs text-red-600 mt-1 ml-1">
+                        {registerForm.formState.errors.termsAccepted.message}
+                      </p>
+                    )}
+
                     {/* Create Account Button */}
                     <button
                       type="submit"
-                      disabled={registerMutation.isPending}
+                      disabled={registerMutation.isPending || !registerForm.watch("termsAccepted")}
                       className="w-full h-11 text-white font-semibold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl mt-4 text-sm"
                     >
                       {registerMutation.isPending ? (
@@ -650,6 +1059,26 @@ export default function AdminLoginFlow({
           )}
         </div>
       </div>
+
+      {/* Terms and Conditions Modal */}
+      <Dialog open={showTermsModal} onOpenChange={setShowTermsModal}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Terms and Conditions</DialogTitle>
+            <DialogDescription>
+              Please read the terms and conditions carefully before proceeding.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="prose prose-sm max-w-none text-gray-800" dangerouslySetInnerHTML={{ __html: markdownToHtml(termsAndConditionsContent) }}></div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <button type="button" className="px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 transition-colors">
+                Close
+              </button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

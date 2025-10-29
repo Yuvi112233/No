@@ -12,6 +12,9 @@ export const insertUserSchema = z.object({
   phone: z.string().min(10, "Phone number must be at least 10 digits").optional(),
   password: z.string().min(6, "Password must be at least 6 characters"),
   role: z.enum(["customer", "salon_owner"]).default("customer"),
+  termsAccepted: z.boolean().refine(val => val === true, {
+    message: "You must accept the terms and conditions",
+  }),
 });
 
 export const insertSalonSchema = z.object({
