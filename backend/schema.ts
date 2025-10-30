@@ -136,7 +136,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
   email: z.string().email().optional().nullable(),
   phone: z.string().optional().nullable(),
   password: z.string().optional().nullable(),
-  role: z.enum(["customer", "salon_owner"]).default("customer"),
+  role: z.enum(["customer", "salon_owner", "super_admin"]).default("customer"),
 });
 
 export const insertSalonSchema = createInsertSchema(salons, {

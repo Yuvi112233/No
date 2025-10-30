@@ -12,7 +12,8 @@
     "dev": "nodemon index.ts",
     "build": "esbuild index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/server.js",
     "start": "node dist/server.js",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "create-super-admin": "tsx scripts/createSuperAdmin.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
