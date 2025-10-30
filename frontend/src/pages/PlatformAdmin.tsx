@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Users, Store, Calendar, DollarSign, TrendingUp, Search, Activity, ArrowUpRight, Filter, Download, RefreshCw } from 'lucide-react';
+import SalonPerformance from '@/components/admin/SalonPerformance';
+import UserSegmentation from '@/components/admin/UserSegmentation';
+import CancellationAnalysis from '@/components/admin/CancellationAnalysis';
 
 interface PlatformStats {
   overview: {
@@ -371,6 +374,15 @@ export default function PlatformAdmin() {
             <TabsTrigger value="analytics" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
               Analytics
             </TabsTrigger>
+            <TabsTrigger value="performance" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              Performance
+            </TabsTrigger>
+            <TabsTrigger value="users" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="cancellations" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              Cancellations
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -699,6 +711,18 @@ export default function PlatformAdmin() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="performance" className="space-y-4">
+            <SalonPerformance />
+          </TabsContent>
+
+          <TabsContent value="users" className="space-y-4">
+            <UserSegmentation />
+          </TabsContent>
+
+          <TabsContent value="cancellations" className="space-y-4">
+            <CancellationAnalysis />
           </TabsContent>
         </Tabs>
       </div>
