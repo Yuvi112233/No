@@ -45,10 +45,10 @@ export default function CancellationAnalysis() {
     const end = new Date();
     const start = new Date();
     start.setDate(start.getDate() - 30);
-    
+
     setStartDate(start.toISOString().split('T')[0]);
     setEndDate(end.toISOString().split('T')[0]);
-    
+
     fetchCancellationData(start.toISOString(), end.toISOString());
   }, []);
 
@@ -57,11 +57,11 @@ export default function CancellationAnalysis() {
       setLoading(true);
       const token = localStorage.getItem('smartq_token');
       const baseURL = import.meta.env.VITE_API_URL || 'https://no-production-d4fc.up.railway.app';
-      
+
       const params = new URLSearchParams();
       if (start) params.append('startDate', start);
       if (end) params.append('endDate', end);
-      
+
       const response = await fetch(
         `${baseURL}/api/admin/platform/cancellation-analysis?${params}`,
         { headers: { Authorization: `Bearer ${token}` } }

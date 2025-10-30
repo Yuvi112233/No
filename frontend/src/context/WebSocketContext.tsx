@@ -166,6 +166,16 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
             }
             break;
 
+          case 'live_viewers_update':
+            // Dispatch custom event for live viewer count updates
+            window.dispatchEvent(new CustomEvent('live_viewers_update', { 
+              detail: { 
+                salonId: message.salonId, 
+                count: message.count 
+              } 
+            }));
+            break;
+
           default:
             console.log('Unknown WebSocket message type:', message.type);
         }
@@ -204,11 +214,15 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
 
     setSocket(ws);
 
+    // Store WebSocket connection globally for salon view tracking
+    (window as any).wsConnection = ws;
+
     // Cleanup on unmount or user change
     return () => {
       if (ws.readyState === WebSocket.OPEN) {
         ws.close(1000, 'Component unmounting');
       }
+      (window as any).wsConnection = null;
     };
   }, [user?.id]); // Only reconnect when user ID changes
 

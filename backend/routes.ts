@@ -29,6 +29,7 @@ import auditRoutes from "./routes/auditRoutes";
 import analyticsRoutes from "./routes/analyticsRoutes";
 import healthRoutes from "./routes/healthRoutes";
 import platformAdminRoutes from "./routes/platformAdminRoutes";
+import liveViewersRoutes from "./routes/liveViewersRoutes";
 import { authenticateToken } from "./middleware/auth";
 
 // Load environment variables
@@ -2180,6 +2181,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // PLATFORM ADMIN ROUTES
   // ====================
   app.use('/api/admin/platform', platformAdminRoutes);
+
+  // ====================
+  // LIVE VIEWERS ROUTES
+  // ====================
+  app.use('/api/live-viewers', liveViewersRoutes);
 
   return httpServer;
 }

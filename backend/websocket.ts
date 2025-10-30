@@ -1,6 +1,7 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
 import jwt from 'jsonwebtoken';
+import liveViewersService from './services/liveViewersService';
 
 interface AuthenticatedWebSocket extends WebSocket {
   userId?: string;
@@ -40,6 +41,8 @@ class WebSocketManager {
 
       ws.on('close', () => {
         if (ws.userId) {
+          // Clean up viewer tracking
+          liveViewersService.removeUser(ws.userId);
           this.clients.delete(ws.userId);
         }
       });
@@ -66,6 +69,14 @@ class WebSocketManager {
       
       case 'ping':
         ws.send(JSON.stringify({ type: 'pong' }));
+        break;
+
+      case 'salon_view_start':
+        this.handleSalonViewStart(ws, message);
+        break;
+
+      case 'salon_view_end':
+        this.handleSalonViewEnd(ws, message);
         break;
 
       default:
@@ -336,6 +347,59 @@ class WebSocketManager {
   // Get the number of active WebSocket connections
   getConnectionCount(): number {
     return this.clients.size;
+  }
+
+  /**
+   * Handle user starting to view a salon page
+   */
+  private handleSalonViewStart(ws: AuthenticatedWebSocket, message: WebSocketMessage) {
+    if (!ws.userId || !message.salonId) {
+      return;
+    }
+
+    const viewerCount = liveViewersService.joinSalonView(message.salonId, ws.userId);
+    
+    // Broadcast updated viewer count to all clients
+    this.broadcastViewerCount(message.salonId, viewerCount);
+  }
+
+  /**
+   * Handle user stopping viewing a salon page
+   */
+  private handleSalonViewEnd(ws: AuthenticatedWebSocket, message: WebSocketMessage) {
+    if (!ws.userId || !message.salonId) {
+      return;
+    }
+
+    const viewerCount = liveViewersService.leaveSalonView(message.salonId, ws.userId);
+    
+    // Broadcast updated viewer count to all clients
+    this.broadcastViewerCount(message.salonId, viewerCount);
+  }
+
+  /**
+   * Broadcast live viewer count update
+   */
+  broadcastViewerCount(salonId: string, count: number) {
+    const message = JSON.stringify({
+      type: 'live_viewers_update',
+      salonId,
+      count,
+      timestamp: new Date().toISOString()
+    });
+
+    this.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN && client.isAuthenticated) {
+        client.send(message);
+      }
+    });
+  }
+
+  /**
+   * Get current viewer count for a salon
+   */
+  getViewerCount(salonId: string): number {
+    return liveViewersService.getViewerCount(salonId);
   }
 }
 

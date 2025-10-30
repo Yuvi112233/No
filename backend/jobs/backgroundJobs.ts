@@ -1,5 +1,6 @@
 import queueService from '../services/queueService';
-import { QueueModel } from '../db';
+import { QueueModel, SalonModel } from '../db';
+import wsManager from '../websocket';
 
 /**
  * Background job to detect and mark no-shows
@@ -43,6 +44,20 @@ export function startPendingVerificationTimeoutJob() {
 }
 
 /**
+ * Background job to auto-reject queues after 30 minutes of no response
+ * Checks every minute for queues in waiting/notified status older than 30 minutes
+ */
+export function startQueueTimeoutJob() {
+  console.log('🔄 Starting queue timeout job (runs every minute)');
+  
+  // Run immediately on startup
+  processQueueTimeouts();
+  
+  // Then run every minute
+  setInterval(processQueueTimeouts, 60 * 1000);
+}
+
+/**
  * Process pending verification timeouts
  */
 async function processPendingVerificationTimeouts() {
@@ -81,6 +96,49 @@ async function processPendingVerificationTimeouts() {
 }
 
 /**
+ * Process queue timeouts - auto-reject after 30 minutes
+ */
+async function processQueueTimeouts() {
+  try {
+    const thirtyMinutesAgo = new Date();
+    thirtyMinutesAgo.setMinutes(thirtyMinutesAgo.getMinutes() - 30);
+
+    // Find queues in waiting or notified status for more than 30 minutes
+    const expiredQueues = await QueueModel.find({
+      status: { $in: ['waiting', 'notified'] },
+      timestamp: { $lte: thirtyMinutesAgo }
+    });
+
+    if (expiredQueues.length === 0) {
+      return;
+    }
+
+    console.log(`⏰ Found ${expiredQueues.length} expired queues (30+ minutes old)`);
+
+    for (const queue of expiredQueues) {
+      const oldStatus = queue.status;
+      queue.status = 'no-show';
+      queue.noShowMarkedAt = new Date();
+      queue.noShowReason = 'Auto-rejected: No response within 30 minutes';
+      await queue.save();
+
+      console.log(`⏱️ Auto-rejected queue ${queue.id} after 30 minutes (status: ${oldStatus})`);
+
+      // Broadcast update to admin
+      wsManager.broadcastQueueUpdate(queue.salonId, {
+        queueId: queue.id,
+        status: 'no-show',
+        oldStatus
+      });
+    }
+
+    console.log(`✅ Processed ${expiredQueues.length} queue timeouts`);
+  } catch (error) {
+    console.error('❌ Error in queue timeout job:', error);
+  }
+}
+
+/**
  * Initialize all background jobs
  */
 export function initializeBackgroundJobs() {
@@ -88,6 +146,7 @@ export function initializeBackgroundJobs() {
   
   startNoShowDetectionJob();
   startPendingVerificationTimeoutJob();
+  startQueueTimeoutJob();
   
   console.log('✅ Background jobs initialized');
 }
