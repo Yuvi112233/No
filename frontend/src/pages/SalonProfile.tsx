@@ -43,6 +43,32 @@ export default function SalonProfile() {
     window.scrollTo(0, 0);
   }, [id]);
 
+  // Track salon page view for live viewer count
+  useEffect(() => {
+    if (!id || !user) return;
+
+    // Send salon_view_start message via WebSocket
+    const ws = (window as any).wsConnection;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({
+        type: 'salon_view_start',
+        salonId: id,
+        userId: user.id
+      }));
+    }
+
+    // Cleanup: send salon_view_end when leaving
+    return () => {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'salon_view_end',
+          salonId: id,
+          userId: user.id
+        }));
+      }
+    };
+  }, [id, user]);
+
   const isFavorited = useMemo(() => {
     if (!user || !user.favoriteSalons) return false;
     return user.favoriteSalons.includes(id || "");

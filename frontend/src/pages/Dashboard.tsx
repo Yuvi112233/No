@@ -52,6 +52,7 @@ import LocationPicker from "../components/LocationPicker";
 import VoiceNotificationSettings from "../components/VoiceNotificationSettings";
 import LocationInputModal from "../components/LocationInputModal";
 import QuickServiceTemplates from "../components/QuickServiceTemplates";
+import LiveViewerCountCard from "../components/LiveViewerCountCard";
 
 const serviceFormSchema = insertServiceSchema.omit({ salonId: true });
 const offerFormSchema = insertOfferSchema.omit({ salonId: true });
@@ -635,8 +636,8 @@ export default function Dashboard() {
       {/* Mobile Header - Fixed at top */}
       <div className="flex-shrink-0 bg-white border-b border-gray-100 z-50 relative">
         <div className="flex items-center justify-between p-4">
-          <div className="flex items-center space-x-3">
-            {/* Logo */}
+          <div className="flex flex-col gap-2">
+            {/* Logo and Name */}
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-teal-600 rounded-lg flex items-center justify-center p-1">
                 <img
@@ -978,16 +979,7 @@ export default function Dashboard() {
                       <div className="text-xs text-teal-700">Customers</div>
                     </div>
 
-                    <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
-                      <div className="flex items-center justify-between mb-2">
-                        <Clock className="h-5 w-5 text-teal-600" />
-                        <span className="text-xs text-teal-500">AVG</span>
-                      </div>
-                      <div className="text-2xl font-bold text-teal-900" data-testid="text-avg-wait">
-                        {analyticsLoading ? "..." : `${Math.round(analytics?.avgWaitTime || 0)}m`}
-                      </div>
-                      <div className="text-xs text-teal-700">Wait Time</div>
-                    </div>
+                    <LiveViewerCountCard salonId={selectedSalonId} />
 
                     <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm">
                       <div className="flex items-center justify-between mb-2">
@@ -1039,37 +1031,37 @@ export default function Dashboard() {
                   </div>
                 </div> */}
 
-                {/* Tab Content */}
-                {activeTab === 'queue' && (
-                  <div className="space-y-4">
-                    {/* Arrival Verification Panel - Show when there are pending verifications */}
-                    {hasPendingVerifications && selectedSalonId && (
-                      <ArrivalVerificationPanel
-                        salonId={selectedSalonId}
-                        onVerificationComplete={() => {
-                          queryClient.invalidateQueries({
-                            queryKey: ['/api/salons', selectedSalonId, 'queues']
-                          });
-                        }}
-                      />
-                    )}
+                  {/* Tab Content */}
+                  {activeTab === 'queue' && (
+                    <div className="space-y-4">
+                      {/* Arrival Verification Panel - Show when there are pending verifications */}
+                      {hasPendingVerifications && selectedSalonId && (
+                        <ArrivalVerificationPanel
+                          salonId={selectedSalonId}
+                          onVerificationComplete={() => {
+                            queryClient.invalidateQueries({
+                              queryKey: ['/api/salons', selectedSalonId, 'queues']
+                            });
+                          }}
+                        />
+                      )}
 
-                    <div className="flex items-center justify-between gap-2">
-                      <h2 className="text-lg font-bold text-black flex-shrink-0">Current Queue</h2>
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setShowCompletedQueues(!showCompletedQueues)}
-                          className="text-xs px-2 h-7"
-                        >
-                          {showCompletedQueues ? 'Hide' : 'Show'} Completed
-                        </Button>
-                        <Badge variant="outline" className="border-gray-300 text-gray-600 text-xs px-2">
-                          {filteredQueues.length} {showCompletedQueues ? 'total' : 'active'}
-                        </Badge>
+                      <div className="flex items-center justify-between gap-2">
+                        <h2 className="text-lg font-bold text-black flex-shrink-0">Current Queue</h2>
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowCompletedQueues(!showCompletedQueues)}
+                            className="text-xs px-2 h-7"
+                          >
+                            {showCompletedQueues ? 'Hide' : 'Show'} Completed
+                          </Button>
+                          <Badge variant="outline" className="border-gray-300 text-gray-600 text-xs px-2">
+                            {filteredQueues.length} {showCompletedQueues ? 'total' : 'active'}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
 
                       {queuesLoading ? (
                         <div className="space-y-3">
@@ -1117,10 +1109,10 @@ export default function Dashboard() {
                                     {/* Join Time */}
                                     <div className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
                                       <Clock className="w-3 h-3" />
-                                      Joined at {new Date(queue.timestamp).toLocaleTimeString('en-US', { 
-                                        hour: '2-digit', 
+                                      Joined at {new Date(queue.timestamp).toLocaleTimeString('en-US', {
+                                        hour: '2-digit',
                                         minute: '2-digit',
-                                        hour12: true 
+                                        hour12: true
                                       })}
                                     </div>
                                     <div className="mt-1">
