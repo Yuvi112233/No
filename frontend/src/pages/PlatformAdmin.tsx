@@ -105,7 +105,8 @@ export default function PlatformAdmin() {
       const token = localStorage.getItem('smartq_token');
       console.log('Fetching platform stats with token:', token ? 'exists' : 'missing');
 
-      const response = await fetch('/api/admin/platform/stats', {
+      const baseURL = import.meta.env.VITE_API_URL || 'https://no-production-d4fc.up.railway.app';
+      const response = await fetch(`${baseURL}/api/admin/platform/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -146,8 +147,9 @@ export default function PlatformAdmin() {
       const token = localStorage.getItem('smartq_token');
       console.log('Fetching salons with token:', token ? 'exists' : 'missing');
 
+      const baseURL = import.meta.env.VITE_API_URL || 'https://no-production-d4fc.up.railway.app';
       const response = await fetch(
-        `/api/admin/platform/salons?page=${currentPage}&limit=20&search=${searchTerm}`,
+        `${baseURL}/api/admin/platform/salons?page=${currentPage}&limit=20&search=${searchTerm}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
