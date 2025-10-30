@@ -21,6 +21,8 @@ import TermsOfService from "./pages/TermsOfService";
 import HelpCenter from "./pages/HelpCenter";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import PlatformAdmin from "./pages/PlatformAdmin";
+import AdminLogin from "./pages/AdminLogin";
 import NotFound from "@/pages/not-found";
 import SkeletonLoadingScreen from "./components/SkeletonLoadingScreen";
 import IntroScreen from "./components/IntroScreen";
@@ -46,6 +48,8 @@ function Router() {
       <Route path="/help" component={HelpCenter} />
       <Route path="/profile" component={Profile} />
       <Route path="/settings" component={Settings} />
+      <Route path="/admin-login" component={AdminLogin} />
+      <Route path="/platform-admin" component={PlatformAdmin} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -55,9 +59,13 @@ function App() {
   const [currentPhase, setCurrentPhase] = useState<'auth' | 'intro' | 'phone-auth' | 'skeleton' | 'category' | 'app'>('auth');
   const [authenticatedUser, setAuthenticatedUser] = useState<any>(null);
   const [, setLocation] = useLocation();
-  
+  const [location] = useLocation();
+
   // Initialize PWA features
   usePWA(authenticatedUser?.id);
+
+  // Check if current path is an admin route
+  const isAdminRoute = location.startsWith('/admin') || location.startsWith('/platform-admin');
 
   // Check for existing authentication on mount
   useEffect(() => {
@@ -65,14 +73,14 @@ function App() {
     const storedUser = localStorage.getItem('smartq_user');
     const storedCategory = getUserCategory();
     const currentPath = window.location.pathname;
-    
+
     if (storedToken && storedUser) {
       try {
         const user = JSON.parse(storedUser);
         console.log('Found existing auth, user:', user);
         console.log('Current path on mount:', currentPath);
         setAuthenticatedUser(user);
-        
+
         // If user is admin (salon_owner), skip category selection
         if (user.role === 'salon_owner') {
           setCurrentPhase('app');
@@ -113,7 +121,7 @@ function App() {
 
   const handleSkeletonComplete = () => {
     console.log('App: Skeleton loading complete');
-    
+
     // Check if user needs category selection
     if (authenticatedUser && authenticatedUser.role !== 'salon_owner') {
       const storedCategory = getUserCategory();
@@ -123,7 +131,7 @@ function App() {
         return;
       }
     }
-    
+
     console.log('Switching to app');
     setCurrentPhase('app');
   };
@@ -142,15 +150,15 @@ function App() {
       console.log('User role:', authenticatedUser.role);
       console.log('Role type:', typeof authenticatedUser.role);
       console.log('Is salon_owner?', authenticatedUser.role === 'salon_owner');
-      
+
       // Get current path
       const currentPath = window.location.pathname;
       console.log('Current path:', currentPath);
-      
+
       // Check if user just logged in (coming from auth page)
       const isOnAuthPage = currentPath === '/auth';
       const isOnRoot = currentPath === '/' || currentPath === '';
-      
+
       // Always redirect if on auth page or root
       if (isOnAuthPage || isOnRoot) {
         if (authenticatedUser.role === 'salon_owner') {
@@ -180,6 +188,26 @@ function App() {
   };
 
   console.log('App render, currentPhase:', currentPhase);
+  console.log('Is admin route:', isAdminRoute);
+
+  // If accessing admin routes, bypass phase system and show admin pages directly
+  if (isAdminRoute) {
+    return (
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <AuthProvider>
+              <WebSocketProvider>
+                <CartProvider>
+                  <Router />
+                </CartProvider>
+              </WebSocketProvider>
+            </AuthProvider>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </GoogleOAuthProvider>
+    );
+  }
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>

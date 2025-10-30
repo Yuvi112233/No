@@ -28,6 +28,7 @@ import { pushNotificationService } from "./services/pushNotificationService";
 import auditRoutes from "./routes/auditRoutes";
 import analyticsRoutes from "./routes/analyticsRoutes";
 import healthRoutes from "./routes/healthRoutes";
+import platformAdminRoutes from "./routes/platformAdminRoutes";
 import { authenticateToken } from "./middleware/auth";
 
 // Load environment variables
@@ -2174,6 +2175,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // HEALTH CHECK ROUTES
   // ====================
   app.use('/api/health', healthRoutes);
+
+  // ====================
+  // PLATFORM ADMIN ROUTES
+  // ====================
+  app.use('/api/admin/platform', platformAdminRoutes);
 
   return httpServer;
 }

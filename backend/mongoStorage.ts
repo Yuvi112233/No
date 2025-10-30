@@ -23,6 +23,11 @@ import { UserModel, SalonModel, ServiceModel, QueueModel, OfferModel, ReviewMode
 export { UserModel as User };
 
 export class MongoStorage implements IStorage {
+  // Expose MongoDB connection for admin routes
+  get db() {
+    return UserModel.db;
+  }
+
   // Users
   async getUser(id: string): Promise<User | undefined> {
     const user = await UserModel.findOne({ id }).lean();
