@@ -128,7 +128,8 @@ export async function sendSubscriptionToBackend(
 ): Promise<boolean> {
   try {
     const token = localStorage.getItem('smartq_token') || localStorage.getItem('token');
-    const response = await fetch('/api/push/subscribe', {
+    const baseURL = import.meta.env.VITE_API_URL || 'https://no-production-d4fc.up.railway.app';
+    const response = await fetch(`${baseURL}/api/push/subscribe`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
