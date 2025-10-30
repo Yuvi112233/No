@@ -113,6 +113,18 @@ export default function Navbar() {
                         Dashboard
                       </Link>
                     )}
+                    {user.role === 'super_admin' && (
+                      <Link
+                        href="/platform-admin"
+                        className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${location === '/platform-admin'
+                          ? 'text-purple-600 bg-purple-50'
+                          : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50'
+                          }`}
+                        data-testid="link-platform-admin"
+                      >
+                        Platform Admin
+                      </Link>
+                    )}
                   </>
                 )}
               </nav>
