@@ -364,20 +364,20 @@ export default function SalonProfile() {
 
         {/* Services Section - Card Layout with Teal Theme */}
         <div className="mb-8">
-          <div className="mb-6 px-4 sm:px-0">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Our Services</h2>
-            <p className="text-gray-600">Choose from our range of professional services</p>
+          <div className="mb-6 px-0">
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">Our Services</h2>
+            <p className="text-sm text-gray-600">Choose from our range of professional services</p>
           </div>
 
           {/* Services Grid */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {salon.services.map((service, index) => {
               const isPopular = isPopularService(service.id, index);
 
               return (
                 <Card
                   key={service.id}
-                  className="flex-shrink-0 w-[85vw] md:w-full snap-start group hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-teal-300 bg-white overflow-hidden relative"
+                  className="w-full group hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-teal-300 bg-white overflow-hidden relative"
                   data-testid={`service-${service.id}`}
                 >
                   {/* Popular Badge */}
@@ -389,32 +389,32 @@ export default function SalonProfile() {
                     </div>
                   )}
 
-                  <CardContent className="p-4">
+                  <CardContent className="p-5">
                     {/* Service Name */}
-                    <h3 className="text-lg font-bold text-gray-900 mb-1 capitalize" data-testid={`text-service-name-${service.id}`}>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 capitalize pr-16" data-testid={`text-service-name-${service.id}`}>
                       {service.name}
                     </h3>
 
                     {/* Service Description */}
                     {service.description ? (
-                      <p className="text-gray-600 text-xs mb-3 line-clamp-2">
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
                         {service.description}
                       </p>
                     ) : (
-                      <p className="text-gray-500 text-xs mb-3 italic">
+                      <p className="text-gray-500 text-sm mb-4 italic">
                         Professional {service.name.toLowerCase()} service
                       </p>
                     )}
 
                     {/* Duration and Price Row */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-gray-500" />
-                        <span className="text-xs text-gray-600" data-testid={`text-service-duration-${service.id}`}>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                        <span className="text-sm text-gray-600" data-testid={`text-service-duration-${service.id}`}>
                           {service.duration} min
                         </span>
                       </div>
-                      <span className="text-xl font-bold text-teal-600" data-testid={`text-service-price-${service.id}`}>
+                      <span className="text-2xl font-bold text-teal-600" data-testid={`text-service-price-${service.id}`}>
                         ₹{service.price}
                       </span>
                     </div>
@@ -434,7 +434,7 @@ export default function SalonProfile() {
                           }
                         }}
                         size="sm"
-                        className={`flex-1 h-8 text-xs ${isServiceInCart(service.id)
+                        className={`flex-1 h-9 text-sm font-medium ${isServiceInCart(service.id)
                           ? 'bg-red-600 hover:bg-red-700'
                           : 'bg-teal-600 hover:bg-teal-700'
                           } text-white`}
@@ -442,12 +442,12 @@ export default function SalonProfile() {
                       >
                         {isServiceInCart(service.id) ? (
                           <>
-                            <X className="w-3 h-3 mr-1" />
+                            <X className="w-4 h-4 mr-1.5" />
                             Remove
                           </>
                         ) : (
                           <>
-                            <ShoppingCart className="w-3 h-3 mr-1" />
+                            <ShoppingCart className="w-4 h-4 mr-1.5" />
                             Add
                           </>
                         )}
@@ -461,9 +461,9 @@ export default function SalonProfile() {
                           }}
                           size="sm"
                           variant="outline"
-                          className="flex-1 h-8 text-xs border-teal-600 text-teal-600 hover:bg-teal-50"
+                          className="flex-1 h-9 text-sm font-medium border-teal-600 text-teal-600 hover:bg-teal-50"
                         >
-                          <Zap className="w-3 h-3 mr-1" />
+                          <Zap className="w-4 h-4 mr-1.5" />
                           Quick Book
                         </Button>
                       )}

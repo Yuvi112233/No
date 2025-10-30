@@ -13,17 +13,34 @@ export default function LiveViewerCountCard({ salonId }: LiveViewerCountCardProp
     const handleViewerUpdate = (event: CustomEvent) => {
       const { salonId: updatedSalonId, count } = event.detail;
       if (updatedSalonId === salonId) {
+        console.log('📊 Live viewer count updated:', count, 'for salon:', updatedSalonId);
         setViewerCount(count);
       }
     };
 
     window.addEventListener('live_viewers_update', handleViewerUpdate as EventListener);
 
-    // Fetch initial count
-    fetch(`/api/live-viewers/${salonId}`)
-      .then(res => res.json())
-      .then(data => setViewerCount(data.count || 0))
-      .catch(err => console.error('Failed to fetch viewer count:', err));
+    // Fetch initial count using full API URL
+    const baseURL = import.meta.env.VITE_API_URL || 'https://no-production-d4fc.up.railway.app';
+    const apiUrl = `${baseURL}/api/live-viewers/${salonId}`;
+    
+    console.log('🔍 Fetching initial viewer count from:', apiUrl);
+    
+    fetch(apiUrl)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log('✅ Initial viewer count received:', data.count);
+        setViewerCount(data.count || 0);
+      })
+      .catch(err => {
+        console.error('❌ Failed to fetch viewer count:', err);
+        setViewerCount(0);
+      });
 
     return () => {
       window.removeEventListener('live_viewers_update', handleViewerUpdate as EventListener);

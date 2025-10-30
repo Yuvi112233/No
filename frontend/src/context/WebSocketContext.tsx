@@ -26,16 +26,24 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
     if (!user) {
       // Clean up socket when user logs out
       if (socket) {
-        socket.close();
+        console.log('🔌 Closing WebSocket - user logged out');
+        socket.close(1000, 'User logged out');
         setSocket(null);
         setConnected(false);
       }
+      // Clean up global reference
+      (window as any).wsConnection = null;
       return;
+    }
+
+    // Close existing socket if any (prevent duplicate connections)
+    if (socket && socket.readyState !== WebSocket.CLOSED) {
+      console.log('🔌 Closing existing WebSocket before creating new one');
+      socket.close(1000, 'Reconnecting');
     }
 
     // Create WebSocket connection
     const baseURL = import.meta.env.VITE_API_URL || 'https://no-production-d4fc.up.railway.app';
-
 
     // Use VITE_WS_URL if available, otherwise construct from baseURL
     let wsUrl = import.meta.env.VITE_WS_URL;
@@ -48,6 +56,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
     console.log('  - Base URL:', baseURL);
     console.log('  - WebSocket URL:', wsUrl);
     console.log('  - User ID:', user.id);
+    console.log('  - Timestamp:', new Date().toISOString());
     console.log('Attempting WebSocket connection...');
     const ws = new WebSocket(wsUrl);
 
@@ -185,14 +194,27 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
     };
 
     ws.onclose = (event) => {
-      console.log('WebSocket disconnected:', event.code, event.reason);
+      console.log('🔌 WebSocket disconnected:', {
+        code: event.code,
+        reason: event.reason,
+        wasClean: event.wasClean,
+        timestamp: new Date().toISOString()
+      });
       setConnected(false);
+      
+      // Clean up global reference
+      if ((window as any).wsConnection === ws) {
+        (window as any).wsConnection = null;
+      }
 
       // Attempt to reconnect after a delay if it wasn't a clean close
-      if (!event.wasClean && user) {
+      // and user is still logged in
+      if (!event.wasClean && user && event.code !== 1000) {
+        console.log('⏳ Scheduling WebSocket reconnection in 3 seconds...');
         setTimeout(() => {
-          console.log('Attempting to reconnect WebSocket...');
-          // The useEffect will handle recreation
+          console.log('🔄 Attempting to reconnect WebSocket...');
+          // The useEffect will handle recreation when user.id changes
+          // Force a re-render by updating a dummy state if needed
         }, 3000);
       }
     };
