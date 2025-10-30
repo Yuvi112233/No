@@ -20,7 +20,8 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const baseURL = import.meta.env.VITE_API_URL || 'https://no-production-d4fc.up.railway.app';
+      const response = await fetch(`${baseURL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
