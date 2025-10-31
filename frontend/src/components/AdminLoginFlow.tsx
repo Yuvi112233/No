@@ -434,7 +434,7 @@ export default function AdminLoginFlow({
 
       // Check if user has required fields for admin access
       const hasRequiredFields = response.user.name && response.user.phone;
-      
+
       if (!hasRequiredFields) {
         // Show profile completion form
         setGoogleAuthUser(response.user);
@@ -447,20 +447,20 @@ export default function AdminLoginFlow({
         // Complete profile, proceed to dashboard
         toast({
           title: response.isNewUser ? "Welcome to SmartQ Admin!" : "Welcome back!",
-          description: response.isNewUser 
-            ? "Your admin account has been created successfully" 
+          description: response.isNewUser
+            ? "Your admin account has been created successfully"
             : "You've been logged in successfully as salon owner",
         });
         onAuthSuccess(response.user, response.token);
       }
     } catch (err: any) {
       let errorMessage = err.message || "Failed to sign in with Google";
-      
+
       // Handle role conflict error
       if (err.existingRole && err.requestedRole) {
         errorMessage = `Account already exists as ${err.existingRole}. Please use the customer login instead.`;
       }
-      
+
       toast({
         title: "Error",
         description: errorMessage,
@@ -504,7 +504,7 @@ export default function AdminLoginFlow({
     const savedEmail = localStorage.getItem('smartq_admin_saved_email');
     const savedPassword = localStorage.getItem('smartq_admin_saved_password');
     const rememberMeEnabled = localStorage.getItem('smartq_admin_remember_me') === 'true';
-    
+
     if (rememberMeEnabled && savedEmail && savedPassword) {
       loginForm.setValue('email', savedEmail);
       loginForm.setValue('password', savedPassword);
@@ -593,10 +593,10 @@ export default function AdminLoginFlow({
       console.error('Error type:', typeof error);
       console.error('Error message:', error?.message);
       console.error('Error keys:', Object.keys(error || {}));
-      
+
       // Extract the actual error message from the API error format
       let errorMessage = "Failed to create account. Please try again.";
-      
+
       if (error?.message) {
         // Try to extract message after "API Error XXX: " prefix
         const match = error.message.match(/API Error \d+:\s*(.+)/);
@@ -607,9 +607,9 @@ export default function AdminLoginFlow({
           errorMessage = error.message;
         }
       }
-      
+
       console.log('Final error message to display:', errorMessage);
-      
+
       toast({
         title: "Registration Failed",
         description: errorMessage,
@@ -679,12 +679,12 @@ export default function AdminLoginFlow({
   const handleProfileCompletion = (completedUser: any, token: string) => {
     // Update stored user data
     localStorage.setItem('smartq_user', JSON.stringify(completedUser));
-    
+
     toast({
       title: "Welcome to SmartQ Admin!",
       description: "Your profile has been completed successfully.",
     });
-    
+
     setShowProfileCompletion(false);
     setGoogleAuthUser(null);
     onAuthSuccess(completedUser, token);
@@ -696,7 +696,7 @@ export default function AdminLoginFlow({
         title: "Profile Incomplete",
         description: "You can complete your profile later from settings.",
       });
-      
+
       setShowProfileCompletion(false);
       onAuthSuccess(googleAuthUser, localStorage.getItem('smartq_token') || '');
       setGoogleAuthUser(null);
@@ -713,7 +713,7 @@ export default function AdminLoginFlow({
           className="w-full h-full object-cover"
         />
 
-      </div> 
+      </div>
 
       {/* Content */}
       <div className="relative flex flex-col h-full overflow-y-auto">
@@ -723,7 +723,7 @@ export default function AdminLoginFlow({
           <div className="flex justify-center mb-6">
             <img
               src="/loadlogo.png"
-              alt="SmartQ Logo" 
+              alt="SmartQ Logo"
               className="h-16 w-auto drop-shadow-2xl"
             />
           </div>
@@ -777,8 +777,8 @@ export default function AdminLoginFlow({
                         setShowPassword(false);
                       }}
                       className={`py-2 px-4 rounded-lg font-semibold text-xs transition-all duration-200 ${isLogin
-                          ? 'bg-white text-teal-600 shadow-sm'
-                          : 'text-gray-600 hover:text-gray-800'
+                        ? 'bg-white text-teal-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-800'
                         }`}
                     >
                       Sign In
@@ -790,8 +790,8 @@ export default function AdminLoginFlow({
                         setShowPassword(false);
                       }}
                       className={`py-2 px-4 rounded-lg font-semibold text-xs transition-all duration-200 ${!isLogin
-                          ? 'bg-white text-teal-600 shadow-sm'
-                          : 'text-gray-600 hover:text-gray-800'
+                        ? 'bg-white text-teal-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-800'
                         }`}
                     >
                       Sign Up
@@ -973,29 +973,108 @@ export default function AdminLoginFlow({
                       )}
                     </div>
 
-                    {/* Password Input */}
-                    <div className="relative">
-                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">
-                        <Lock className="w-4 h-4" />
+                    {/* Password Input with Strength Indicator */}
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">
+                          <Lock className="w-4 h-4" />
+                        </div>
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Password"
+                          className={`h-11 pl-11 pr-11 text-gray-900 bg-gray-50 border rounded-xl focus:outline-none focus:bg-white placeholder-gray-400 transition-all text-sm ${registerForm.formState.errors.password
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-gray-300 focus:border-teal-500'
+                            }`}
+                          {...registerForm.register("password")}
+                          autoComplete="new-password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
                       </div>
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Password"
-                        className="h-11 pl-11 pr-11 text-gray-900 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:border-teal-500 focus:bg-white placeholder-gray-400 transition-all text-sm"
-                        {...registerForm.register("password")}
-                        autoComplete="new-password"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                      {registerForm.formState.errors.password && (
-                        <p className="text-xs text-red-600 mt-1 ml-1">
-                          {registerForm.formState.errors.password.message}
-                        </p>
+
+                      {/* Password Strength Indicator */}
+                      {registerForm.watch("password") && (
+                        <div className="space-y-1.5">
+                          {/* Progress Bar */}
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4].map((level) => {
+                              const password = registerForm.watch("password") || "";
+                              const hasMinLength = password.length >= 8;
+                              const hasUpperCase = /[A-Z]/.test(password);
+                              const hasLowerCase = /[a-z]/.test(password);
+                              const hasNumber = /[0-9]/.test(password);
+                              const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+                              const strength = [hasMinLength, hasUpperCase, hasLowerCase, hasNumber, hasSpecial].filter(Boolean).length;
+
+                              let barColor = 'bg-gray-200';
+                              if (strength >= level) {
+                                if (strength <= 2) barColor = 'bg-red-500';
+                                else if (strength === 3) barColor = 'bg-yellow-500';
+                                else if (strength === 4) barColor = 'bg-blue-500';
+                                else barColor = 'bg-green-500';
+                              }
+
+                              return (
+                                <div
+                                  key={level}
+                                  className={`h-1 flex-1 rounded-full transition-all duration-300 ${barColor}`}
+                                />
+                              );
+                            })}
+                          </div>
+
+                          {/* Validation Messages */}
+                          {registerForm.formState.errors.password ? (
+                            <p className="text-xs text-red-600 leading-tight">
+                              {registerForm.formState.errors.password.message}
+                            </p>
+                          ) : (
+                            <div className="space-y-0.5">
+                              {(() => {
+                                const password = registerForm.watch("password") || "";
+                                const hasMinLength = password.length >= 8;
+                                const hasUpperCase = /[A-Z]/.test(password);
+                                const hasLowerCase = /[a-z]/.test(password);
+                                const hasNumber = /[0-9]/.test(password);
+                                const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+                                const allValid = hasMinLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecial;
+
+                                if (allValid) {
+                                  return (
+                                    <p className="text-xs text-green-600 font-medium flex items-center gap-1">
+                                      <span className="inline-block w-1 h-1 bg-green-600 rounded-full"></span>
+                                      Strong password! ✓
+                                    </p>
+                                  );
+                                }
+
+                                // Show what's missing
+                                const missing = [];
+                                if (!hasMinLength) missing.push("8+ characters");
+                                if (!hasUpperCase) missing.push("uppercase letter");
+                                if (!hasLowerCase) missing.push("lowercase letter");
+                                if (!hasNumber) missing.push("number");
+                                if (!hasSpecial) missing.push("special character");
+
+                                return (
+                                  <p className="text-xs text-gray-600 leading-tight">
+                                    {missing.length > 0
+                                      ? `Missing: ${missing.join(", ")}`
+                                      : "Use mix of characters, numbers, and symbols"
+                                    }
+                                  </p>
+                                );
+                              })()}
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
 
