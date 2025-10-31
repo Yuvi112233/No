@@ -218,13 +218,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
+      // Check if account is locked
+      if (user.accountLockedUntil && new Date(user.accountLockedUntil) > new Date()) {
+        const lockTimeRemaining = Math.ceil((new Date(user.accountLockedUntil).getTime() - Date.now()) / 60000);
+        return res.status(423).json({ 
+          message: `Account locked – Try again in ${lockTimeRemaining} minute${lockTimeRemaining > 1 ? 's' : ''}`,
+          lockedUntil: user.accountLockedUntil
+        });
+      }
+
       // Check if user has a password (email/password auth)
       if (!user.password) {
         return res.status(401).json({ message: 'Invalid credentials. Please use phone or Google sign-in.' });
       }
 
       const isValidPassword = await bcrypt.compare(password, user.password);
-      if (!isValidPassword) return res.status(401).json({ message: 'Invalid credentials' });
+      if (!isValidPassword) {
+        // Increment failed login attempts
+        const failedAttempts = (user.failedLoginAttempts || 0) + 1;
+        const updates: any = { failedLoginAttempts: failedAttempts };
+        
+        // Lock account after 5 failed attempts for 15 minutes
+        if (failedAttempts >= 5) {
+          const lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+          updates.accountLockedUntil = lockUntil;
+          await storage.updateUser(user.id, updates);
+          return res.status(423).json({ 
+            message: 'Account locked – Try again later',
+            lockedUntil: lockUntil
+          });
+        }
+        
+        await storage.updateUser(user.id, updates);
+        return res.status(401).json({ 
+          message: 'Invalid credentials',
+          attemptsRemaining: 5 - failedAttempts
+        });
+      }
+
+      // Reset failed login attempts on successful login
+      if (user.failedLoginAttempts && user.failedLoginAttempts > 0) {
+        await storage.updateUser(user.id, { 
+          failedLoginAttempts: 0,
+          accountLockedUntil: null
+        });
+      }
 
       // For email/password auth, allow login even if not fully verified
       // They can verify email/phone later if needed

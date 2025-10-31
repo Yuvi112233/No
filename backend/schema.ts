@@ -24,6 +24,9 @@ export const users = pgTable("users", {
   phoneVerified: boolean("phone_verified").default(false),
   emailVerified: boolean("email_verified").default(false),
   isVerified: boolean("is_verified").default(false),
+  // Account security fields
+  failedLoginAttempts: integer("failed_login_attempts").default(0),
+  accountLockedUntil: timestamp("account_locked_until"),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
