@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import {
-    Lock,
-    Eye,
-    EyeOff,
+    // Lock,
+    // Eye,
+    // EyeOff,
     Trash2,
     AlertTriangle,
     ArrowLeft,
@@ -29,25 +29,25 @@ export default function Settings() {
     const { user, logout } = useAuth();
     const { toast } = useToast();
     const [, setLocation] = useLocation();
-    const [showPassword, setShowPassword] = useState(false);
+    // const [showPassword, setShowPassword] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [deletePassword, setDeletePassword] = useState("");
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const [formData, setFormData] = useState({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: ""
-    });
+    // const [formData, setFormData] = useState({
+    //     currentPassword: "",
+    //     newPassword: "",
+    //     confirmPassword: ""
+    // });
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-    };
+    // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     setFormData({
+    //         ...formData,
+    //         [e.target.name]: e.target.value
+    //     });
+    // };
 
-    const handlePasswordUpdate = async () => {
+    /* const handlePasswordUpdate = async () => {
         if (!formData.currentPassword || !formData.newPassword || !formData.confirmPassword) {
             toast({
                 title: "Missing fields",
@@ -116,7 +116,7 @@ export default function Settings() {
                 variant: "destructive",
             });
         }
-    };
+    }; */
 
     const handleDeleteAccount = async () => {
         setIsDeleting(true);
@@ -198,8 +198,8 @@ export default function Settings() {
                 </div>
 
                 <div className="space-y-6 sm:space-y-8">
-                    {/* Password Change */}
-                    <Card className="border-0 bg-white/90 backdrop-blur-sm shadow-xl mx-1">
+                    {/* Password Change - Commented out */}
+                    {/* <Card className="border-0 bg-white/90 backdrop-blur-sm shadow-xl mx-1">
                         <CardHeader>
                             <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center">
                                 <Lock className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-purple-600" />
@@ -269,7 +269,7 @@ export default function Settings() {
                                 Update Password
                             </Button>
                         </CardContent>
-                    </Card>
+                    </Card> */}
 
                     {/* Delete Account Section */}
                     <Card className="border-2 border-red-200 bg-gradient-to-br from-white to-red-50 mx-1">
