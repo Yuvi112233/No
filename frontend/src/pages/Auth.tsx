@@ -32,6 +32,7 @@ export default function Auth() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showOTPVerification, setShowOTPVerification] = useState(false);
   const [registeredUser, setRegisteredUser] = useState<(UserType & { password?: string }) | null>(null);
+  const [rememberMe, setRememberMe] = useState(false);
   const { login } = useAuth();
   const { toast } = useToast();
 
@@ -41,8 +42,21 @@ export default function Auth() {
       email: "",
       password: "",
     },
-    mode: "onChange",
+    mode: "onTouched",
   });
+
+  // Load saved credentials on mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('smartq_saved_email');
+    const savedPassword = localStorage.getItem('smartq_saved_password');
+    const rememberMeEnabled = localStorage.getItem('smartq_remember_me') === 'true';
+
+    if (rememberMeEnabled && savedEmail && savedPassword) {
+      loginForm.setValue('email', savedEmail);
+      loginForm.setValue('password', savedPassword);
+      setRememberMe(true);
+    }
+  }, []);
 
   const registerForm = useForm<RegisterForm>({
     resolver: zodResolver(registerFormSchema),
@@ -69,6 +83,18 @@ export default function Auth() {
   const loginMutation = useMutation({
     mutationFn: api.auth.login,
     onSuccess: (data) => {
+      // Save credentials if Remember Me is checked
+      if (rememberMe) {
+        localStorage.setItem('smartq_saved_email', loginForm.getValues('email'));
+        localStorage.setItem('smartq_saved_password', loginForm.getValues('password'));
+        localStorage.setItem('smartq_remember_me', 'true');
+      } else {
+        // Clear saved credentials if Remember Me is not checked
+        localStorage.removeItem('smartq_saved_email');
+        localStorage.removeItem('smartq_saved_password');
+        localStorage.removeItem('smartq_remember_me');
+      }
+
       login(data.user, data.token);
       toast({
         title: "Welcome back!",
@@ -136,10 +162,10 @@ export default function Auth() {
       // Log the full error for debugging
       console.error('Customer Registration error:', error);
       console.error('Error message:', error?.message);
-      
+
       // Extract the actual error message from the API error format
       let errorMessage = "Failed to create account. Please try again.";
-      
+
       if (error?.message) {
         // Try to extract message after "API Error XXX: " prefix
         const match = error.message.match(/API Error \d+:\s*(.+)/);
@@ -150,9 +176,9 @@ export default function Auth() {
           errorMessage = error.message;
         }
       }
-      
+
       console.log('Final error message to display:', errorMessage);
-      
+
       toast({
         title: "Registration Failed",
         description: errorMessage,
@@ -377,14 +403,16 @@ export default function Auth() {
                         <input
                           type="checkbox"
                           className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                          checked={rememberMe}
                           onChange={(e) => {
-                            if (e.target.checked) {
-                              localStorage.setItem('smartq_remember_me', 'true');
-                            } else {
+                            setRememberMe(e.target.checked);
+                            if (!e.target.checked) {
+                              // Clear saved credentials immediately when unchecked
+                              localStorage.removeItem('smartq_saved_email');
+                              localStorage.removeItem('smartq_saved_password');
                               localStorage.removeItem('smartq_remember_me');
                             }
                           }}
-                          defaultChecked={localStorage.getItem('smartq_remember_me') === 'true'}
                         />
                         <span className="text-sm text-gray-600">Remember Me</span>
                       </label>
