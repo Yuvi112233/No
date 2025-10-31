@@ -68,6 +68,12 @@ const userSchema = new mongoose.Schema({
   phoneOTP: { type: String },
   otpExpiry: { type: Date },
   isVerified: { type: Boolean, default: false },
+  // Account security fields
+  failedLoginAttempts: { type: Number, default: 0 },
+  accountLockedUntil: { type: Date },
+  // Password reset fields
+  passwordResetToken: { type: String },
+  passwordResetExpiry: { type: Date },
   createdAt: { type: Date, default: Date.now },
 });
 

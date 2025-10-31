@@ -23,6 +23,7 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import PlatformAdmin from "./pages/PlatformAdmin";
 import AdminLogin from "./pages/AdminLogin";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "@/pages/not-found";
 import SkeletonLoadingScreen from "./components/SkeletonLoadingScreen";
 import IntroScreen from "./components/IntroScreen";
@@ -50,6 +51,7 @@ function Router() {
       <Route path="/settings" component={Settings} />
       <Route path="/admin-login" component={AdminLogin} />
       <Route path="/platform-admin" component={PlatformAdmin} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -64,8 +66,8 @@ function App() {
   // Initialize PWA features
   usePWA(authenticatedUser?.id);
 
-  // Check if current path is an admin route
-  const isAdminRoute = location.startsWith('/admin') || location.startsWith('/platform-admin');
+  // Check if current path is an admin route or public route that should bypass phase system
+  const isAdminRoute = location.startsWith('/admin') || location.startsWith('/platform-admin') || location.startsWith('/reset-password');
 
   // Check for existing authentication on mount
   useEffect(() => {

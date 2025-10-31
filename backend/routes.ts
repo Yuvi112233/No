@@ -19,6 +19,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { uploadImageToCloudinary, deleteImageFromCloudinary } from "./cloudinary";
 import otpService from "./otpService";
+import emailService from "./emailService";
 import { wsManager } from "./websocket";
 import dotenv from "dotenv";
 import { OAuth2Client } from 'google-auth-library';
@@ -72,7 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ====================
   // AUTH ROUTES
   // ====================
-  
+
   // Send OTP to email (for both new and existing users - Zomato style)
   app.post('/api/auth/send-email-otp-login', async (req, res) => {
     try {
@@ -221,7 +222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if account is locked
       if (user.accountLockedUntil && new Date(user.accountLockedUntil) > new Date()) {
         const lockTimeRemaining = Math.ceil((new Date(user.accountLockedUntil).getTime() - Date.now()) / 60000);
-        return res.status(423).json({ 
+        return res.status(423).json({
           message: `Account locked – Try again in ${lockTimeRemaining} minute${lockTimeRemaining > 1 ? 's' : ''}`,
           lockedUntil: user.accountLockedUntil
         });
@@ -237,20 +238,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Increment failed login attempts
         const failedAttempts = (user.failedLoginAttempts || 0) + 1;
         const updates: any = { failedLoginAttempts: failedAttempts };
-        
+
         // Lock account after 5 failed attempts for 15 minutes
         if (failedAttempts >= 5) {
           const lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
           updates.accountLockedUntil = lockUntil;
           await storage.updateUser(user.id, updates);
-          return res.status(423).json({ 
+          return res.status(423).json({
             message: 'Account locked – Try again later',
             lockedUntil: lockUntil
           });
         }
-        
+
         await storage.updateUser(user.id, updates);
-        return res.status(401).json({ 
+        return res.status(401).json({
           message: 'Invalid credentials',
           attemptsRemaining: 5 - failedAttempts
         });
@@ -258,7 +259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Reset failed login attempts on successful login
       if (user.failedLoginAttempts && user.failedLoginAttempts > 0) {
-        await storage.updateUser(user.id, { 
+        await storage.updateUser(user.id, {
           failedLoginAttempts: 0,
           accountLockedUntil: null
         });
@@ -313,6 +314,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Profile update error:', error);
       res.status(500).json({ message: 'Failed to update profile', error });
+    }
+  });
+
+  // ====================
+  // PASSWORD RESET ROUTES
+  // ====================
+
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+      }
+
+      const user = await storage.getUserByEmail(email);
+
+      // Always return success to prevent email enumeration
+      if (!user) {
+        return res.json({ message: 'If an account exists with this email, a password reset link has been sent.' });
+      }
+
+      // Generate reset token
+      const resetToken = jwt.sign(
+        { userId: user.id, email: user.email, type: 'password-reset' },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      // Save token and expiry to database
+      const resetExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      try {
+        await storage.updateUser(user.id, {
+          passwordResetToken: resetToken,
+          passwordResetExpiry: resetExpiry
+        });
+        console.log('Password reset token saved for user:', user.id);
+      } catch (updateError) {
+        console.error('Failed to save reset token:', updateError);
+        throw updateError;
+      }
+
+      // Send reset email
+      try {
+        const emailSent = await emailService.sendPasswordReset(
+          user.email,
+          resetToken,
+          user.name || 'User'
+        );
+
+        if (!emailSent) {
+          console.error('Failed to send password reset email, but continuing');
+        } else {
+          console.log('Password reset email sent successfully to:', user.email);
+        }
+      } catch (emailError) {
+        console.error('Email service error:', emailError);
+        // Don't fail the request if email fails - token is still saved
+      }
+
+      res.json({ message: 'If an account exists with this email, a password reset link has been sent.' });
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      res.status(500).json({ message: 'Failed to process password reset request' });
+    }
+  });
+
+  app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+
+      if (!token || !newPassword) {
+        return res.status(400).json({ message: 'Token and new password are required' });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: 'Password must be at least 6 characters' });
+      }
+
+      // Verify token
+      let decoded: any;
+      try {
+        decoded = jwt.verify(token, JWT_SECRET);
+      } catch (error) {
+        return res.status(400).json({ message: 'Invalid or expired reset token' });
+      }
+
+      if (decoded.type !== 'password-reset') {
+        return res.status(400).json({ message: 'Invalid token type' });
+      }
+
+      // Get user and verify token matches
+      const user = await storage.getUser(decoded.userId);
+      if (!user || user.passwordResetToken !== token) {
+        return res.status(400).json({ message: 'Invalid or expired reset token' });
+      }
+
+      // Check if token has expired
+      if (user.passwordResetExpiry && new Date(user.passwordResetExpiry) < new Date()) {
+        return res.status(400).json({ message: 'Reset token has expired' });
+      }
+
+      // Update password and clear reset token
+      // Note: updateUser will hash the password automatically
+      await storage.updateUser(user.id, {
+        password: newPassword, // Pass plain password, updateUser will hash it
+        passwordResetToken: null,
+        passwordResetExpiry: null,
+        failedLoginAttempts: 0,
+        accountLockedUntil: null
+      });
+
+      console.log('Password reset successful for user:', user.id);
+      res.json({ message: 'Password has been reset successfully' });
+    } catch (error) {
+      console.error('Reset password error:', error);
+      res.status(500).json({ message: 'Failed to reset password' });
     }
   });
 
@@ -1762,12 +1880,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get today's completed customers (by completion time within business hours)
       const todayCompletedQueues = queues.filter(q => {
         if (q.status !== 'completed') return false;
-        
+
         // Use serviceCompletedAt if available, otherwise fall back to timestamp
-        const completionTime = q.serviceCompletedAt 
-          ? new Date(q.serviceCompletedAt) 
+        const completionTime = q.serviceCompletedAt
+          ? new Date(q.serviceCompletedAt)
           : new Date(q.timestamp);
-        
+
         // Check if completion time is within today's business hours
         return completionTime >= businessDayStart && completionTime <= businessDayEnd;
       });
@@ -2076,7 +2194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Return user data with token
         const { password, emailOTP, phoneOTP, otpExpiry, ...userWithoutSensitiveData } = user;
-        res.json({ 
+        res.json({
           message: 'Email verified successfully',
           user: userWithoutSensitiveData,
           token
