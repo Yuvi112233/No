@@ -96,6 +96,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.removeItem('smartq_token');
     localStorage.removeItem('smartq_user');
     clearUserCategory(); // Reset category selection on logout
+    
+    // Redirect to home page after logout
+    window.location.href = '/';
   };
 
   const updateUser = (updatedUserData: User) => {
