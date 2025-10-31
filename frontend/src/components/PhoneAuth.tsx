@@ -202,7 +202,7 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
     } catch (err: any) {
       clearTimeout(messageTimer1);
       clearTimeout(messageTimer2);
-      
+
       const errorInfo = getErrorMessage(err);
       setError(errorInfo.message);
       toast({
@@ -213,12 +213,6 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
     } finally {
       setIsLoading(false);
       setLoadingMessage('');
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !isLoading && phoneNumber.trim()) {
-      handleSendOTP();
     }
   };
 
@@ -269,16 +263,20 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
                   <Phone className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex">
-                  <div className="w-14 sm:w-16 h-10 sm:h-11 pl-9 sm:pl-11 pr-1 sm:pr-2 text-gray-700 bg-gray-50 border border-gray-300 rounded-l-xl flex items-center justify-center font-semibold text-xs sm:text-sm shrink-0">
+                  <div className="h-10 sm:h-11 pl-9 sm:pl-11 pr-3 sm:pr-3.5 text-gray-700 bg-gray-50 border border-r-0 border-gray-300 rounded-l-xl flex items-center justify-center font-semibold text-xs sm:text-sm shrink-0">
                     +91
                   </div>
-                  <input 
+                  <input
                     type="tel"
                     placeholder="Phone Number"
                     value={phoneNumber}
                     onChange={handlePhoneChange}
-                    onKeyPress={handleKeyPress}
-                    className="flex-1 min-w-0 h-10 sm:h-11 px-2.5 sm:px-3.5 text-gray-900 bg-gray-50 border border-l-0 border-gray-300 rounded-r-xl focus:outline-none focus:border-teal-500 focus:bg-white placeholder-gray-400 transition-all text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !isLoading && phoneNumber.trim()) {
+                        handleSendOTP();
+                      }
+                    }}
+                    className="flex-1 min-w-0 h-10 sm:h-11 px-3 sm:px-3.5 text-gray-900 bg-gray-50 border border-gray-300 rounded-r-xl focus:outline-none focus:border-teal-500 focus:bg-white placeholder-gray-400 transition-all text-sm"
                     maxLength={11}
                     autoComplete="tel"
                     autoFocus
