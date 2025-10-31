@@ -19,7 +19,8 @@ async function throwIfResNotOk(res: Response) {
         errorDetail = text;
       }
     }
-    throw new Error(`API Error ${res.status}: ${errorDetail}`);
+    // Return just the error message without the "API Error XXX:" prefix
+    throw new Error(errorDetail);
   }
 }
 
