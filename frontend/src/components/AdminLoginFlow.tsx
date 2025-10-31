@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -409,6 +409,7 @@ export default function AdminLoginFlow({
   const [registeredUser, setRegisteredUser] = useState<(UserType & { password?: string }) | null>(null);
   const [googleAuthUser, setGoogleAuthUser] = useState<UserType | null>(null);
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const { toast } = useToast();
 
   // Google authentication handlers
@@ -496,9 +497,34 @@ export default function AdminLoginFlow({
     mode: "onChange",
   });
 
+  // Load saved credentials on mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('smartq_admin_saved_email');
+    const savedPassword = localStorage.getItem('smartq_admin_saved_password');
+    const rememberMeEnabled = localStorage.getItem('smartq_admin_remember_me') === 'true';
+    
+    if (rememberMeEnabled && savedEmail && savedPassword) {
+      loginForm.setValue('email', savedEmail);
+      loginForm.setValue('password', savedPassword);
+      setRememberMe(true);
+    }
+  }, []);
+
   const loginMutation = useMutation({
     mutationFn: api.auth.login,
     onSuccess: (data) => {
+      // Save credentials if Remember Me is checked
+      if (rememberMe) {
+        localStorage.setItem('smartq_admin_saved_email', loginForm.getValues('email'));
+        localStorage.setItem('smartq_admin_saved_password', loginForm.getValues('password'));
+        localStorage.setItem('smartq_admin_remember_me', 'true');
+      } else {
+        // Clear saved credentials if Remember Me is not checked
+        localStorage.removeItem('smartq_admin_saved_email');
+        localStorage.removeItem('smartq_admin_saved_password');
+        localStorage.removeItem('smartq_admin_remember_me');
+      }
+
       if (data.user.role === 'salon_owner') {
         toast({
           title: "Welcome back!",
@@ -815,6 +841,38 @@ export default function AdminLoginFlow({
                           {loginForm.formState.errors.password.message}
                         </p>
                       )}
+                    </div>
+
+                    {/* Remember Me and Forgot Password */}
+                    <div className="flex items-center justify-between mt-3">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                          checked={rememberMe}
+                          onChange={(e) => {
+                            setRememberMe(e.target.checked);
+                            if (!e.target.checked) {
+                              localStorage.removeItem('smartq_admin_saved_email');
+                              localStorage.removeItem('smartq_admin_saved_password');
+                              localStorage.removeItem('smartq_admin_remember_me');
+                            }
+                          }}
+                        />
+                        <span className="text-sm text-gray-600">Remember Me</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          toast({
+                            title: "Feature Coming Soon",
+                            description: "Password recovery will be available soon. Please contact support for assistance.",
+                          });
+                        }}
+                        className="text-sm text-teal-600 hover:text-teal-700 font-medium"
+                      >
+                        Forgot Password?
+                      </button>
                     </div>
 
                     {/* Login Button */}
