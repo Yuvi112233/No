@@ -371,6 +371,37 @@ export default function Auth() {
                       )}
                     </div>
 
+                    {/* Remember Me and Forgot Password */}
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              localStorage.setItem('smartq_remember_me', 'true');
+                            } else {
+                              localStorage.removeItem('smartq_remember_me');
+                            }
+                          }}
+                          defaultChecked={localStorage.getItem('smartq_remember_me') === 'true'}
+                        />
+                        <span className="text-sm text-gray-600">Remember Me</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          toast({
+                            title: "Feature Coming Soon",
+                            description: "Password recovery will be available soon. Please contact support for assistance.",
+                          });
+                        }}
+                        className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
+
                     {/* Sign In Button */}
                     <Button
                       type="submit"
