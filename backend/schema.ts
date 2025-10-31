@@ -27,6 +27,9 @@ export const users = pgTable("users", {
   // Account security fields
   failedLoginAttempts: integer("failed_login_attempts").default(0),
   accountLockedUntil: timestamp("account_locked_until"),
+  // Password reset fields
+  passwordResetToken: text("password_reset_token"),
+  passwordResetExpiry: timestamp("password_reset_expiry"),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 

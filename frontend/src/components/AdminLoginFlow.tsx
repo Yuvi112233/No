@@ -10,6 +10,7 @@ import { api } from "../lib/api";
 import { loginSchema, insertUserSchema } from "../lib/schemas";
 import OTPVerification from "./OTPVerification";
 import AdminProfileCompletion from "./AdminProfileCompletion";
+import ForgotPassword from "./ForgotPassword";
 import type { User as UserType } from "../types";
 import { GoogleLogin } from "@react-oauth/google";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -410,6 +411,7 @@ export default function AdminLoginFlow({
   const [googleAuthUser, setGoogleAuthUser] = useState<UserType | null>(null);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { toast } = useToast();
 
   // Google authentication handlers
@@ -726,8 +728,10 @@ export default function AdminLoginFlow({
             />
           </div>
 
-          {/* Show Profile Completion, OTP Verification, or Auth Form */}
-          {showProfileCompletion && googleAuthUser ? (
+          {/* Show Profile Completion, OTP Verification, Forgot Password, or Auth Form */}
+          {showForgotPassword ? (
+            <ForgotPassword onBack={() => setShowForgotPassword(false)} />
+          ) : showProfileCompletion && googleAuthUser ? (
             <div className="w-full max-w-sm">
               <AdminProfileCompletion
                 user={googleAuthUser}
@@ -863,12 +867,7 @@ export default function AdminLoginFlow({
                       </label>
                       <button
                         type="button"
-                        onClick={() => {
-                          toast({
-                            title: "Feature Coming Soon",
-                            description: "Password recovery will be available soon. Please contact support for assistance.",
-                          });
-                        }}
+                        onClick={() => setShowForgotPassword(true)}
                         className="text-sm text-teal-600 hover:text-teal-700 font-medium"
                       >
                         Forgot Password?
