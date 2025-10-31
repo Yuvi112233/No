@@ -217,20 +217,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user = await storage.getUserByEmail(email);
       }
 
-      if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+      if (!user) return res.status(401).json({ message: 'We couldn\'t find an account with that email address. Please check your email or sign up for a new account.' });
 
       // Check if account is locked
       if (user.accountLockedUntil && new Date(user.accountLockedUntil) > new Date()) {
         const lockTimeRemaining = Math.ceil((new Date(user.accountLockedUntil).getTime() - Date.now()) / 60000);
         return res.status(423).json({
-          message: `Account locked – Try again in ${lockTimeRemaining} minute${lockTimeRemaining > 1 ? 's' : ''}`,
+          message: `Too many failed login attempts. Your account has been temporarily locked for security. Please try again in ${lockTimeRemaining} minute${lockTimeRemaining > 1 ? 's' : ''}.`,
           lockedUntil: user.accountLockedUntil
         });
       }
 
       // Check if user has a password (email/password auth)
       if (!user.password) {
-        return res.status(401).json({ message: 'Invalid credentials. Please use phone or Google sign-in.' });
+        return res.status(401).json({ message: 'This account was created using phone or Google sign-in. Please use the same method to log in.' });
       }
 
       const isValidPassword = await bcrypt.compare(password, user.password);
@@ -245,14 +245,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           updates.accountLockedUntil = lockUntil;
           await storage.updateUser(user.id, updates);
           return res.status(423).json({
-            message: 'Account locked – Try again later',
+            message: 'Too many failed login attempts. Your account has been temporarily locked for 15 minutes for security reasons. Please try again later or use "Forgot Password" to reset your password.',
             lockedUntil: lockUntil
           });
         }
 
         await storage.updateUser(user.id, updates);
         return res.status(401).json({
-          message: 'Invalid credentials',
+          message: `Incorrect email or password. You have ${5 - failedAttempts} attempt${5 - failedAttempts > 1 ? 's' : ''} remaining before your account is temporarily locked.`,
           attemptsRemaining: 5 - failedAttempts
         });
       }
@@ -326,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { email } = req.body;
 
       if (!email) {
-        return res.status(400).json({ message: 'Email is required' });
+        return res.status(400).json({ message: 'Please enter your email address to reset your password.' });
       }
 
       const user = await storage.getUserByEmail(email);
@@ -386,11 +386,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { token, newPassword } = req.body;
 
       if (!token || !newPassword) {
-        return res.status(400).json({ message: 'Token and new password are required' });
+        return res.status(400).json({ message: 'Please provide all required information to reset your password.' });
       }
 
       if (newPassword.length < 6) {
-        return res.status(400).json({ message: 'Password must be at least 6 characters' });
+        return res.status(400).json({ message: 'Your password must be at least 6 characters long for security.' });
       }
 
       // Verify token
@@ -398,22 +398,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         decoded = jwt.verify(token, JWT_SECRET);
       } catch (error) {
-        return res.status(400).json({ message: 'Invalid or expired reset token' });
+        return res.status(400).json({ message: 'This password reset link has expired or is invalid. Please request a new one.' });
       }
 
       if (decoded.type !== 'password-reset') {
-        return res.status(400).json({ message: 'Invalid token type' });
+        return res.status(400).json({ message: 'This link is not valid for password reset. Please request a new password reset link.' });
       }
 
       // Get user and verify token matches
       const user = await storage.getUser(decoded.userId);
       if (!user || user.passwordResetToken !== token) {
-        return res.status(400).json({ message: 'Invalid or expired reset token' });
+        return res.status(400).json({ message: 'This password reset link has already been used or is invalid. Please request a new one.' });
       }
 
       // Check if token has expired
       if (user.passwordResetExpiry && new Date(user.passwordResetExpiry) < new Date()) {
-        return res.status(400).json({ message: 'Reset token has expired' });
+        return res.status(400).json({ message: 'This password reset link has expired. Please request a new one to continue.' });
       }
 
       // Update password and clear reset token
