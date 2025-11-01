@@ -9,4 +9,3 @@ const userData = {
 };
 
 const token = jwt.sign(userData, JWT_SECRET, { expiresIn: '24h' });
-console.log('Generated JWT Token:', token);

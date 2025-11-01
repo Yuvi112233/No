@@ -18,13 +18,6 @@ class WhatsAppService {
     this.verifyToken = process.env.WHATSAPP_VERIFY_TOKEN || 'smartq-verify-token';
     
     this.baseUrl = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
-    
-    console.log('WhatsApp config:', {
-      hasAccessToken: !!this.accessToken,
-      phoneNumberId: this.phoneNumberId,
-      apiVersion: this.apiVersion,
-      accessTokenLength: this.accessToken.length
-    });
   }
 
   async sendOTP(phoneNumber: string, otp: string, name: string = 'User'): Promise<boolean> {
@@ -90,18 +83,14 @@ class WhatsAppService {
     const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN || 'smartq_webhook_token';
     
     if (mode === 'subscribe' && token === verifyToken) {
-      console.log('WhatsApp webhook verified successfully');
       return challenge;
     }
     
-    console.log('WhatsApp webhook verification failed');
     return null;
   }
 
   async handleWebhook(body: any): Promise<void> {
     try {
-      console.log('WhatsApp webhook received:', JSON.stringify(body, null, 2));
-      
       // Handle incoming messages, delivery receipts, etc.
       if (body.entry && body.entry[0] && body.entry[0].changes) {
         const changes = body.entry[0].changes[0];
@@ -109,7 +98,6 @@ class WhatsAppService {
           const messages = changes.value.messages;
           if (messages && messages.length > 0) {
             // Process incoming messages if needed
-            console.log('Received WhatsApp messages:', messages);
           }
         }
       }

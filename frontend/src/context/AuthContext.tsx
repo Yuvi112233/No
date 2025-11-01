@@ -68,19 +68,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [error]);
 
   const login = (userData: User, authToken: string) => {
-    console.log('Login called with:', { userData, authToken });
     setUser(userData);
     setToken(authToken);
     localStorage.setItem('smartq_token', authToken);
     localStorage.setItem('smartq_user', JSON.stringify(userData));
-    console.log('Token stored in localStorage:', localStorage.getItem('smartq_token'));
     
     // Verify token has role information
     try {
       const tokenData = JSON.parse(atob(authToken.split('.')[1]));
       if (!tokenData.role && userData.role) {
         // Re-login to ensure role is in token
-        console.log('Role missing in token, refreshing authentication');
         localStorage.removeItem('smartq_token');
         clearUserCategory();
         window.location.href = '/auth';

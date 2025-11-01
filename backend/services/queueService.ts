@@ -415,8 +415,6 @@ class QueueService {
         notifiedAt: { $lte: twentyMinutesAgo }
       });
 
-      console.log(`🔍 Found ${expiredQueues.length} expired queues to mark as no-show`);
-
       for (const queue of expiredQueues) {
         // Update to no-show
         queue.status = 'no-show';
@@ -462,8 +460,6 @@ class QueueService {
         // Recalculate positions
         await this.recalculatePositions(queue.salonId);
       }
-
-      console.log(`✅ Processed ${expiredQueues.length} no-shows`);
     } catch (error) {
       console.error('Error processing no-shows:', error);
     }

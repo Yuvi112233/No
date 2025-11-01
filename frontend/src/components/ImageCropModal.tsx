@@ -51,9 +51,6 @@ export default function ImageCropModal({ image, onCropComplete, onClose }: Image
             throw new Error('No 2d context');
         }
 
-        console.log('Crop data:', pixelCrop);
-        console.log('Image dimensions:', image.width, 'x', image.height);
-
         // Use a fixed size for better quality (500x500 is a good balance)
         const outputSize = 500;
         canvas.width = outputSize;
@@ -87,12 +84,9 @@ export default function ImageCropModal({ image, onCropComplete, onClose }: Image
         // Restore context state
         ctx.restore();
 
-        console.log('Canvas size:', canvas.width, 'x', canvas.height);
-
         return new Promise((resolve) => {
             canvas.toBlob((blob) => {
                 if (blob) {
-                    console.log('Blob size:', blob.size, 'bytes');
                     resolve(blob);
                 }
             }, 'image/jpeg', 0.95);

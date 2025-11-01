@@ -45,8 +45,6 @@ async function fetchWithRetry(
       return response; // Success!
 
     } catch (error: any) {
-      console.log(`Attempt ${attempt} failed:`, error.message);
-
       // Don't retry on last attempt
       if (attempt === maxRetries) {
         // Enhance error message based on type
@@ -69,7 +67,6 @@ async function fetchWithRetry(
 
       // Wait before retrying (exponential backoff)
       const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
-      console.log(`Retrying in ${delay}ms...`);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
@@ -91,10 +88,8 @@ export async function apiRequest(
   
   // Add Authorization header if token exists
   const token = localStorage.getItem('smartq_token');
-  console.log('apiRequest - Token from localStorage:', token);
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
-    console.log('apiRequest - Authorization header set:', headers["Authorization"]);
   }
 
   // Use full backend URL
@@ -103,7 +98,6 @@ export async function apiRequest(
     throw new Error('VITE_API_URL environment variable is not set. Please configure your backend URL.');
   }
   const fullUrl = url.startsWith('http') ? url : `${baseURL}${url}`;
-  console.log('Making API request to:', fullUrl);
 
   const res = await fetchWithRetry(fullUrl, {
     method,
@@ -122,7 +116,6 @@ export async function apiRequest(
       if (errorData.newToken) {
         // Update token in localStorage
         localStorage.setItem('smartq_token', errorData.newToken);
-        console.log('Token updated from server response');
         
         // Retry the request with new token
         return apiRequest(method, url, data);
@@ -146,10 +139,8 @@ export const getQueryFn: <T>(options: {
     
     // Add Authorization header if token exists
     const token = localStorage.getItem('smartq_token');
-    console.log('getQueryFn - Token from localStorage:', token);
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
-      console.log('getQueryFn - Authorization header set:', headers["Authorization"]);
     }
 
     // Use full backend URL for query functions

@@ -183,13 +183,6 @@ export default function Queue() {
 
   // Open Google Maps directions
   const openDirections = (salon: any) => {
-    console.log('Opening directions for salon:', {
-      name: salon.name,
-      latitude: salon.latitude,
-      longitude: salon.longitude,
-      location: salon.location
-    });
-
     // Open directions immediately with salon coordinates
     const openMapsToSalon = (userLat?: number, userLng?: number) => {
       if (salon.latitude && salon.longitude) {
@@ -202,13 +195,11 @@ export default function Queue() {
           // Just show salon location and let Google Maps handle routing
           url = `https://www.google.com/maps/dir/?api=1&destination=${salon.latitude},${salon.longitude}&travelmode=driving`;
         }
-        console.log('Opening Google Maps URL:', url);
         window.open(url, '_blank');
       } else {
         // Fallback to address search
         const query = encodeURIComponent(salon.fullAddress || salon.location || salon.name);
         const url = `https://www.google.com/maps/search/${query}`;
-        console.log('Opening Google Maps with address search:', url);
         window.open(url, '_blank');
       }
     };
@@ -217,7 +208,6 @@ export default function Queue() {
     if (navigator.geolocation) {
       const timeoutId = setTimeout(() => {
         // If location takes too long, just open without user location
-        console.log('Location timeout, opening without user location');
         openMapsToSalon();
       }, 3000); // 3 second timeout
 
@@ -225,12 +215,10 @@ export default function Queue() {
         (position) => {
           clearTimeout(timeoutId);
           const { latitude, longitude } = position.coords;
-          console.log('Got user location:', { latitude, longitude });
           openMapsToSalon(latitude, longitude);
         },
         (error) => {
           clearTimeout(timeoutId);
-          console.log('Geolocation error:', error.message);
           // Open without user location on error
           openMapsToSalon();
         },

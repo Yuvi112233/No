@@ -39,9 +39,6 @@ export default function LocationPicker({ onLocationSelect, initialLocation }: Lo
 
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-  console.log('Google Maps API Key configured:', !!googleMapsApiKey);
-  console.log('API Key (first 10 chars):', googleMapsApiKey?.substring(0, 10));
-
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: googleMapsApiKey,
     libraries,
@@ -53,9 +50,6 @@ export default function LocationPicker({ onLocationSelect, initialLocation }: Lo
     if (loadError) {
       console.error('Google Maps load error:', loadError);
     }
-    if (isLoaded) {
-      console.log('Google Maps loaded successfully');
-    }
   }, [isLoaded, loadError]);
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
@@ -64,7 +58,6 @@ export default function LocationPicker({ onLocationSelect, initialLocation }: Lo
       geocoderRef.current = new google.maps.Geocoder();
       autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
       placesServiceRef.current = new google.maps.places.PlacesService(map);
-      console.log('Google Maps loaded successfully, Geocoder and Places services initialized');
     } catch (error) {
       console.error('Error initializing Google services:', error);
       geocoderRef.current = null;
@@ -92,16 +85,13 @@ export default function LocationPicker({ onLocationSelect, initialLocation }: Lo
     }
 
     setIsLoading(true);
-    console.log('Starting reverse geocoding for:', { lat, lng });
 
     try {
       const response = await geocoderRef.current.geocode({ location: { lat, lng } });
-      console.log('Geocoding response:', response);
 
       // Check if response exists and has the expected structure
       if (response && response.results && Array.isArray(response.results) && response.results.length > 0) {
         const newAddress = response.results[0].formatted_address;
-        console.log('Reverse geocoding successful:', newAddress);
         setAddress(newAddress);
         onLocationSelect({ latitude: lat, longitude: lng, address: newAddress });
         return newAddress;

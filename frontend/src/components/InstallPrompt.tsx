@@ -21,7 +21,6 @@ export function InstallPrompt() {
   const handleInstall = async () => {
     const accepted = await promptInstall();
     if (accepted) {
-      console.log('User accepted the install prompt');
       setIsVisible(false);
     }
   };

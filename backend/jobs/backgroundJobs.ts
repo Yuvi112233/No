@@ -7,8 +7,6 @@ import wsManager from '../websocket';
  * Runs every 5 minutes
  */
 export function startNoShowDetectionJob() {
-  console.log('🔄 Starting no-show detection background job (runs every 5 minutes)');
-  
   // Run immediately on startup
   processNoShowsJob();
   
@@ -21,9 +19,7 @@ export function startNoShowDetectionJob() {
  */
 async function processNoShowsJob() {
   try {
-    console.log('⏰ Running no-show detection job...');
     await queueService.processNoShows();
-    console.log('✅ No-show detection job completed');
   } catch (error) {
     console.error('❌ Error in no-show detection job:', error);
   }
@@ -34,8 +30,6 @@ async function processNoShowsJob() {
  * Checks every minute for pending verifications older than 5 minutes
  */
 export function startPendingVerificationTimeoutJob() {
-  console.log('🔄 Starting pending verification timeout job (runs every minute)');
-  
   // Run immediately on startup
   processPendingVerificationTimeouts();
   
@@ -48,8 +42,6 @@ export function startPendingVerificationTimeoutJob() {
  * Checks every minute for queues in waiting/notified status older than 30 minutes
  */
 export function startQueueTimeoutJob() {
-  console.log('🔄 Starting queue timeout job (runs every minute)');
-  
   // Run immediately on startup
   processQueueTimeouts();
   
@@ -75,21 +67,14 @@ async function processPendingVerificationTimeouts() {
       return;
     }
 
-    console.log(`⏰ Found ${expiredVerifications.length} expired pending verifications`);
-
     for (const queue of expiredVerifications) {
       // Revert status to 'notified'
-      const oldStatus = queue.status;
       queue.status = 'notified';
       await queue.save();
-
-      console.log(`⏱️ Auto-rejected pending verification for queue ${queue.id} (timeout)`);
 
       // Note: We could send a notification to the user here
       // For now, just log it
     }
-
-    console.log(`✅ Processed ${expiredVerifications.length} pending verification timeouts`);
   } catch (error) {
     console.error('❌ Error in pending verification timeout job:', error);
   }
@@ -113,16 +98,12 @@ async function processQueueTimeouts() {
       return;
     }
 
-    console.log(`⏰ Found ${expiredQueues.length} expired queues (30+ minutes old)`);
-
     for (const queue of expiredQueues) {
       const oldStatus = queue.status;
       queue.status = 'no-show';
       queue.noShowMarkedAt = new Date();
       queue.noShowReason = 'Auto-rejected: No response within 30 minutes';
       await queue.save();
-
-      console.log(`⏱️ Auto-rejected queue ${queue.id} after 30 minutes (status: ${oldStatus})`);
 
       // Broadcast update to admin
       wsManager.broadcastQueueUpdate(queue.salonId, {
@@ -131,8 +112,6 @@ async function processQueueTimeouts() {
         oldStatus
       });
     }
-
-    console.log(`✅ Processed ${expiredQueues.length} queue timeouts`);
   } catch (error) {
     console.error('❌ Error in queue timeout job:', error);
   }
@@ -142,11 +121,7 @@ async function processQueueTimeouts() {
  * Initialize all background jobs
  */
 export function initializeBackgroundJobs() {
-  console.log('🚀 Initializing background jobs...');
-  
   startNoShowDetectionJob();
   startPendingVerificationTimeoutJob();
   startQueueTimeoutJob();
-  
-  console.log('✅ Background jobs initialized');
 }

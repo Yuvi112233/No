@@ -27,11 +27,8 @@ export default function SkeletonLoadingScreen({ onComplete }: SkeletonLoadingScr
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
     setCurrentQuote(randomQuote);
     
-    console.log('SkeletonLoadingScreen mounted, starting timer');
-    
     // Show skeleton loading for 3 seconds
     const timer = setTimeout(() => {
-      console.log('SkeletonLoadingScreen calling onComplete');
       onComplete();
     }, 3000);
 

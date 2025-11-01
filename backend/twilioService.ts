@@ -20,13 +20,6 @@ class TwilioService {
     if (this.accountSid && this.authToken) {
       this.client = twilio(this.accountSid, this.authToken);
     }
-
-    console.log('Twilio config:', {
-      hasSid: !!this.accountSid,
-      hasToken: !!this.authToken,
-      hasVerifyService: !!this.verifyServiceSid,
-      sidLength: this.accountSid.length,
-    });
   }
 
   async sendOTP(phoneNumber: string, name: string = 'User'): Promise<boolean> {
@@ -41,12 +34,6 @@ class TwilioService {
         .verifications
         .create({ to: formatted, channel: 'sms' });
 
-      console.log('Twilio Verify started:', {
-        sid: res.sid,
-        status: res.status,
-        to: res.to,
-        channel: res.channel,
-      });
       return true;
     } catch (error: any) {
       console.error('Twilio Verify send failed:', error?.message || error);
@@ -64,12 +51,6 @@ class TwilioService {
       const check = await this.client.verify.v2.services(this.verifyServiceSid)
         .verificationChecks
         .create({ to: formatted, code });
-
-      console.log('Twilio Verify check:', {
-        sid: check.sid,
-        status: check.status,
-        to: check.to,
-      });
 
       return check.status === 'approved';
     } catch (error: any) {
@@ -97,13 +78,6 @@ class TwilioService {
         to: formatted,
         from: fromNumber,
         twiml: `<Response><Say>Hello, this is ${salonName}. Your turn is coming up. Please check your phone for details.</Say></Response>`
-      });
-
-      console.log('Twilio call initiated:', {
-        sid: call.sid,
-        status: call.status,
-        to: call.to,
-        from: call.from
       });
 
       return true;

@@ -134,9 +134,6 @@ export function registerQueueManagementRoutes(app: Express, authenticateToken: a
       const servicesList = services.map(s => s.name).join(', ');
       const whatsappMessage = message || `Hi ${user.name}! 👋\n\nYour turn is coming up at ${salon.name}!\n\n📋 Services: ${servicesList}\n⏰ Please arrive in: ${estimatedMinutes} minutes\n\nWe're ready for you! See you soon! 🎉`;
 
-      console.log(`📱 Message prepared for ${user.phone} (queue ${queueId})`);
-      console.log(`📢 WebSocket notification sent to user ${queue.userId}`);
-
       res.json({
         success: true,
         phoneNumber: user.phone,
@@ -539,9 +536,6 @@ export function registerQueueManagementRoutes(app: Express, authenticateToken: a
         return res.status(400).json({ message: 'User phone number not available' });
       }
 
-      // Return phone number for direct call
-      console.log(`📞 Call requested for ${user.phone} (queue ${queueId})`);
-
       res.json({
         success: true,
         phoneNumber: user.phone,
@@ -633,6 +627,4 @@ export function registerQueueManagementRoutes(app: Express, authenticateToken: a
       });
     }
   });
-
-  console.log('✅ Queue management routes registered');
 }

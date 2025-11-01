@@ -84,7 +84,6 @@ export default function AuthRouter({ defaultFlow = 'customer' }: AuthRouterProps
       setShowBookingModal(true);
     } else {
       // User has complete profile, proceed with booking
-      console.log('Proceeding with booking for salon:', salonId);
       // TODO: Navigate to booking flow
     }
   };
@@ -102,7 +101,6 @@ export default function AuthRouter({ defaultFlow = 'customer' }: AuthRouterProps
       setShowBookingModal(false);
       
       // Now proceed with booking
-      console.log('Profile completed, proceeding with booking for salon:', selectedSalonId);
       // TODO: Navigate to booking flow
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -111,7 +109,6 @@ export default function AuthRouter({ defaultFlow = 'customer' }: AuthRouterProps
 
   const handleOpenProfile = () => {
     // TODO: Navigate to profile page or show profile modal
-    console.log('Opening profile');
   };
 
   // Render current step

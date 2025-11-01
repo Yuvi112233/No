@@ -26,7 +26,6 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
     if (!user) {
       // Clean up socket when user logs out
       if (socket) {
-        console.log('🔌 Closing WebSocket - user logged out');
         socket.close(1000, 'User logged out');
         setSocket(null);
         setConnected(false);
@@ -38,7 +37,6 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
 
     // Close existing socket if any (prevent duplicate connections)
     if (socket && socket.readyState !== WebSocket.CLOSED) {
-      console.log('🔌 Closing existing WebSocket before creating new one');
       socket.close(1000, 'Reconnecting');
     }
 
@@ -52,16 +50,9 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
     }
     wsUrl = wsUrl + '/ws';
 
-    console.log('🔌 WebSocket Configuration:');
-    console.log('  - Base URL:', baseURL);
-    console.log('  - WebSocket URL:', wsUrl);
-    console.log('  - User ID:', user.id);
-    console.log('  - Timestamp:', new Date().toISOString());
-    console.log('Attempting WebSocket connection...');
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
-      console.log('✅ WebSocket connected successfully to:', wsUrl);
       setConnected(true);
 
       // Authenticate with user ID
@@ -69,26 +60,18 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         type: 'authenticate',
         userId: user.id,
       };
-      console.log('Sending authentication message:', authMessage);
       ws.send(JSON.stringify(authMessage));
     };
 
     ws.onmessage = (event) => {
       try {
         const message: WebSocketMessage = JSON.parse(event.data);
-        console.log('📨 WebSocket message received:', message.type, message);
 
         switch (message.type) {
           case 'queue_join':
             // Voice notification for admin when new customer joins
             if (user?.role === 'salon_owner' && message.data) {
-              console.log('🔔 Queue join event received:', message.data);
-
               const { customerName, serviceName } = message.data;
-
-              console.log('✅ Triggering voice notification');
-              console.log('Customer:', customerName, 'Service:', serviceName);
-
               voiceNotificationService.speakQueueJoin(customerName, serviceName);
             }
 
@@ -186,7 +169,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
             break;
 
           default:
-            console.log('Unknown WebSocket message type:', message.type);
+            break;
         }
       } catch (error) {
         console.error('Failed to parse WebSocket message:', error);
@@ -194,12 +177,6 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
     };
 
     ws.onclose = (event) => {
-      console.log('🔌 WebSocket disconnected:', {
-        code: event.code,
-        reason: event.reason,
-        wasClean: event.wasClean,
-        timestamp: new Date().toISOString()
-      });
       setConnected(false);
       
       // Clean up global reference
@@ -210,9 +187,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
       // Attempt to reconnect after a delay if it wasn't a clean close
       // and user is still logged in
       if (!event.wasClean && user && event.code !== 1000) {
-        console.log('⏳ Scheduling WebSocket reconnection in 3 seconds...');
         setTimeout(() => {
-          console.log('🔄 Attempting to reconnect WebSocket...');
           // The useEffect will handle recreation when user.id changes
           // Force a re-render by updating a dummy state if needed
         }, 3000);
@@ -220,10 +195,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
     };
 
     ws.onerror = (error) => {
-      console.error('❌ WebSocket error:', error);
-      console.error('Failed to connect to:', wsUrl);
-      console.error('WebSocket readyState:', ws.readyState);
-      console.error('Make sure backend server is running on:', baseURL);
+      console.error('WebSocket error:', error);
       setConnected(false);
 
       // Show user-friendly error
@@ -254,12 +226,9 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
 
     const handleServiceWorkerMessage = (event: MessageEvent) => {
       if (event.data && event.data.type === 'PUSH_NOTIFICATION_RECEIVED') {
-        console.log('📬 Push notification received from service worker:', event.data.data);
-        
         // Trigger voice notification if it's a queue_join event
         if (event.data.data?.type === 'queue_join') {
           const { customerName, serviceName } = event.data.data;
-          console.log('🔊 Triggering voice from push notification');
           voiceNotificationService.speakQueueJoin(customerName, serviceName);
         }
       }

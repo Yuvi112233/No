@@ -78,7 +78,6 @@ export default function SalonCard({ salon, showWaitTime = true, showDistance = f
         setResolvedAddress('Location available on map');
       }
     } catch (error) {
-      console.log('Could not fetch address for coordinates:', error);
       setResolvedAddress('Location available on map');
     }
   };
@@ -138,25 +137,14 @@ export default function SalonCard({ salon, showWaitTime = true, showDistance = f
     e.preventDefault();
     e.stopPropagation();
 
-    console.log('SalonCard - Opening maps for salon:', {
-      id: salon.id,
-      name: salon.name,
-      latitude: salon.latitude,
-      longitude: salon.longitude,
-      fullAddress: salon.fullAddress,
-      location: salon.location
-    });
-
     if (salon.latitude && salon.longitude) {
       // Use exact coordinates for precise location
       const url = `https://www.google.com/maps?q=${salon.latitude},${salon.longitude}`;
-      console.log('SalonCard - Using coordinates URL:', url);
       window.open(url, '_blank');
     } else {
       // Fallback to address search
       const query = encodeURIComponent(salon.fullAddress || salon.location);
       const url = `https://www.google.com/maps/search/${query}`;
-      console.log('SalonCard - Using address URL:', url);
       window.open(url, '_blank');
     }
   };

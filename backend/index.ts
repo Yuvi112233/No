@@ -24,50 +24,38 @@ let isMongoConnected = false;
 connectDB()
   .then(() => {
     isMongoConnected = true;
-    console.log("✅ MongoDB connected successfully");
   })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err);
-    console.log("⚠️ Continuing with in-memory storage for development...");
   });
 
 const app = express();
 
 // CORS configuration for frontend communications
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('Setting up CORS...');
-
 app.use(cors({
   origin: function (origin, callback) {
-    console.log('🌐 CORS request from origin:', origin);
-    
     // Allow requests with no origin (mobile apps, Postman, curl)
     if (!origin) {
-      console.log('✅ No origin - allowing (mobile/native app)');
       return callback(null, true);
     }
     
     // Allow localhost for development (any port)
     if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      console.log('✅ Localhost - allowing');
       return callback(null, true);
     }
     
     // Allow ALL Vercel deployments (production + preview branches)
     if (origin.endsWith('.vercel.app')) {
-      console.log('✅ Vercel deployment - allowing');
       return callback(null, true);
     }
     
     // Custom domain support (for future launch)
     const customDomain = process.env.CUSTOM_DOMAIN; // e.g., "altq.com"
     if (customDomain && origin.includes(customDomain)) {
-      console.log('✅ Custom domain - allowing');
       return callback(null, true);
     }
     
     // Block everything else
-    console.log('❌ Origin blocked:', origin);
     callback(new Error(`CORS policy: Origin ${origin} is not allowed`));
   },
   credentials: true,
@@ -142,7 +130,6 @@ app.use((req, res, next) => {
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "…";
       }
-      console.log(logLine);
     }
   });
 
@@ -159,8 +146,6 @@ app.use((req, res, next) => {
 
   if (env === "development") {
     // Development mode - backend only, frontend runs separately
-    console.log("🔧 Running in development mode - backend only");
-    console.log("🌐 Frontend should be running separately on http://localhost:3000");
   } else {
     // ✅ Serve frontend build in production
     // NOTE: server runs from dist/server.js, so frontend dist is at ../frontend/dist
@@ -190,10 +175,6 @@ app.use((req, res, next) => {
     {
       port,
       host: "0.0.0.0",
-    },
-    () => {
-     console.log(`🚀 Serving on port ${port}`);
-     console.log(`🔌 WebSocket server ready on ws://localhost:${port}/ws`);
     }
   );
 })();

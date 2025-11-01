@@ -9,15 +9,9 @@ interface CategorySelectionProps {
 export default function CategorySelection({ onCategorySelect }: CategorySelectionProps) {
   const [selectedCategory, setSelectedCategory] = useState<UserCategory | null>(null);
 
-  useEffect(() => {
-    console.log('CategorySelection: Component mounted');
-  }, []);
-
   const handleCategoryClick = (category: UserCategory) => {
-    console.log('CategorySelection: User clicked category:', category);
     setSelectedCategory(category);
     setTimeout(() => {
-      console.log('CategorySelection: Calling onCategorySelect with:', category);
       onCategorySelect(category);
     }, 300);
   };

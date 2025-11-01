@@ -492,13 +492,11 @@ export default function Profile() {
     // Handle profile image removal
     const handleRemoveProfileImage = async () => {
         try {
-            console.log('Starting profile image removal...');
             const token = localStorage.getItem('smartq_token');
             if (!token) {
                 throw new Error('No authentication token found');
             }
 
-            console.log('Sending DELETE request to backend...');
             const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://no-production-d4fc.up.railway.app'}/api/user/profile-image`, {
                 method: 'DELETE',
                 headers: {
@@ -506,16 +504,12 @@ export default function Profile() {
                 }
             });
 
-            console.log('Response status:', response.status);
-
             if (!response.ok) {
                 const error = await response.json();
-                console.error('Backend error:', error);
                 throw new Error(error.message || 'Failed to remove image');
             }
 
-            const result = await response.json();
-            console.log('Backend response:', result);
+            await response.json();
 
             // Update user context to remove profile image
             if (user) {
@@ -524,13 +518,10 @@ export default function Profile() {
                     profileImage: null,
                 } as any;
                 updateUser(updatedUser);
-                console.log('Updated user context');
             }
 
             // Refetch user data to ensure it's synced with backend
-            console.log('Refetching user data...');
             await refetchUser();
-            console.log('User data refetched');
 
             toast({
                 title: "Profile picture removed",

@@ -34,8 +34,6 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
       scope: '/'
     });
 
-    console.log('Service worker registered:', registration);
-
     // Handle updates
     registration.addEventListener('updatefound', () => {
       const newWorker = registration.installing;
@@ -43,7 +41,6 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
             // New service worker available
-            console.log('New service worker available');
             // Optionally notify user to refresh
           }
         });
@@ -89,7 +86,6 @@ export async function subscribeToPushNotifications(
     let subscription = await registration.pushManager.getSubscription();
 
     if (subscription) {
-      console.log('Already subscribed to push notifications');
       return subscription;
     }
 
@@ -111,7 +107,6 @@ export async function subscribeToPushNotifications(
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
     });
 
-    console.log('Subscribed to push notifications:', subscription);
     return subscription;
   } catch (error) {
     console.error('Failed to subscribe to push notifications:', error);
@@ -145,7 +140,6 @@ export async function sendSubscriptionToBackend(
       throw new Error('Failed to send subscription to backend');
     }
 
-    console.log('Subscription sent to backend');
     return true;
   } catch (error) {
     console.error('Failed to send subscription to backend:', error);
@@ -166,7 +160,6 @@ export async function unsubscribeFromPushNotifications(
     }
 
     const success = await subscription.unsubscribe();
-    console.log('Unsubscribed from push notifications');
     return success;
   } catch (error) {
     console.error('Failed to unsubscribe from push notifications:', error);

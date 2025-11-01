@@ -29,8 +29,6 @@ export async function generateServiceDescription(
       throw new Error('GEMINI_API_KEY is not configured');
     }
 
-    console.log('✅ API Key found, length:', API_KEY.length);
-
     // Handle both string and object inputs for backward compatibility
     const details: ServiceDetails = 
       typeof serviceDetails === 'string' 
@@ -38,8 +36,6 @@ export async function generateServiceDescription(
         : serviceDetails;
 
     const { serviceName, duration, price } = details;
-
-    console.log('📝 Generating description for:', serviceName);
 
     // Initialize the model
     const model = genAI.getGenerativeModel({ 
@@ -63,15 +59,10 @@ export async function generateServiceDescription(
     
     prompt += ` The description should highlight the benefits, experience, and what customers can expect. Make it engaging and suitable for a salon booking system.`;
 
-    console.log('🤖 Calling Gemini API...');
-
     // Generate content
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-    
-    console.log('✨ Description generated successfully');
-    console.log('📄 Generated text:', text.substring(0, 100) + '...');
     
     return text.trim();
   } catch (error: any) {

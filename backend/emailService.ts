@@ -8,18 +8,14 @@ class EmailService {
 
     if (!apiKey) {
       console.error('RESEND_API_KEY is not set in environment variables');
-      console.log('Available env vars:', Object.keys(process.env).filter(key => key.includes('RESEND')));
       throw new Error('RESEND_API_KEY is required');
     }
 
     this.resend = new Resend(apiKey);
-    console.log('Resend email service initialized successfully');
   }
 
   async sendOTP(email: string, otp: string, name: string = 'User'): Promise<boolean> {
     try {
-      console.log(`Attempting to send email OTP to: ${email}`);
-
       const { data, error } = await this.resend.emails.send({
         from: 'AltQ <team@altq.in>', // Use your verified domain or resend.dev for testing
         to: [email],
@@ -92,7 +88,6 @@ class EmailService {
         return false;
       }
 
-      console.log('Email sent successfully:', data?.id);
       return true;
     } catch (error) {
       console.error('Email sending failed:', error);
@@ -102,8 +97,6 @@ class EmailService {
 
   async sendPasswordReset(email: string, resetToken: string, name: string = 'User'): Promise<boolean> {
     try {
-      console.log(`Attempting to send password reset email to: ${email}`);
-
       const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
 
       const { data, error } = await this.resend.emails.send({
@@ -182,7 +175,6 @@ class EmailService {
         return false;
       }
 
-      console.log('Password reset email sent successfully:', data?.id);
       return true;
     } catch (error) {
       console.error('Password reset email sending failed:', error);
@@ -200,7 +192,6 @@ class EmailService {
         return false;
       }
 
-      console.log('Resend service is ready');
       return true;
     } catch (error) {
       console.error('Resend service connection failed:', error);

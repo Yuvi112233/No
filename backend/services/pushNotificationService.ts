@@ -12,7 +12,6 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
     VAPID_PUBLIC_KEY,
     VAPID_PRIVATE_KEY
   );
-  console.log('✅ Web Push configured with VAPID keys');
 } else {
   console.warn('⚠️  VAPID keys not configured. Push notifications will not work.');
   console.warn('   Generate keys with: npx web-push generate-vapid-keys');
@@ -66,7 +65,6 @@ class PushNotificationService {
         }
       });
       
-      console.log(`✅ Loaded ${subscriptions.length} push subscriptions from database`);
       this.isInitialized = true;
     } catch (error) {
       console.error('❌ Failed to load push subscriptions:', error);
@@ -78,7 +76,6 @@ class PushNotificationService {
    */
   saveSubscription(userId: string, subscription: PushSubscription): void {
     this.subscriptions.set(userId, subscription);
-    console.log(`💾 Saved push subscription for user: ${userId}`);
   }
 
   /**
@@ -86,7 +83,6 @@ class PushNotificationService {
    */
   removeSubscription(userId: string): void {
     this.subscriptions.delete(userId);
-    console.log(`🗑️  Removed push subscription for user: ${userId}`);
   }
 
   /**
@@ -103,7 +99,6 @@ class PushNotificationService {
     const subscription = this.subscriptions.get(userId);
     
     if (!subscription) {
-      console.log(`⚠️  No push subscription found for user: ${userId}`);
       return false;
     }
 
@@ -113,14 +108,12 @@ class PushNotificationService {
         JSON.stringify(payload)
       );
       
-      console.log(`📤 Push notification sent to user: ${userId}`);
       return true;
     } catch (error: any) {
       console.error(`❌ Failed to send push notification to user ${userId}:`, error.message);
       
       // Remove invalid subscriptions
       if (error.statusCode === 410 || error.statusCode === 404) {
-        console.log(`🗑️  Removing invalid subscription for user: ${userId}`);
         this.removeSubscription(userId);
       }
       
@@ -136,7 +129,6 @@ class PushNotificationService {
     const results = await Promise.all(promises);
     const successCount = results.filter(success => success).length;
     
-    console.log(`📤 Sent push notifications to ${successCount}/${userIds.length} users`);
     return successCount;
   }
 

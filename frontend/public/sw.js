@@ -11,12 +11,9 @@ const STATIC_ASSETS = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker...');
-  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[SW] Caching static assets');
         return cache.addAll(STATIC_ASSETS);
       })
       .then(() => self.skipWaiting())
@@ -25,8 +22,6 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating service worker...');
-  
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
@@ -34,7 +29,6 @@ self.addEventListener('activate', (event) => {
           cacheNames
             .filter((name) => name !== CACHE_NAME && name !== API_CACHE_NAME)
             .map((name) => {
-              console.log('[SW] Deleting old cache:', name);
               return caches.delete(name);
             })
         );
@@ -132,8 +126,6 @@ self.addEventListener('fetch', (event) => {
 
 // Push notification event
 self.addEventListener('push', (event) => {
-  console.log('[SW] Push notification received');
-
   let notificationData = {
     title: 'SmartQ Notification',
     body: 'You have a new notification',
@@ -159,7 +151,7 @@ self.addEventListener('push', (event) => {
         silent: false // Ensure sound plays
       };
     } catch (error) {
-      console.error('[SW] Error parsing push data:', error);
+      // Error parsing push data
     }
   }
 
@@ -183,8 +175,6 @@ self.addEventListener('push', (event) => {
 
 // Notification click event
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] Notification clicked');
-  
   event.notification.close();
 
   const urlToOpen = event.notification.data?.url || '/';
@@ -210,8 +200,6 @@ self.addEventListener('notificationclick', (event) => {
 // Handle notification action clicks
 self.addEventListener('notificationclick', (event) => {
   if (event.action) {
-    console.log('[SW] Notification action clicked:', event.action);
-    
     // Handle specific actions
     switch (event.action) {
       case 'view':
@@ -222,8 +210,6 @@ self.addEventListener('notificationclick', (event) => {
       case 'dismiss':
         // Just close the notification
         break;
-      default:
-        console.log('[SW] Unknown action:', event.action);
     }
   }
   
@@ -232,18 +218,13 @@ self.addEventListener('notificationclick', (event) => {
 
 // Background sync event (for future use)
 self.addEventListener('sync', (event) => {
-  console.log('[SW] Background sync:', event.tag);
-  
   if (event.tag === 'sync-queues') {
     event.waitUntil(
       // Sync queue data when back online
       fetch('/api/queues')
         .then((response) => response.json())
-        .then((data) => {
-          console.log('[SW] Synced queue data:', data);
-        })
-        .catch((error) => {
-          console.error('[SW] Sync failed:', error);
+        .catch(() => {
+          // Sync failed
         })
     );
   }
@@ -251,8 +232,6 @@ self.addEventListener('sync', (event) => {
 
 // Message event - handle messages from clients
 self.addEventListener('message', (event) => {
-  console.log('[SW] Message received:', event.data);
-  
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }

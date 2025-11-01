@@ -49,7 +49,6 @@ class CircuitBreaker {
       if (Date.now() - this.lastFailureTime >= this.options.resetTimeoutMs) {
         this.state = CircuitState.HALF_OPEN;
         this.successCount = 0;
-        console.log('Circuit breaker entering HALF_OPEN state');
       } else {
         throw new Error('Circuit breaker is OPEN - service unavailable');
       }
@@ -73,7 +72,6 @@ class CircuitBreaker {
       // Require multiple successes to close circuit
       if (this.successCount >= 2) {
         this.state = CircuitState.CLOSED;
-        console.log('Circuit breaker CLOSED - service recovered');
       }
     }
   }
@@ -85,11 +83,9 @@ class CircuitBreaker {
     if (this.state === CircuitState.HALF_OPEN) {
       // Failed during testing, reopen circuit
       this.state = CircuitState.OPEN;
-      console.log('Circuit breaker reopened - service still failing');
     } else if (this.failureCount >= this.options.failureThreshold) {
       // Too many failures, open circuit
       this.state = CircuitState.OPEN;
-      console.log(`Circuit breaker OPEN - ${this.failureCount} failures detected`);
     }
   }
 
@@ -133,9 +129,6 @@ export async function retryWithBackoff<T>(
       if (attempt === maxAttempts || !shouldRetry(error)) {
         throw error;
       }
-
-      // Log retry attempt
-      console.log(`Retry attempt ${attempt}/${maxAttempts} after ${currentDelay}ms delay`);
 
       // Wait before retrying
       await sleep(currentDelay);
@@ -291,8 +284,6 @@ class MessageQueue {
       timestamp: Date.now(),
       attempts: 0
     });
-
-    console.log(`Message queued for user ${userId}. Queue size: ${this.queue.length}`);
   }
 
   /**
@@ -308,13 +299,7 @@ class MessageQueue {
    * Remove messages for a user after successful delivery
    */
   removeMessagesForUser(userId: string): void {
-    const beforeSize = this.queue.length;
     this.queue = this.queue.filter(item => item.userId !== userId);
-    const removed = beforeSize - this.queue.length;
-    
-    if (removed > 0) {
-      console.log(`Removed ${removed} queued messages for user ${userId}`);
-    }
   }
 
   /**
@@ -327,11 +312,6 @@ class MessageQueue {
     this.queue = this.queue.filter(item => {
       return now - item.timestamp < this.maxAge;
     });
-
-    const removed = beforeSize - this.queue.length;
-    if (removed > 0) {
-      console.log(`Cleaned up ${removed} expired messages from queue`);
-    }
   }
 
   /**
@@ -399,5 +379,4 @@ export function resetAllCircuitBreakers(): void {
   circuitBreakers.whatsapp.reset();
   circuitBreakers.websocket.reset();
   circuitBreakers.push.reset();
-  console.log('All circuit breakers reset');
 }

@@ -30,11 +30,8 @@ export default function LoadingScreen({ onComplete, onPhaseChange }: LoadingScre
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
     setCurrentQuote(randomQuote);
     
-    console.log('LoadingScreen mounted, starting timers');
-    
     // First screen: Brand splash (3 seconds)
     const timer1 = setTimeout(() => {
-      console.log('Switching to screen 1 (quote screen)');
       if (onPhaseChange) {
         onPhaseChange();
         return; // Don't set up timer2 if we're switching phases
@@ -47,7 +44,6 @@ export default function LoadingScreen({ onComplete, onPhaseChange }: LoadingScre
     let timer2: NodeJS.Timeout;
     if (!onPhaseChange) {
       timer2 = setTimeout(() => {
-        console.log('Calling onComplete');
         onComplete();
       }, 6000);
     }
@@ -57,8 +53,6 @@ export default function LoadingScreen({ onComplete, onPhaseChange }: LoadingScre
       if (timer2) clearTimeout(timer2);
     };
   }, [onComplete, onPhaseChange]);
-
-  console.log('LoadingScreen render, currentScreen:', currentScreen);
 
   if (currentScreen === 0) {
     // First Screen: Brand Splash (Salon-themed)
