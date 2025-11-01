@@ -24,14 +24,7 @@ class OTPService {
       // Try to send email, but don't fail if it doesn't work (for testing)
       const emailSent = await emailService.sendOTP(email, otp, name);
       
-      if (emailSent) {
-        console.log(`✅ Email OTP sent to ${email}: ${otp}`);
-        return true;
-      } else {
-        console.log(`⚠️ Email sending failed, but OTP saved for testing: ${otp}`);
-        console.log(`📧 Use this OTP for email verification: ${otp}`);
-        return true; // Return true for testing purposes
-      }
+      return true; // Return true for testing purposes
     } catch (error) {
       console.error('Email OTP service error:', error);
       return false;
@@ -52,7 +45,6 @@ class OTPService {
         }
       );
 
-      console.log(`📱 Use this OTP for phone verification: ${otp}`);
       return otp;
 
       /*
@@ -71,10 +63,8 @@ class OTPService {
           }
         );
 
-        console.log(`✅ SMS verification started for ${phone}`);
         return true;
       } else {
-        console.log('⚠️ Failed to start SMS verification with Twilio');
         return false;
       }
       */
@@ -108,7 +98,6 @@ class OTPService {
         // Check if both email and phone are verified
         await this.updateVerificationStatus(userId);
         
-        console.log(`Email verified for user ${userId}`);
         return true;
       } else {
         console.error('Invalid or expired email OTP');
@@ -142,7 +131,6 @@ class OTPService {
 
         await this.updateVerificationStatus(userId);
         
-        console.log(`Phone verified for user ${userId}`);
         return true;
       } else {
         console.error('Invalid or expired phone OTP');
@@ -167,7 +155,6 @@ class OTPService {
         // Check if both email and phone are verified
         await this.updateVerificationStatus(userId);
         
-        console.log(`Phone verified via Twilio Verify for user ${userId}`);
         return true;
       } else {
         console.error('Twilio Verify rejected the code');
@@ -189,7 +176,6 @@ class OTPService {
           { id: userId },
           { isVerified: true }
         );
-        console.log(`User ${userId} is now fully verified`);
       }
     } catch (error) {
       console.error('Error updating verification status:', error);

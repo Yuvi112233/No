@@ -40,21 +40,12 @@ class WebSocketManager {
       });
 
       ws.on('close', (code, reason) => {
-        console.log('🔌 WebSocket client disconnected:', {
-          userId: ws.userId,
-          code,
-          reason: reason.toString(),
-          timestamp: new Date().toISOString()
-        });
-        
         if (ws.userId) {
           // Clean up viewer tracking
-          const remainingViewers = liveViewersService.removeUser(ws.userId);
-          console.log('👥 User removed from viewer tracking:', ws.userId);
+          liveViewersService.removeUser(ws.userId);
           
           // Remove from clients map
           this.clients.delete(ws.userId);
-          console.log('📊 Active WebSocket clients:', this.clients.size);
         }
       });
 
@@ -68,8 +59,6 @@ class WebSocketManager {
         message: 'WebSocket connection established' 
       }));
     });
-
-    console.log('🚀 WebSocket server initialized on /ws');
   }
 
   private handleMessage(ws: AuthenticatedWebSocket, message: WebSocketMessage) {
@@ -91,14 +80,14 @@ class WebSocketManager {
         break;
 
       default:
-        console.log('🔄 Unknown WebSocket message type:', message.type);
+        // Unknown message type
+        break;
     }
   }
 
   private authenticateClient(ws: AuthenticatedWebSocket, message: WebSocketMessage) {
     try {
       if (!message.userId) {
-        console.log('❌ Authentication failed: No user ID provided');
         ws.send(JSON.stringify({ 
           type: 'auth_error', 
           message: 'User ID required' 
@@ -109,7 +98,6 @@ class WebSocketManager {
       // Check if user already has a connection
       const existingConnection = this.clients.get(message.userId);
       if (existingConnection && existingConnection !== ws) {
-        console.log('⚠️ User already has an active connection, closing old one:', message.userId);
         existingConnection.close(1000, 'New connection established');
         this.clients.delete(message.userId);
       }
@@ -118,12 +106,6 @@ class WebSocketManager {
       ws.userId = message.userId;
       ws.isAuthenticated = true;
       this.clients.set(message.userId, ws);
-      
-      console.log('✅ WebSocket client authenticated:', {
-        userId: message.userId,
-        totalClients: this.clients.size,
-        timestamp: new Date().toISOString()
-      });
       
       ws.send(JSON.stringify({ 
         type: 'authenticated', 
@@ -381,18 +363,10 @@ class WebSocketManager {
    */
   private handleSalonViewStart(ws: AuthenticatedWebSocket, message: WebSocketMessage) {
     if (!ws.userId || !message.salonId) {
-      console.log('⚠️ Invalid salon_view_start:', { userId: ws.userId, salonId: message.salonId });
       return;
     }
 
     const viewerCount = liveViewersService.joinSalonView(message.salonId, ws.userId);
-    
-    console.log('👁️ User started viewing salon:', {
-      userId: ws.userId,
-      salonId: message.salonId,
-      newViewerCount: viewerCount,
-      timestamp: new Date().toISOString()
-    });
     
     // Broadcast updated viewer count to all clients
     this.broadcastViewerCount(message.salonId, viewerCount);
@@ -403,18 +377,10 @@ class WebSocketManager {
    */
   private handleSalonViewEnd(ws: AuthenticatedWebSocket, message: WebSocketMessage) {
     if (!ws.userId || !message.salonId) {
-      console.log('⚠️ Invalid salon_view_end:', { userId: ws.userId, salonId: message.salonId });
       return;
     }
 
     const viewerCount = liveViewersService.leaveSalonView(message.salonId, ws.userId);
-    
-    console.log('👁️ User stopped viewing salon:', {
-      userId: ws.userId,
-      salonId: message.salonId,
-      newViewerCount: viewerCount,
-      timestamp: new Date().toISOString()
-    });
     
     // Broadcast updated viewer count to all clients
     this.broadcastViewerCount(message.salonId, viewerCount);
@@ -431,19 +397,10 @@ class WebSocketManager {
       timestamp: new Date().toISOString()
     });
 
-    let sentCount = 0;
     this.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN && client.isAuthenticated) {
         client.send(message);
-        sentCount++;
       }
-    });
-    
-    console.log('📡 Broadcasted viewer count update:', {
-      salonId,
-      count,
-      sentToClients: sentCount,
-      totalClients: this.clients.size
     });
   }
 

@@ -96,7 +96,7 @@ export class MongoStorage implements IStorage {
     // Separate fields to unset (null values) from fields to set
     const fieldsToSet: any = {};
     const fieldsToUnset: any = {};
-    
+
     for (const [key, value] of Object.entries(updates)) {
       if (value === null || value === undefined) {
         fieldsToUnset[key] = "";

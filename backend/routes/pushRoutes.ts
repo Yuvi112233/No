@@ -41,7 +41,6 @@ router.post('/subscribe', authenticateToken, async (req, res) => {
       existingSubscription.lastUsed = new Date();
       await existingSubscription.save();
 
-      console.log(`✅ Updated push subscription for user ${userId}`);
       return res.json({
         success: true,
         message: 'Subscription updated',
@@ -65,7 +64,6 @@ router.post('/subscribe', authenticateToken, async (req, res) => {
       keys: subscription.keys
     });
 
-    console.log(`✅ Created push subscription for user ${userId}`);
     res.json({
       success: true,
       message: 'Subscription created',
@@ -109,7 +107,6 @@ router.delete('/unsubscribe', authenticateToken, async (req, res) => {
       });
     }
 
-    console.log(`✅ Deleted push subscription for user ${userId}`);
     res.json({
       success: true,
       message: 'Subscription deleted'

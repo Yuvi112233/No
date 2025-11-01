@@ -151,7 +151,7 @@ self.addEventListener('push', (event) => {
         silent: false // Ensure sound plays
       };
     } catch (error) {
-      console.error('[SW] Error parsing push data:', error);
+      // Error parsing push data
     }
   }
 
@@ -223,8 +223,8 @@ self.addEventListener('sync', (event) => {
       // Sync queue data when back online
       fetch('/api/queues')
         .then((response) => response.json())
-        .catch((error) => {
-          console.error('[SW] Sync failed:', error);
+        .catch(() => {
+          // Sync failed
         })
     );
   }

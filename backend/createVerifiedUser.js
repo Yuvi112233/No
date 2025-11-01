@@ -18,12 +18,7 @@ async function createVerifiedUser() {
       favoriteSalons: []
     };
     
-    const user = await storage.createUser(userData);
-    console.log('Created verified user:', user.id);
-    console.log('Email:', user.email);
-    console.log('Password: password123');
-    console.log('Role:', user.role);
-    console.log('Verified:', user.isVerified);
+    await storage.createUser(userData);
   } catch (error) {
     console.error('Error creating user:', error);
   }
