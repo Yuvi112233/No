@@ -179,7 +179,6 @@ class NotificationService {
       const subscriptions = await PushSubscription.find({ userId });
 
       if (subscriptions.length === 0) {
-        console.log(`⚠️ No push subscriptions found for user ${userId}`);
         return false;
       }
 

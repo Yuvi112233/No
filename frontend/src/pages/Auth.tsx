@@ -71,14 +71,6 @@ export default function Auth() {
     mode: "onChange",
   });
 
-  // Debug: Monitor form values
-  useEffect(() => {
-    console.log('Login form values:', loginForm.watch());
-  }, [loginForm.watch()]);
-
-  useEffect(() => {
-    console.log('Register form values:', registerForm.watch());
-  }, [registerForm.watch()]);
 
   const loginMutation = useMutation({
     mutationFn: api.auth.login,
@@ -142,7 +134,6 @@ export default function Auth() {
 
   const registerMutation = useMutation({
     mutationFn: (userData: Omit<RegisterForm, 'confirmPassword'>) => {
-      console.log("Sending registration with role:", userData.role);
       return api.auth.register(userData);
     },
     onSuccess: (data: any) => {
@@ -177,8 +168,6 @@ export default function Auth() {
         }
       }
 
-      console.log('Final error message to display:', errorMessage);
-
       toast({
         title: "Registration Failed",
         description: errorMessage,
@@ -188,15 +177,11 @@ export default function Auth() {
   });
 
   const onLoginSubmit = (data: LoginForm) => {
-    console.log('Login form submitted with:', data);
     loginMutation.mutate(data);
   };
 
   const onRegisterSubmit = (data: RegisterForm) => {
-    console.log('Register form submitted with:', data);
     const { confirmPassword, ...userData } = data;
-
-    console.log('Sending to API with role:', userData.role);
     registerMutation.mutate(userData);
   };
 
@@ -209,11 +194,6 @@ export default function Auth() {
           password: registeredUser.password
         };
 
-        console.log('Auto-logging in user after verification...', {
-          email: loginData.email,
-          hasPassword: !!loginData.password,
-          userRole: registeredUser.role
-        });
         const data = await api.auth.login(loginData);
 
         // Log the user in
@@ -225,14 +205,11 @@ export default function Auth() {
         });
 
         // Redirect based on user role after verification
-        console.log('Redirecting user based on role:', data.user.role);
         if (data.user.role === 'salon_owner') {
           // Salon owners go to dashboard where they can create/manage salons
-          console.log('Redirecting salon owner to dashboard');
           setLocation('/dashboard');
         } else {
           // Customers go to home page where they can browse and book salons
-          console.log('Redirecting customer to home');
           setLocation('/');
         }
 

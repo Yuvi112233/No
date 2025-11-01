@@ -6,7 +6,6 @@ let pingIntervalId: number | null = null;
 export const keepAliveService = {
   start() {
     if (pingIntervalId) {
-      console.log('Keep-alive already running');
       return;
     }
 
@@ -15,8 +14,6 @@ export const keepAliveService = {
       console.warn('VITE_API_URL not set, keep-alive disabled');
       return;
     }
-
-    console.log('Starting keep-alive service...');
 
     // Ping immediately
     this.ping();
@@ -31,7 +28,6 @@ export const keepAliveService = {
     if (pingIntervalId) {
       clearInterval(pingIntervalId);
       pingIntervalId = null;
-      console.log('Keep-alive service stopped');
     }
   },
 
@@ -51,11 +47,9 @@ export const keepAliveService = {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Keep-alive ping successful:', data);
       }
     } catch (error) {
       // Silent fail - don't bother user with ping failures
-      console.log('Keep-alive ping failed (this is normal):', error);
     }
   }
 };

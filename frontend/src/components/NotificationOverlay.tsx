@@ -34,9 +34,7 @@ export default function NotificationOverlay({
       if (!audioRef.current) {
         audioRef.current = new Audio('/notification.mp3');
       }
-      audioRef.current.play().catch((error) => {
-        console.log('Failed to play notification sound:', error);
-      });
+      audioRef.current.play().catch(() => {});
 
       // Prevent body scroll
       document.body.style.overflow = 'hidden';

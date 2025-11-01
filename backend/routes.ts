@@ -130,8 +130,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error('Email sending error:', emailError);
       }
 
-      console.log(`📧 Email OTP for ${email}: ${otp}`);
-
       res.json({
         success: true,
         isNewUser,
@@ -154,7 +152,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(userData.email);
       if (existingUser) {
-        console.log(`Registration attempt with existing email: ${userData.email}`);
         return res.status(400).json({ message: 'User already exists with this email' });
       }
 
@@ -350,7 +347,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           passwordResetToken: resetToken,
           passwordResetExpiry: resetExpiry
         });
-        console.log('Password reset token saved for user:', user.id);
       } catch (updateError) {
         console.error('Failed to save reset token:', updateError);
         throw updateError;
@@ -366,8 +362,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (!emailSent) {
           console.error('Failed to send password reset email, but continuing');
-        } else {
-          console.log('Password reset email sent successfully to:', user.email);
         }
       } catch (emailError) {
         console.error('Email service error:', emailError);
@@ -426,7 +420,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         accountLockedUntil: null
       });
 
-      console.log('Password reset successful for user:', user.id);
       res.json({ message: 'Password has been reset successfully' });
     } catch (error) {
       console.error('Reset password error:', error);
@@ -439,20 +432,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ====================
   app.post('/api/auth/google', async (req, res) => {
     try {
-      console.log('=== GOOGLE AUTH REQUEST ===');
-      console.log('Request body:', JSON.stringify(req.body, null, 2));
-
       const { credential, role } = req.body;
 
       if (!credential) {
-        console.log('No credential provided');
         return res.status(400).json({ message: 'Google credential is required' });
       }
 
       // Validate role if provided
       const userRole = role === 'salon_owner' ? 'salon_owner' : 'customer';
-      console.log('User role determined:', userRole);
-      console.log('Google Client ID configured:', !!GOOGLE_CLIENT_ID);
 
       // Verify the Google token
       const ticket = await googleClient.verifyIdToken({
@@ -467,12 +454,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { email, name, picture, sub: googleId } = payload;
 
-      console.log('=== GOOGLE AUTH PAYLOAD ===');
-      console.log('Email:', email);
-      console.log('Name:', name);
-      console.log('Picture:', picture);
-      console.log('===========================');
-
       if (!email) {
         return res.status(400).json({ message: 'Email not provided by Google' });
       }
@@ -484,9 +465,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         // Create new user with Google data
         isNewUser = true;
-        console.log('Creating new user with Google data');
-        console.log('Profile picture:', picture);
-        console.log('User role:', userRole);
         const userData: any = {
           name: name || '',
           email: email,
@@ -500,9 +478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userData.profileImage = picture;
         }
 
-        console.log('Creating user with data:', JSON.stringify(userData, null, 2));
         user = await storage.createUser(userData);
-        console.log('User created successfully:', user?.id);
 
         // Update with verification fields after creation
         const updatedUser = await storage.updateUser(user.id, {
@@ -511,13 +487,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isVerified: true, // Consider Google auth as verified
         });
         user = updatedUser || user;
-        console.log('Created user profileImage:', user?.profileImage);
       } else {
         // Update existing user's profile image and verification status
-        console.log('Existing user found:', email);
-        console.log('Existing user role:', user.role);
-        console.log('Requested role:', userRole);
-        console.log('Google profile picture URL:', picture);
 
         // Check for role mismatch - if existing user has different role than requested
         if (user.role !== userRole) {
@@ -536,13 +507,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Always update profile image from Google if available
         if (picture) {
           updates.profileImage = picture;
-          console.log('Updating profile image to:', picture);
         }
 
         await storage.updateUser(user.id, updates);
         const updatedUser = await storage.getUser(user.id);
         user = updatedUser || user;
-        console.log('Updated user profileImage:', user.profileImage);
       }
 
       // Generate JWT token
@@ -651,7 +620,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         } catch (err) {
           // Invalid token, treat as unauthenticated
-          console.log('Invalid token in send-otp, treating as new user');
         }
       }
 
@@ -691,7 +659,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // TODO: Send actual SMS via Twilio or other service
-      console.log(`📱 OTP for ${phoneNumber}: ${otp}`);
 
       res.json({
         success: true,
@@ -728,7 +695,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isAuthenticatedUser = true;
         } catch (err) {
           // Invalid token, fall through to phone lookup
-          console.log('Invalid token in verify-otp, trying phone lookup');
         }
       }
 
@@ -883,7 +849,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (isTemporaryUser) {
           // Delete the temporary user since we're merging it with the Google auth user
-          console.log(`Deleting temporary phone-only user ${existingUser.id} for phone ${phone}`);
           await storage.deleteUser(existingUser.id);
         } else {
           return res.status(400).json({ message: 'Phone number is already registered to another account' });
@@ -1106,7 +1071,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const salonsWithDetails = await Promise.all(
         salons.map(async (salon) => {
-          console.log('Processing salon with ID:', salon.id);
           const services = await storage.getServicesBySalon(salon.id);
           const queues = await storage.getQueuesBySalon(salon.id);
           const waitingQueues = queues.filter(q => q.status === 'waiting');
@@ -1123,8 +1087,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           });
           const reviews = Array.from(latestReviewsMap.values());
-
-          console.log(`Found ${photos.length} photos for salon ${salon.id}`);
 
           return {
             ...salon,
@@ -1192,20 +1154,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/salons', authenticateToken, async (req, res) => {
     try {
-      console.log('Salon creation request received');
-      console.log('User role:', req.user!.role);
-      console.log('Request body:', req.body);
-
       if (req.user!.role !== 'salon_owner') {
-        console.log('Authorization failed - not salon owner');
         return res.status(403).json({ message: 'Only salon owners can create salons' });
       }
 
       const salonData = insertSalonSchema.parse({ ...req.body, ownerId: req.user!.userId });
-      console.log('Parsed salon data:', salonData);
 
       const salon = await storage.createSalon(salonData);
-      console.log('Salon created successfully:', salon);
 
       res.status(201).json(salon);
     } catch (error) {
@@ -1217,15 +1172,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/salons/:id', authenticateToken, async (req, res) => {
     try {
-      console.log('Salon deletion request for ID:', req.params.id);
       const salon = await storage.getSalon(req.params.id);
       if (!salon) {
-        console.log('Salon not found');
         return res.status(404).json({ message: 'Salon not found' });
       }
 
       if (salon.ownerId !== req.user!.userId) {
-        console.log('Authorization failed - not salon owner');
         return res.status(403).json({ message: 'Not authorized to delete this salon' });
       }
 
@@ -1246,7 +1198,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: 'Failed to delete salon' });
       }
 
-      console.log('Salon deleted successfully');
       res.json({ message: 'Salon deleted successfully' });
     } catch (error) {
       console.error('Salon deletion error:', error);
@@ -1337,26 +1288,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/services', authenticateToken, async (req, res) => {
     try {
-      console.log('Service creation request received:', req.body);
-      console.log('User:', req.user);
-
       const serviceData = insertServiceSchema.parse(req.body);
-      console.log('Parsed service data:', serviceData);
 
       // Verify salon ownership
       const salon = await storage.getSalon(serviceData.salonId);
-      console.log('Salon found:', salon);
-      console.log('Salon ownerId:', salon?.ownerId);
-      console.log('Current userId:', req.user!.userId);
 
       if (!salon || salon.ownerId !== req.user!.userId) {
-        console.log('Authorization failed - salon not found or wrong owner');
         return res.status(403).json({ message: 'Not authorized to add services to this salon' });
       }
 
-      console.log('Creating service with data:', serviceData);
       const service = await storage.createService(serviceData);
-      console.log('Service created successfully:', service);
       res.status(201).json(service);
     } catch (error) {
       console.error('Service creation error:', error);
@@ -1517,9 +1458,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             services: services.length > 0 ? services : undefined, // Add all services if available
           };
 
-          // For debugging
-          console.log(`Salon queue ${queue.id} services:`, services);
-
           return queueWithDetails;
         })
       );
@@ -1543,9 +1481,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const offers = await storage.getOffersBySalon(req.params.salonId);
-      console.log(`Fetching offers for salon ${req.params.salonId}:`, offers);
-      console.log(`Number of offers found: ${offers.length}`);
-      console.log(`Offers data:`, JSON.stringify(offers, null, 2));
       res.json(offers);
     } catch (error) {
       console.error('Error fetching offers:', error);
@@ -1555,15 +1490,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/queues', authenticateToken, async (req, res) => {
     try {
-      console.log('Queue creation request body:', req.body);
-      console.log('User ID from token:', req.user!.userId);
-
       const queueData = insertQueueSchema.parse({
         ...req.body,
         userId: req.user!.userId,
       });
-
-      console.log('Parsed queue data:', queueData);
 
       // Check if user is already in active queue for this salon
       const existingQueue = await storage.getUserQueuePosition(req.user!.userId, queueData.salonId);
@@ -1596,8 +1526,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             loyaltyPoints: (user.loyaltyPoints || 0) - pointsToDeduct,
             salonLoyaltyPoints: updatedSalonPoints
           });
-
-          console.log(`Deducted ${pointsToDeduct} loyalty points from user ${req.user!.userId} for salon ${queueData.salonId}`);
         }
       }
 
@@ -1613,24 +1541,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       const validServices = services.filter(Boolean);
 
-      console.log(`Salon queue ${queue.id} services:`, validServices);
-
       // Broadcast queue_join event for voice notifications
-      console.log('🚀 About to call broadcastQueueJoin with:', {
-        salonId: queueData.salonId,
-        queueId: queue.id,
-        customerName: queueUser?.name || 'A customer',
-        serviceName: validServices.length > 0 ? validServices[0].name : 'a service'
-      });
-
       wsManager.broadcastQueueJoin(queueData.salonId, {
         queueId: queue.id,
         customerName: queueUser?.name || 'A customer',
         serviceName: validServices.length > 0 ? validServices[0].name : 'a service',
         position: queue.position
       });
-
-      console.log('✅ broadcastQueueJoin called successfully');
 
       // Send push notification to salon owner
       const salon = await storage.getSalon(queueData.salonId);
@@ -1750,7 +1667,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/salons/:salonId/public-offers', async (req, res) => {
     try {
       const salonId = req.params.salonId;
-      console.log('Fetching offers for salon:', salonId);
 
       const salon = await storage.getSalon(salonId);
 
@@ -1759,12 +1675,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const offers = await storage.getOffersBySalon(salonId);
-      console.log('Found offers for salon:', offers);
 
       // Only return active offers with valid dates
       const now = new Date();
       const activeOffers = offers.filter(offer => offer.isActive && new Date(offer.validityPeriod) > now);
-      console.log('Active offers after filtering:', activeOffers);
 
       res.json(activeOffers);
     } catch (error) {
@@ -1775,12 +1689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/offers', authenticateToken, async (req, res) => {
     try {
-      console.log('Raw request body:', req.body);
-      console.log('validityPeriod type:', typeof req.body.validityPeriod);
-      console.log('validityPeriod value:', req.body.validityPeriod);
-
       const offerData = insertOfferSchema.parse(req.body);
-      console.log('Parsed offer data:', offerData);
 
       // Verify salon ownership
       const salon = await storage.getSalon(offerData.salonId);
@@ -1934,16 +1843,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
-      // Debug logging
-      console.log('Analytics calculation for salon:', req.params.salonId);
-      console.log('Business day range:', businessDayStart.toISOString(), 'to', businessDayEnd.toISOString());
-      console.log('Total queues:', queues.length);
-      console.log('Completed queues (all time):', completedQueues.length);
-      console.log('Today completed queues (9 AM - 11 PM):', todayCompletedQueues.length);
-      console.log('Today revenue:', todayRevenue);
-      console.log('Total revenue (all time):', totalRevenue);
-      console.log('Analytics result:', analytics);
-
       res.json(analytics);
     } catch (error) {
       res.status(500).json({ message: 'Server error', error });
@@ -1956,42 +1855,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Test endpoint to verify routing
   app.get('/api/test-photos', (req, res) => {
-    console.log('=== TEST PHOTOS ENDPOINT HIT ===');
     res.json({ message: 'Photo routes are working', timestamp: new Date().toISOString() });
   });
 
   // Test endpoint to verify photo saving with your salon ID
   app.post('/api/test-photo-save', async (req, res) => {
     try {
-      console.log('=== TEST PHOTO SAVE ENDPOINT HIT ===');
-
       const testPhotoData = {
         salonId: 'a5562294-9026-46c6-9086-ef1518ad5b39', // Your salon ID
         url: 'https://test-cloudinary-url.com/test-image.jpg',
         publicId: 'test-public-id',
       };
 
-      console.log('Test photo data:', testPhotoData);
-
       // Test schema validation first
       try {
-        const validatedData = insertSalonPhotoSchema.parse(testPhotoData);
-        console.log('Schema validation successful:', validatedData);
-      } catch (schemaError) {
-        console.error('Schema validation failed:', schemaError);
+        insertSalonPhotoSchema.parse(testPhotoData);
+      } catch (schemaError: any) {
         return res.status(400).json({ error: 'Schema validation failed', details: schemaError.message });
       }
 
       const photo = await storage.createSalonPhoto(testPhotoData);
-      console.log('Test photo saved successfully:', photo);
 
       // Verify it was saved by fetching it back
       const savedPhotos = await storage.getSalonPhotosBySalon('a5562294-9026-46c6-9086-ef1518ad5b39');
-      console.log('Photos found for salon after test save:', savedPhotos.length);
 
       res.status(201).json({ success: true, photo, totalPhotos: savedPhotos.length });
-    } catch (error) {
-      console.error('Test photo save error:', error);
+    } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   });
@@ -1999,7 +1888,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get salon photos
   app.get('/api/salons/:salonId/photos', async (req, res) => {
     try {
-      console.log('=== GET PHOTOS ENDPOINT HIT ===', req.params.salonId);
       const photos = await storage.getSalonPhotosBySalon(req.params.salonId);
       res.json(photos);
     } catch (error) {
@@ -2010,33 +1898,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Upload salon photo
   app.post('/api/salons/:salonId/photos', authenticateToken, upload.single('image'), async (req, res) => {
     try {
-      console.log('=== PHOTO UPLOAD ENDPOINT HIT ===');
-      console.log('Photo upload request received for salon:', req.params.salonId);
-      console.log('File received:', !!req.file);
-      console.log('User ID:', req.user?.userId);
-
       if (!req.file) {
-        console.log('No file provided in request');
         return res.status(400).json({ message: 'No image file provided' });
       }
 
       // Verify salon ownership
       const salon = await storage.getSalon(req.params.salonId);
-      console.log('Salon found:', !!salon);
-      console.log('Salon owner ID:', salon?.ownerId);
 
       if (!salon || salon.ownerId !== req.user!.userId) {
-        console.log('Authorization failed - salon owner mismatch');
         return res.status(403).json({ message: 'Not authorized to upload photos for this salon' });
       }
 
-      console.log('Uploading to Cloudinary...');
       // Upload to Cloudinary
       const { url, publicId } = await uploadImageToCloudinary(req.file.buffer, 'salon_photos');
-      console.log('Cloudinary upload successful:', { url, publicId });
-
-      // Save to database
-      console.log('Preparing photo data for database save...');
 
       // Create photo data without schema validation first to test
       const photoData = {
@@ -2045,28 +1919,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         publicId,
         category: req.body.category || 'interior', // Default to interior if not provided
       };
-      console.log('Photo data to save:', photoData);
 
       // Validate with schema
-      try {
-        const validatedData = insertSalonPhotoSchema.parse(photoData);
-        console.log('Schema validation successful:', validatedData);
-      } catch (schemaError) {
-        console.error('Schema validation failed:', schemaError);
-        throw new Error(`Schema validation failed: ${schemaError.message}`);
-      }
+      insertSalonPhotoSchema.parse(photoData);
 
-      console.log('Calling storage.createSalonPhoto...');
       const photo = await storage.createSalonPhoto(photoData);
-      console.log('Photo saved to database successfully:', photo);
-
-      // Verify the photo was saved by fetching it back
-      console.log('Verifying photo was saved...');
-      const savedPhotos = await storage.getSalonPhotosBySalon(req.params.salonId);
-      console.log('Photos found for salon after save:', savedPhotos.length);
 
       res.status(201).json(photo);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Photo upload error:', error);
       res.status(400).json({ message: 'Failed to upload photo', error: error.message });
     }

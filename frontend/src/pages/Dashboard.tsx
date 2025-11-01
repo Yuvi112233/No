@@ -158,9 +158,7 @@ export default function Dashboard() {
     queryKey: ['salon-offers', selectedSalonId],
     enabled: !!selectedSalonId,
     queryFn: async () => {
-      console.log('Fetching offers for salon:', selectedSalonId);
       const token = localStorage.getItem('smartq_token');
-      console.log('Using token:', token ? 'Token exists' : 'No token');
 
       const baseURL = import.meta.env.VITE_API_URL || 'https://no-production-d4fc.up.railway.app';
       const response = await fetch(`${baseURL}/api/salons/${selectedSalonId}/offers`, {
@@ -170,14 +168,12 @@ export default function Dashboard() {
         },
       });
 
-      console.log('Response status:', response.status);
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Failed to fetch offers:', errorText);
         throw new Error(`Failed to fetch offers: ${response.status} ${errorText}`);
       }
       const data = await response.json();
-      console.log('Received offers data:', data);
       return data;
     },
   });
@@ -187,9 +183,7 @@ export default function Dashboard() {
     queryKey: ['salon-services', selectedSalonId],
     enabled: !!selectedSalonId,
     queryFn: async () => {
-      console.log('Fetching services for salon:', selectedSalonId);
       const token = localStorage.getItem('smartq_token');
-      console.log('Using token:', token ? 'Token exists' : 'No token');
 
       const baseURL = import.meta.env.VITE_API_URL || 'https://no-production-d4fc.up.railway.app';
       const response = await fetch(`${baseURL}/api/salons/${selectedSalonId}/services`, {
@@ -199,23 +193,15 @@ export default function Dashboard() {
         },
       });
 
-      console.log('Response status:', response.status);
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Failed to fetch services:', errorText);
         throw new Error(`Failed to fetch services: ${response.status} ${errorText}`);
       }
       const data = await response.json();
-      console.log('Received services data:', data);
       return data;
     },
   });
-
-  // Debug offers
-  console.log('Offers state:', { offers, offersLoading, offersError, selectedSalonId });
-
-  // Debug services
-  console.log('Services state:', { services, servicesLoading, servicesError, selectedSalonId });
 
   // Forms
   const salonForm = useForm<SalonForm>({
@@ -256,23 +242,14 @@ export default function Dashboard() {
   // Mutations
   const createSalonMutation = useMutation({
     mutationFn: async (data: any) => {
-      console.log('=== STARTING SALON CREATION ===');
-      console.log('Salon data:', data);
-      console.log('Selected images count:', selectedImages.length);
-
       try {
         // First create the salon
-        console.log('Step 1: Creating salon...');
         const createdSalon = await api.salons.create(data);
-        console.log('✅ Salon created successfully:', createdSalon);
 
         // Then upload images if any are selected
         if (selectedImages.length > 0) {
-          console.log('Step 2: Starting image upload process...');
-
           for (let i = 0; i < selectedImages.length; i++) {
             const image = selectedImages[i];
-            console.log(`Uploading image ${i + 1}/${selectedImages.length}: ${image.name}`);
 
             const formData = new FormData();
             formData.append('image', image);
@@ -296,13 +273,9 @@ export default function Dashboard() {
             }
 
             const result = await response.json();
-            console.log(`✅ Image ${i + 1} uploaded successfully:`, result);
           }
-
-          console.log('✅ All images uploaded successfully');
         }
 
-        console.log('=== SALON CREATION COMPLETED SUCCESSFULLY ===');
         return createdSalon;
 
       } catch (error) {
@@ -311,7 +284,6 @@ export default function Dashboard() {
       }
     },
     onSuccess: (createdSalon) => {
-      console.log('🎉 Salon creation success callback triggered');
       toast({
         title: "Success!",
         description: "Salon created successfully!",
@@ -325,7 +297,6 @@ export default function Dashboard() {
       setSelectedImages([]);
       setSelectedLocation(null);
 
-      console.log('✅ Form reset and queries invalidated');
     },
     onError: (error: any) => {
       console.error('❌ Salon creation error callback triggered:', error);
@@ -482,15 +453,8 @@ export default function Dashboard() {
   });
 
   const onSalonSubmit = async (data: SalonForm) => {
-    console.log('🚀 Form submission started');
-    console.log('Form data:', data);
-    console.log('Selected location:', selectedLocation);
-    console.log('Selected images count:', selectedImages.length);
-    console.log('User:', user);
-
     // Validation checks
     if (selectedImages.length === 0) {
-      console.log('❌ Validation failed: No images selected');
       toast({
         title: "Images Required",
         description: "Please select at least one salon photo.",
@@ -500,7 +464,6 @@ export default function Dashboard() {
     }
 
     if (!user?.id) {
-      console.log('❌ Validation failed: No user ID');
       toast({
         title: "Authentication Error",
         description: "Please log in again to create a salon.",
@@ -510,7 +473,6 @@ export default function Dashboard() {
     }
 
     if (!data.name?.trim()) {
-      console.log('❌ Validation failed: No salon name');
       toast({
         title: "Salon Name Required",
         description: "Please enter a salon name.",
@@ -520,7 +482,6 @@ export default function Dashboard() {
     }
 
     if (!selectedLocation) {
-      console.log('❌ Validation failed: No location provided');
       toast({
         title: "Location Required",
         description: "Please select or enter a salon location.",
@@ -538,11 +499,8 @@ export default function Dashboard() {
       ownerId: user.id,
     };
 
-    console.log('✅ Validation passed, submitting salon data:', salonData);
-
     try {
       await createSalonMutation.mutateAsync(salonData);
-      console.log('🎉 Salon creation completed successfully');
     } catch (error) {
       console.error('❌ Salon creation failed in submit handler:', error);
     }
@@ -558,7 +516,6 @@ export default function Dashboard() {
 
   const onOfferSubmit = (data: OfferForm) => {
     if (!selectedSalonId) return;
-    console.log('Offer form data:', data);
 
     // Ensure all required fields are present and properly formatted
     const offerData = {
@@ -570,7 +527,6 @@ export default function Dashboard() {
       salonId: selectedSalonId,
     };
 
-    console.log('Sending offer data:', offerData);
     createOfferMutation.mutate(offerData);
   };
 
@@ -758,17 +714,11 @@ export default function Dashboard() {
                       <Form {...salonForm}>
                         <form
                           onSubmit={(e) => {
-                            console.log('🔥 Form submit event triggered');
-                            console.log('Form errors:', salonForm.formState.errors);
-                            console.log('Form values:', salonForm.getValues());
-                            console.log('Form is valid:', salonForm.formState.isValid);
                             salonForm.handleSubmit(
                               (data) => {
-                                console.log('✅ Form validation passed, calling onSalonSubmit');
                                 onSalonSubmit(data);
                               },
                               (errors) => {
-                                console.log('❌ Form validation failed:', errors);
                                 // Show validation errors to user
                                 const errorMessages = Object.entries(errors)
                                   .map(([field, error]) => `${field}: ${error?.message}`)
@@ -1170,18 +1120,10 @@ export default function Dashboard() {
                           data-testid="button-add-service"
                           onClick={() => {
                             const currentSalon = salons.find((s: any) => s.id === selectedSalonId);
-                            console.log('Add Service clicked - Current salon:', {
-                              id: currentSalon?.id,
-                              name: currentSalon?.name,
-                              manualLocation: currentSalon?.manualLocation,
-                              hasManualLocation: !!currentSalon?.manualLocation && currentSalon.manualLocation.trim() !== ''
-                            });
 
                             if (!currentSalon?.manualLocation || currentSalon.manualLocation.trim() === '') {
-                              console.log('Opening location modal - no manual location set');
                               setIsLocationModalOpen(true);
                             } else {
-                              console.log('Opening service dialog - manual location exists:', currentSalon.manualLocation);
                               setIsServiceDialogOpen(true);
                             }
                           }}

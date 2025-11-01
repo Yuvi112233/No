@@ -35,7 +35,6 @@ class ReputationService {
       };
 
       reputation = await UserReputationModel.create(newReputation);
-      console.log(`✅ Initialized reputation for user: ${userId}`);
     }
 
     return reputation.toObject() as UserReputation;
@@ -115,10 +114,6 @@ class ReputationService {
 
     // Save changes
     await reputation.save();
-
-    console.log(
-      `📊 Updated reputation for user ${userId}: ${action} (${scoreChange > 0 ? '+' : ''}${scoreChange}) -> Score: ${reputation.reputationScore}, Level: ${reputation.trustLevel}`
-    );
 
     return reputation.toObject() as UserReputation;
   }

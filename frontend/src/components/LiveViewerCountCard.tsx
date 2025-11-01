@@ -13,7 +13,6 @@ export default function LiveViewerCountCard({ salonId }: LiveViewerCountCardProp
     const handleViewerUpdate = (event: CustomEvent) => {
       const { salonId: updatedSalonId, count } = event.detail;
       if (updatedSalonId === salonId) {
-        console.log('📊 Live viewer count updated:', count, 'for salon:', updatedSalonId);
         setViewerCount(count);
       }
     };
@@ -24,8 +23,6 @@ export default function LiveViewerCountCard({ salonId }: LiveViewerCountCardProp
     const baseURL = import.meta.env.VITE_API_URL || 'https://no-production-d4fc.up.railway.app';
     const apiUrl = `${baseURL}/api/live-viewers/${salonId}`;
     
-    console.log('🔍 Fetching initial viewer count from:', apiUrl);
-    
     fetch(apiUrl)
       .then(res => {
         if (!res.ok) {
@@ -34,7 +31,6 @@ export default function LiveViewerCountCard({ salonId }: LiveViewerCountCardProp
         return res.json();
       })
       .then(data => {
-        console.log('✅ Initial viewer count received:', data.count);
         setViewerCount(data.count || 0);
       })
       .catch(err => {

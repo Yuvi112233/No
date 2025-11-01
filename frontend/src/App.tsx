@@ -79,8 +79,6 @@ function App() {
     if (storedToken && storedUser) {
       try {
         const user = JSON.parse(storedUser);
-        console.log('Found existing auth, user:', user);
-        console.log('Current path on mount:', currentPath);
         setAuthenticatedUser(user);
 
         // If user is admin (salon_owner), skip category selection
@@ -104,42 +102,33 @@ function App() {
   }, []);
 
   const handleAuthComplete = (user?: any) => {
-    console.log('App: Auth complete, user:', user);
     setAuthenticatedUser(user);
     // If user is an admin (salon_owner), skip intro and go directly to app
     if (user && user.role === 'salon_owner') {
-      console.log('Admin user detected, skipping intro screen');
       setCurrentPhase('skeleton');
     } else {
-      console.log('Regular user, showing intro screen');
       setCurrentPhase('intro');
     }
   };
 
   const handleIntroComplete = () => {
-    console.log('App: Intro complete, switching to skeleton loading');
     setCurrentPhase('skeleton');
   };
 
   const handleSkeletonComplete = () => {
-    console.log('App: Skeleton loading complete');
-
     // Check if user needs category selection
     if (authenticatedUser && authenticatedUser.role !== 'salon_owner') {
       const storedCategory = getUserCategory();
       if (!storedCategory) {
-        console.log('No category selected, showing category selection');
         setCurrentPhase('category');
         return;
       }
     }
 
-    console.log('Switching to app');
     setCurrentPhase('app');
   };
 
   const handleCategorySelect = (category: UserCategory) => {
-    console.log('Category selected:', category);
     setUserCategory(category);
     setCurrentPhase('app');
   };
@@ -147,15 +136,8 @@ function App() {
   // Navigate to appropriate page when entering app phase (only if needed)
   useEffect(() => {
     if (currentPhase === 'app' && authenticatedUser) {
-      console.log('=== APP ROUTING DEBUG ===');
-      console.log('App phase reached with user:', authenticatedUser);
-      console.log('User role:', authenticatedUser.role);
-      console.log('Role type:', typeof authenticatedUser.role);
-      console.log('Is salon_owner?', authenticatedUser.role === 'salon_owner');
-
       // Get current path
       const currentPath = window.location.pathname;
-      console.log('Current path:', currentPath);
 
       // Check if user just logged in (coming from auth page)
       const isOnAuthPage = currentPath === '/auth';
@@ -164,33 +146,23 @@ function App() {
       // Always redirect if on auth page or root
       if (isOnAuthPage || isOnRoot) {
         if (authenticatedUser.role === 'salon_owner') {
-          console.log('✅ Navigating ADMIN to /dashboard');
           setLocation('/dashboard');
         } else {
-          console.log('✅ Navigating CUSTOMER to /');
           setLocation('/');
         }
-      } else {
-        console.log('User already on a valid page, staying at:', currentPath);
       }
-      console.log('=== END ROUTING DEBUG ===');
     }
   }, [currentPhase, authenticatedUser, setLocation]);
 
   const handleSignIn = () => {
-    console.log('App: Sign in requested, going to phone auth');
     setCurrentPhase('phone-auth');
   };
 
   const handlePhoneAuthComplete = (user?: any) => {
-    console.log('App: Phone auth complete, user:', user);
     setAuthenticatedUser(user);
     // All phone auth goes to skeleton loading (admins will be routed by the auth context)
     setCurrentPhase('skeleton');
   };
-
-  console.log('App render, currentPhase:', currentPhase);
-  console.log('Is admin route:', isAdminRoute);
 
   // If accessing admin routes, bypass phase system and show admin pages directly
   if (isAdminRoute) {

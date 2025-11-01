@@ -80,8 +80,6 @@ class AuditService {
    */
   async logStatusTransition(log: StatusTransitionLog): Promise<void> {
     try {
-      console.log(`📝 [AUDIT] Status transition: Queue ${log.queueId} | ${log.oldStatus} → ${log.newStatus} | Actor: ${log.actor}`);
-      
       // Store in a dedicated collection or extend existing queue document
       // For now, we'll log to console and could extend to a StatusTransitionLog collection
       // This provides an audit trail for all status changes
@@ -121,8 +119,6 @@ class AuditService {
         suspiciousReasons: log.suspiciousReasons || [],
         timeSinceNotification: log.timeSinceNotification
       });
-
-      console.log(`📝 [AUDIT] Check-in attempt logged: ${checkInLog.id} | User: ${log.userId} | Success: ${log.success} | Method: ${log.method}`);
     } catch (error) {
       console.error('Error logging check-in attempt:', error);
     }
@@ -134,8 +130,6 @@ class AuditService {
    */
   async logAdminAction(log: AdminActionLog): Promise<void> {
     try {
-      console.log(`📝 [AUDIT] Admin action: ${log.action} | Admin: ${log.adminId} | Queue: ${log.queueId} | Details:`, log.details);
-      
       // Store admin actions for audit trail
       // This could be extended to a separate AdminActionLog collection
       
@@ -162,8 +156,6 @@ class AuditService {
         channels: log.channels,
         viewed: false
       });
-
-      console.log(`📝 [AUDIT] Notification logged: ${notificationLog.id} | Type: ${log.type} | User: ${log.userId} | WhatsApp: ${log.channels.whatsapp.sent} | WebSocket: ${log.channels.websocket.sent}`);
     } catch (error) {
       console.error('Error logging notification delivery:', error);
     }

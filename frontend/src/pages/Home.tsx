@@ -88,8 +88,6 @@ export default function Home() {
     queryFn: () => api.salons.getAll(),
   });
 
-  // Debug log to see what data we're getting
-  console.log('Salons data from API:', salons);
 
 
 

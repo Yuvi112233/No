@@ -69,22 +69,16 @@ export default function PlatformAdmin() {
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   useEffect(() => {
-    console.log('PlatformAdmin: Current user:', user);
-    console.log('PlatformAdmin: User role:', user?.role);
-
     if (!user) {
-      console.log('PlatformAdmin: No user, redirecting to admin login');
       window.location.href = '/admin-login';
       return;
     }
 
     if (user?.role !== 'super_admin') {
-      console.log('PlatformAdmin: User is not super_admin, redirecting to admin login');
       window.location.href = '/admin-login';
       return;
     }
 
-    console.log('PlatformAdmin: User is super_admin, fetching data');
     fetchPlatformStats();
     fetchSalons();
   }, [user, currentPage]);
@@ -94,7 +88,6 @@ export default function PlatformAdmin() {
     if (!autoRefresh || !user || user.role !== 'super_admin') return;
 
     const interval = setInterval(() => {
-      console.log('Auto-refreshing dashboard data...');
       fetchPlatformStats();
       fetchSalons();
       setLastUpdated(new Date());
@@ -106,22 +99,15 @@ export default function PlatformAdmin() {
   const fetchPlatformStats = async () => {
     try {
       const token = localStorage.getItem('smartq_token');
-      console.log('Fetching platform stats with token:', token ? 'exists' : 'missing');
 
       const baseURL = import.meta.env.VITE_API_URL || 'https://no-production-d4fc.up.railway.app';
       const response = await fetch(`${baseURL}/api/admin/platform/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      console.log('Platform stats response status:', response.status);
-
       if (response.ok) {
         const data = await response.json();
-        console.log('Platform stats data:', data);
         setStats(data);
-      } else {
-        const errorText = await response.text();
-        console.error('Failed to fetch stats:', response.status, errorText);
       }
     } catch (error) {
       console.error('Failed to fetch platform stats:', error);
@@ -148,7 +134,6 @@ export default function PlatformAdmin() {
     try {
       setLoading(true);
       const token = localStorage.getItem('smartq_token');
-      console.log('Fetching salons with token:', token ? 'exists' : 'missing');
 
       const baseURL = import.meta.env.VITE_API_URL || 'https://no-production-d4fc.up.railway.app';
       const response = await fetch(
@@ -156,16 +141,10 @@ export default function PlatformAdmin() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log('Salons response status:', response.status);
-
       if (response.ok) {
         const data = await response.json();
-        console.log('Salons data:', data);
         setSalons(data.salons);
         setTotalPages(data.pagination.pages);
-      } else {
-        const errorText = await response.text();
-        console.error('Failed to fetch salons:', response.status, errorText);
       }
     } catch (error) {
       console.error('Failed to fetch salons:', error);

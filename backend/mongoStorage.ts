@@ -46,9 +46,6 @@ export class MongoStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     try {
-      console.log('=== CREATE USER DEBUG ===');
-      console.log('Insert user data:', JSON.stringify(insertUser, null, 2));
-      
       const id = randomUUID();
       // Only hash password if it exists and is not empty
       const hashedPassword = insertUser.password && insertUser.password.trim() !== ''
@@ -71,14 +68,11 @@ export class MongoStorage implements IStorage {
         userObject.phone = insertUser.phone;
       }
 
-      console.log('User object to create:', JSON.stringify(userObject, null, 2));
       const createdUserDoc = await UserModel.create(userObject);
-      console.log('User created in MongoDB:', createdUserDoc._id);
 
       // Mongoose's .create() can return a Mongoose document, not a plain object.
       // We convert it to a plain object to match the return type.
       const user = createdUserDoc.toObject() as User;
-      console.log('User converted to object:', user.id);
 
       return user;
     } catch (error: any) {
@@ -221,9 +215,7 @@ export class MongoStorage implements IStorage {
       createdAt: new Date(),
     };
 
-    console.log('MongoDB: Creating service with data:', newService);
-    const result = await ServiceModel.create(newService);
-    console.log('MongoDB: Service creation result:', result);
+    await ServiceModel.create(newService);
     return newService;
   }
 
@@ -311,14 +303,11 @@ export class MongoStorage implements IStorage {
   }
 
   async getOffersBySalon(salonId: string): Promise<Offer[]> {
-    console.log('MongoDB: Searching for offers with salonId:', salonId);
     const offers = await OfferModel.find({ salonId }).lean();
-    console.log('MongoDB: Found offers:', offers);
     return offers as unknown as Offer[];
   }
 
   async getActiveOffers(): Promise<Offer[]> {
-    console.log('MongoDB: Searching for active offers');
     const offers = await OfferModel.find({
       validityPeriod: { $gt: new Date() },
       isActive: true
@@ -334,9 +323,7 @@ export class MongoStorage implements IStorage {
       createdAt: new Date(),
     };
 
-    console.log('MongoDB: Creating offer:', newOffer);
     await OfferModel.create(newOffer);
-    console.log('MongoDB: Offer created successfully');
     return newOffer;
   }
 

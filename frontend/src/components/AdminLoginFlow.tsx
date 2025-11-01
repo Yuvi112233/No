@@ -572,7 +572,6 @@ export default function AdminLoginFlow({
 
   const registerMutation = useMutation({
     mutationFn: (userData: AdminRegisterForm) => {
-      console.log("Sending admin registration with role:", userData.role);
       return api.auth.register(userData);
     },
     onSuccess: (data: any) => {
@@ -608,8 +607,6 @@ export default function AdminLoginFlow({
         }
       }
 
-      console.log('Final error message to display:', errorMessage);
-
       toast({
         title: "Registration Failed",
         description: errorMessage,
@@ -619,13 +616,10 @@ export default function AdminLoginFlow({
   });
 
   const onLoginSubmit = (data: AdminLoginForm) => {
-    console.log('Admin login form submitted with:', data);
     loginMutation.mutate(data);
   };
 
   const onRegisterSubmit = (data: AdminRegisterForm) => {
-    console.log('Admin register form submitted with:', data);
-    console.log('Sending to API with role:', data.role);
     registerMutation.mutate(data);
   };
 
@@ -637,11 +631,6 @@ export default function AdminLoginFlow({
           password: registeredUser.password
         };
 
-        console.log('Auto-logging in admin user after verification...', {
-          email: loginData.email,
-          hasPassword: !!loginData.password,
-          userRole: registeredUser.role
-        });
         const data = await api.auth.login(loginData);
 
         if (data.user.role === 'salon_owner') {

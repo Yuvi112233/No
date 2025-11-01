@@ -37,8 +37,6 @@ class VoiceNotificationService {
             utterance.volume = 0;
             this.synthesis.speak(utterance);
 
-            console.log('🔓 Speech synthesis unlocked on user interaction');
-
             // Remove listeners after first interaction
             document.removeEventListener('click', unlockSpeech);
             document.removeEventListener('touchstart', unlockSpeech);
@@ -69,7 +67,6 @@ class VoiceNotificationService {
 
             if (selectedVoice) {
                 this.voice = selectedVoice;
-                console.log('Loaded saved voice:', this.voice.name);
                 this.emit('voice-changed', this.voice);
             } else if (!this.voice) {
                 // Fallback to default if no voice is loaded yet
@@ -81,7 +78,6 @@ class VoiceNotificationService {
 
                 if (defaultVoice) {
                     this.voice = defaultVoice;
-                    console.log('Loaded default voice:', this.voice.name);
                     this.emit('voice-changed', this.voice);
                 }
             }
@@ -139,7 +135,6 @@ class VoiceNotificationService {
     enable() {
         this.isEnabled = true;
         this.saveSettings();
-        console.log('Voice notifications enabled');
     }
 
     /**
@@ -148,7 +143,6 @@ class VoiceNotificationService {
     disable() {
         this.isEnabled = false;
         this.saveSettings();
-        console.log('Voice notifications disabled');
     }
 
     /**
@@ -216,7 +210,6 @@ class VoiceNotificationService {
         if (selectedVoice) {
             this.voice = selectedVoice;
             this.saveSettings();
-            console.log('Voice changed to:', voiceName);
             this.emit('voice-changed', this.voice);
         }
     }
@@ -236,7 +229,6 @@ class VoiceNotificationService {
         }
 
         if (!this.isEnabled) {
-            console.log('Voice notifications disabled, skipping:', text);
             return;
         }
 
@@ -257,12 +249,10 @@ class VoiceNotificationService {
 
         // Set callbacks
         utterance.onstart = () => {
-            console.log('Speaking:', text);
             options?.onStart?.();
         };
 
         utterance.onend = () => {
-            console.log('Finished speaking');
             options?.onEnd?.();
         };
 
