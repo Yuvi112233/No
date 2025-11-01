@@ -221,7 +221,10 @@ export default function UnifiedAuthScreen({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden">
+    <div 
+      className="fixed inset-0 z-50 overflow-hidden"
+      style={{ overscrollBehavior: 'none' }}
+    >
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
@@ -232,9 +235,9 @@ export default function UnifiedAuthScreen({
       </div>
 
       {/* Content */}
-      <div className="relative min-h-full flex flex-col">
+      <div className="relative h-screen flex flex-col">
         {/* Main Content */}
-        <div className="flex-1 flex flex-col justify-center items-center px-4 py-4 sm:py-6">
+        <div className="flex-1 flex flex-col justify-center items-center px-4 py-4 sm:py-6 overflow-y-auto">
           {/* Logo & Hero Text */}
           <div className="text-center mb-4 sm:mb-6">
             <img
