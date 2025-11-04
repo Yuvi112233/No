@@ -118,14 +118,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Progressive authentication helpers
   const needsProfileCompletion = (): boolean => {
     if (!user) return false;
-    // User needs profile completion if they don't have a name or email (phone-only auth)
-    return !user.name || user.name.trim() === '' || !user.email || user.email.trim() === '';
+    // User needs profile completion if they don't have a name or valid email
+    // Exclude placeholder emails created during phone-only auth
+    const hasValidEmail = user.email && !user.email.includes('@placeholder.com');
+    return !user.name || user.name.trim() === '' || !hasValidEmail;
   };
 
   const needsPhoneVerification = (): boolean => {
     if (!user) return false;
-    // User needs phone verification if they don't have a phone (Google auth)
-    return !user.phone || user.phone.trim() === '';
+    // User needs phone verification ONLY if they have email but no phone (Google auth users)
+    // Don't ask for phone if user already has a verified phone from mobile signup
+    const hasEmail = !!(user.email && !user.email.includes('@placeholder.com'));
+    const hasPhone = !!(user.phone && user.phone.trim() !== '');
+    return hasEmail && !hasPhone;
   };
 
   const isProfileComplete = user ? (!needsProfileCompletion() && !needsPhoneVerification()) : false;
