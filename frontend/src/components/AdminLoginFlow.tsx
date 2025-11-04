@@ -456,16 +456,29 @@ export default function AdminLoginFlow({
     } catch (err: any) {
       let errorMessage = err.message || "Failed to sign in with Google";
 
-      // Handle role conflict error
-      if (err.existingRole && err.requestedRole) {
-        errorMessage = `Account already exists as ${err.existingRole}. Please use the customer login instead.`;
+      // Handle role conflict error - check both status code and error data
+      if (err.status === 403 && err.message?.includes('customer')) {
+        errorMessage = "This account is registered as a Customer. Please use the Customer Login to access your account.";
+        toast({
+          title: "Customer Account Detected",
+          description: errorMessage,
+          variant: "destructive",
+          duration: 6000,
+        });
+      } else if (err.data?.existingRole && err.data?.requestedRole) {
+        errorMessage = `Account already exists as ${err.data.existingRole}. Please use the customer login instead.`;
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
       }
-
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
     }
   };
 

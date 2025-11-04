@@ -106,13 +106,25 @@ export default function UnifiedAuthScreen({
 
       window.location.reload();
     } catch (err: any) {
-      const errorInfo = getErrorMessage(err);
-      setError(errorInfo.message);
-      toast({
-        title: errorInfo.title,
-        description: errorInfo.message,
-        variant: "destructive",
-      });
+      // Check if this is an admin trying to log in as customer
+      if (err.status === 403 && err.message?.includes('salon_owner')) {
+        const adminErrorMessage = "This account is registered as a Salon Owner. Please use the Admin Login to access your account.";
+        setError(adminErrorMessage);
+        toast({
+          title: "Admin Account Detected",
+          description: adminErrorMessage,
+          variant: "destructive",
+          duration: 6000,
+        });
+      } else {
+        const errorInfo = getErrorMessage(err);
+        setError(errorInfo.message);
+        toast({
+          title: errorInfo.title,
+          description: errorInfo.message,
+          variant: "destructive",
+        });
+      }
     }
   };
 

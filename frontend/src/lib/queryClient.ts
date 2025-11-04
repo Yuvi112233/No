@@ -3,9 +3,11 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     let errorDetail = res.statusText; // Default error detail
+    let errorData: any = null;
     try {
       // Try to parse as JSON first
       const errorJson = await res.json();
+      errorData = errorJson;
       if (errorJson && typeof errorJson === 'object' && errorJson.message) {
         errorDetail = errorJson.message;
       } else if (errorJson) {
@@ -19,8 +21,11 @@ async function throwIfResNotOk(res: Response) {
         errorDetail = text;
       }
     }
-    // Return just the error message without the "API Error XXX:" prefix
-    throw new Error(errorDetail);
+    // Create error with status code and additional data
+    const error: any = new Error(errorDetail);
+    error.status = res.status;
+    error.data = errorData;
+    throw error;
   }
 }
 
