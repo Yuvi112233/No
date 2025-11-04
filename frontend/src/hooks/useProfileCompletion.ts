@@ -18,8 +18,11 @@ export function useProfileCompletion() {
 
   const needsPhoneVerification = (): boolean => {
     if (!user) return false;
-    // User needs phone verification if they don't have a phone number (Google auth)
-    return !user.phone || user.phone.trim() === '';
+    // User needs phone verification ONLY if they have email but no phone (Google auth users)
+    // Don't ask for phone if user already has a verified phone from mobile signup
+    const hasEmail = !!(user.email && !user.email.includes('@placeholder.com'));
+    const hasPhone = !!(user.phone && user.phone.trim() !== '');
+    return hasEmail && !hasPhone;
   };
 
   const requireProfileCompletion = (action: () => void) => {
@@ -30,13 +33,15 @@ export function useProfileCompletion() {
     }
 
     // Check if user needs name/email completion (phone auth users)
+    // Phone-authenticated users should provide name and email, not phone again
     if (needsProfileCompletion()) {
       setPendingAction(() => action);
       setIsModalOpen(true);
       return;
     }
 
-    // Check if user needs phone verification (Google auth users)
+    // Check if user needs phone verification (Google auth users ONLY)
+    // Only ask for phone if user came from Google/email auth and doesn't have phone
     if (needsPhoneVerification()) {
       setPendingAction(() => action);
       setIsPhoneModalOpen(true);
@@ -56,6 +61,8 @@ export function useProfileCompletion() {
         ...user!,
         name: data.name,
         email: data.email || user!.email,
+        // If phone was provided, it means it was already verified in BookingDetailsModal
+        ...(data.phone && { phone: data.phone, phoneVerified: true }),
       };
       updateUser(updatedUser);
 
@@ -68,7 +75,8 @@ export function useProfileCompletion() {
       setIsModalOpen(false);
 
       // Check if phone verification is needed next
-      if (needsPhoneVerification()) {
+      // Skip if phone was already provided (already verified in BookingDetailsModal)
+      if (!data.phone && needsPhoneVerification()) {
         setIsPhoneModalOpen(true);
       } else if (pendingAction) {
         // Execute pending action if profile is fully complete
