@@ -56,15 +56,20 @@ export function useProfileCompletion() {
     try {
       await api.auth.completeProfile(data.name, data.email);
       
-      // Update user in context
-      const updatedUser = {
-        ...user!,
-        name: data.name,
-        email: data.email || user!.email,
-        // If phone was provided, it means it was already verified in BookingDetailsModal
-        ...(data.phone && { phone: data.phone, phoneVerified: true }),
-      };
-      updateUser(updatedUser);
+      // If phone was provided, it's already been verified and updated in the backend
+      // Fetch the latest user data from backend to ensure we have phoneVerified flag
+      if (data.phone) {
+        const freshUserData = await api.auth.getProfile();
+        updateUser(freshUserData);
+      } else {
+        // Update user in context with just name and email
+        const updatedUser = {
+          ...user!,
+          name: data.name,
+          email: data.email || user!.email,
+        };
+        updateUser(updatedUser);
+      }
 
       toast({
         title: 'Profile Updated!',
@@ -100,12 +105,9 @@ export function useProfileCompletion() {
       // Update user phone in backend
       await api.auth.updatePhone(phone);
       
-      // Update user in context
-      const updatedUser = {
-        ...user!,
-        phone: phone,
-      };
-      updateUser(updatedUser);
+      // Fetch fresh user data from backend to ensure phoneVerified flag is set
+      const freshUserData = await api.auth.getProfile();
+      updateUser(freshUserData);
 
       toast({
         title: 'Phone Verified!',
