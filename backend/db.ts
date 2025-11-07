@@ -274,7 +274,7 @@ queueSchema.index({ userId: 1, status: 1 });
 queueSchema.index({ status: 1, notifiedAt: 1 });
 queueSchema.index({ salonId: 1, position: 1 });
 
-userReputationSchema.index({ userId: 1 }, { unique: true });
+// userId already has unique index from schema definition
 userReputationSchema.index({ trustLevel: 1 });
 userReputationSchema.index({ reputationScore: 1 });
 
