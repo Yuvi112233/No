@@ -86,11 +86,6 @@ export default function EmailInput({
       // Zomato-style: Send OTP to both new and existing users
       const response = await api.auth.sendEmailOTPLogin(email.trim().toLowerCase());
 
-      // Store debug OTP if available
-      if (response.debug?.otp) {
-        localStorage.setItem('debug_email_otp', response.debug.otp);
-      }
-
       // Save to recent emails
       saveRecentEmail(email.trim().toLowerCase());
 

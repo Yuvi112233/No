@@ -23,7 +23,6 @@ interface NewAuthPageProps {
 export default function NewAuthPage({ onComplete }: NewAuthPageProps) {
   const [currentStep, setCurrentStep] = useState<AuthStep>('loading');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [debugOTP, setDebugOTP] = useState<string>('');
   const [, setLocation] = useLocation();
 
   const {

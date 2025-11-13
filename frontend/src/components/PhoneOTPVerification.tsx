@@ -21,16 +21,8 @@ export default function PhoneOTPVerification({
   const [resendCountdown, setResendCountdown] = useState(30);
   const [canResend, setCanResend] = useState(false);
   const [attempts, setAttempts] = useState(0);
-  const [currentDebugOTP, setCurrentDebugOTP] = useState<string>('');
   const { toast } = useToast();
   const otpInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const storedOTP = localStorage.getItem('debug_otp');
-    if (storedOTP) {
-      setCurrentDebugOTP(storedOTP);
-    }
-  }, []);
 
   useEffect(() => {
     if (resendCountdown > 0) {
@@ -91,8 +83,6 @@ export default function PhoneOTPVerification({
       const { api } = await import("../lib/api");
       const response = await api.auth.verifyOTP(phoneNumber, otpValue);
 
-      localStorage.removeItem('debug_otp');
-
       toast({
         title: "Phone Verified!",
         description: "Welcome to SmartQ!",
@@ -139,24 +129,12 @@ export default function PhoneOTPVerification({
 
     try {
       const { api } = await import("../lib/api");
-      const response = await api.auth.sendOTP(phoneNumber);
+      await api.auth.sendOTP(phoneNumber);
 
-      if (response.debug?.otp) {
-        localStorage.setItem('debug_otp', response.debug.otp);
-        setCurrentDebugOTP(response.debug.otp);
-        toast({
-          title: "OTP Resent!",
-          description: `Your new verification code is: ${response.debug.otp}`,
-          duration: 10000,
-        });
-      } else {
-        localStorage.removeItem('debug_otp');
-        setCurrentDebugOTP('');
-        toast({
-          title: "OTP Resent!",
-          description: `New verification code sent to ${maskPhoneNumber(phoneNumber)}`,
-        });
-      }
+      toast({
+        title: "OTP Resent!",
+        description: `New verification code sent to ${maskPhoneNumber(phoneNumber)}`,
+      });
 
       setResendCountdown(30);
       setCanResend(false);
@@ -236,24 +214,6 @@ export default function PhoneOTPVerification({
                 </button>
               </div>
             </div>
-
-            {/* Debug OTP Display */}
-            {currentDebugOTP && (
-              <div className="mb-6 p-3 bg-teal-50 border border-teal-200 rounded-xl">
-                <p className="text-xs text-teal-700 text-center font-medium">
-                  🔐 Code: <span className="font-bold text-base text-teal-800">{currentDebugOTP}</span>
-                </p>
-                <button
-                  onClick={() => {
-                    setOtp(currentDebugOTP);
-                    handleVerifyOTP(currentDebugOTP);
-                  }}
-                  className="mt-2 w-full px-3 py-2 bg-teal-600 text-white text-xs font-medium rounded-lg hover:bg-teal-700 transition-colors"
-                >
-                  Auto-fill & Verify
-                </button>
-              </div>
-            )}
 
             {/* OTP Input */}
             <div className="mb-6">

@@ -43,7 +43,6 @@ export default function BookingDetailsModal({
   const [otp, setOtp] = useState('');
   const [countdown, setCountdown] = useState(0);
   const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [debugOTP, setDebugOTP] = useState<string>('');
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -102,22 +101,12 @@ export default function BookingDetailsModal({
         setPhoneNumber(fullPhoneNumber);
 
         // Send phone OTP
-        const response = await api.auth.sendOTP(fullPhoneNumber);
+        await api.auth.sendOTP(fullPhoneNumber);
 
-        // Store debug OTP for testing
-        if (response.debug?.otp) {
-          setDebugOTP(response.debug.otp);
-          toast({
-            title: "OTP Sent!",
-            description: `Your verification code is: ${response.debug.otp}`,
-            duration: 10000,
-          });
-        } else {
-          toast({
-            title: "Verification Code Sent",
-            description: "Please check your phone for the verification code.",
-          });
-        }
+        toast({
+          title: "Verification Code Sent",
+          description: "Please check your phone for the verification code.",
+        });
 
         // Move to phone verification step
         setStep('phone-verify');
@@ -185,22 +174,12 @@ export default function BookingDetailsModal({
 
     try {
       const { api } = await import("../lib/api");
-      const response = await api.auth.sendOTP(phoneNumber);
+      await api.auth.sendOTP(phoneNumber);
 
-      // Store debug OTP for testing
-      if (response.debug?.otp) {
-        setDebugOTP(response.debug.otp);
-        toast({
-          title: "OTP Resent!",
-          description: `Your verification code is: ${response.debug.otp}`,
-          duration: 10000,
-        });
-      } else {
-        toast({
-          title: "Code Resent",
-          description: "A new verification code has been sent to your phone.",
-        });
-      }
+      toast({
+        title: "Code Resent",
+        description: "A new verification code has been sent to your phone.",
+      });
 
       setCountdown(30);
       setOtp('');
@@ -218,7 +197,6 @@ export default function BookingDetailsModal({
   const handleBack = () => {
     setStep('details');
     setOtp('');
-    setDebugOTP('');
   };
 
   return (
@@ -387,30 +365,6 @@ export default function BookingDetailsModal({
           </form>
         ) : (
           <div className="space-y-4 pt-3 sm:pt-4">
-            {/* Debug OTP Display - For Testing Only */}
-            {debugOTP && (
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-3 sm:p-4">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
-                  <p className="text-xs font-bold text-amber-900 uppercase tracking-wide">
-                    Testing Mode
-                  </p>
-                  <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-amber-700 mb-2">Your OTP Code:</p>
-                  <div className="bg-white rounded-lg p-3 border-2 border-amber-200">
-                    <p className="text-3xl font-black text-amber-900 tracking-[0.5em] font-mono">
-                      {debugOTP}
-                    </p>
-                  </div>
-                  <p className="text-xs text-amber-600 mt-2">
-                    Copy this code to verify your phone number
-                  </p>
-                </div>
-              </div>
-            )}
-
             {/* OTP Input */}
             <div className="space-y-2">
               <label className="text-xs sm:text-sm font-semibold text-gray-700 flex items-center gap-2">

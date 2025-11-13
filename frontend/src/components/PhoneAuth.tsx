@@ -175,25 +175,15 @@ export default function PhoneAuth({ onOTPSent, onSwitchToAdmin }: PhoneAuthProps
 
     try {
       const { api } = await import("../lib/api");
-      const response = await api.auth.sendOTP(fullPhoneNumber);
+      await api.auth.sendOTP(fullPhoneNumber);
 
       clearTimeout(messageTimer1);
       clearTimeout(messageTimer2);
 
-      if (response.debug?.otp) {
-        localStorage.setItem("debug_otp", response.debug.otp);
-        toast({
-          title: "OTP Sent!",
-          description: `Your verification code is: ${response.debug.otp}`,
-          duration: 10000,
-        });
-      } else {
-        localStorage.removeItem("debug_otp");
-        toast({
-          title: "OTP Sent!",
-          description: `Verification code sent to ${fullPhoneNumber}`,
-        });
-      }
+      toast({
+        title: "OTP Sent!",
+        description: `Verification code sent to ${fullPhoneNumber}`,
+      });
 
       onOTPSent(fullPhoneNumber);
     } catch (err: any) {
