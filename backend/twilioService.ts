@@ -25,6 +25,7 @@ class TwilioService {
   async sendOTP(phoneNumber: string, name: string = 'User'): Promise<boolean> {
     try {
       const formatted = this.formatPhoneNumber(phoneNumber);
+      console.log('Sending OTP to phone:', formatted);
 
       if (!this.client) {
         this.client = twilio(this.accountSid, this.authToken);
@@ -34,9 +35,15 @@ class TwilioService {
         .verifications
         .create({ to: formatted, channel: 'sms' });
 
+      console.log('Twilio OTP sent successfully, SID:', res.sid);
       return true;
     } catch (error: any) {
-      console.error('Twilio Verify send failed:', error?.message || error);
+      console.error('Twilio Verify send failed:', {
+        message: error?.message,
+        code: error?.code,
+        moreInfo: error?.moreInfo,
+        status: error?.status
+      });
       return false;
     }
   }
@@ -44,6 +51,8 @@ class TwilioService {
   async verifyOTP(phoneNumber: string, code: string): Promise<boolean> {
     try {
       const formatted = this.formatPhoneNumber(phoneNumber);
+      console.log('Verifying OTP for phone:', formatted, 'with code:', code);
+      
       if (!this.client) {
         this.client = twilio(this.accountSid, this.authToken);
       }
@@ -52,9 +61,15 @@ class TwilioService {
         .verificationChecks
         .create({ to: formatted, code });
 
+      console.log('Twilio verification result:', check.status);
       return check.status === 'approved';
     } catch (error: any) {
-      console.error('Twilio Verify check failed:', error?.message || error);
+      console.error('Twilio Verify check failed:', {
+        message: error?.message,
+        code: error?.code,
+        moreInfo: error?.moreInfo,
+        status: error?.status
+      });
       return false;
     }
   }

@@ -134,9 +134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true,
         isNewUser,
         userId: user.id,
-        message: 'OTP sent successfully',
-        // For testing only - remove in production
-        debug: process.env.NODE_ENV === 'development' ? { otp } : undefined
+        message: 'OTP sent successfully'
       });
 
     } catch (error) {
@@ -192,9 +190,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         user: { ...userWithoutPassword, emailVerified: false, isVerified: false },
         requiresVerification: true,
-        message: 'Account created successfully. Please verify your email.',
-        // For testing only - remove in production
-        debug: process.env.NODE_ENV === 'development' ? { otp } : undefined
+        message: 'Account created successfully. Please verify your email.'
       });
     } catch (error) {
       console.error('Registration error:', error);
@@ -612,11 +608,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Check if phone is already taken by a DIFFERENT user
             const existingPhoneUser = await storage.getUserByPhone(phoneNumber);
             if (existingPhoneUser && existingPhoneUser.id !== user.id) {
-              return res.status(400).json({
-                message: 'Phone number is already registered to another account'
-              });
+              // Check if the existing user is a temporary phone-only user
+              const isTemporaryUser = existingPhoneUser.email?.includes('@placeholder.com') &&
+                !existingPhoneUser.name &&
+                existingPhoneUser.phone === phoneNumber;
+
+              if (isTemporaryUser) {
+                // Delete the temporary user since we're merging it with the authenticated user
+                await storage.deleteUser(existingPhoneUser.id);
+              } else {
+                return res.status(400).json({
+                  message: 'Phone number is already registered to another account'
+                });
+              }
             }
-            // This is an existing user adding their phone - don't create new user
+            
+            // Temporarily store the phone number for this user (will be marked verified after OTP)
+            const updatedUser = await storage.updateUser(user.id, {
+              phone: phoneNumber,
+              phoneVerified: false,
+            });
+            user = updatedUser || user; // Use updated user object
           }
         } catch (err) {
           // Invalid token, treat as unauthenticated
@@ -648,24 +660,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Generate and send OTP
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+      // Send OTP via Twilio
+      const sent = await otpService.sendPhoneOTP(user.id, phoneNumber, user.name || 'User');
 
-      // Store OTP in user record
-      await storage.updateUser(user.id, {
-        phoneOTP: otp,
-        otpExpiry: expiry,
-      });
-
-      // TODO: Send actual SMS via Twilio or other service
+      if (!sent) {
+        return res.status(500).json({
+          message: 'Failed to send OTP. Please try again.'
+        });
+      }
 
       res.json({
         success: true,
         isNewUser,
-        message: 'OTP sent successfully',
-        // For testing only - remove in production
-        debug: { otp }
+        message: 'OTP sent successfully'
       });
 
     } catch (error) {
@@ -706,32 +713,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Verify OTP
-      if (user.phoneOTP !== otp) {
-        return res.status(400).json({ message: 'Invalid OTP' });
+      // Verify OTP using Twilio Verify service
+      const verified = await otpService.verifyPhoneOTP(user.id, otp);
+
+      if (!verified) {
+        return res.status(400).json({ message: 'Invalid or expired OTP' });
       }
 
-      // Check if OTP has expired
-      if (!user.otpExpiry || user.otpExpiry < new Date()) {
-        return res.status(400).json({ message: 'OTP has expired' });
+      // Get updated user after verification
+      const updatedUser = await storage.getUser(user.id);
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
       }
-
-      // Mark phone as verified and clear OTP
-      await storage.updateUser(user.id, {
-        phoneVerified: true,
-        isVerified: true,
-        phoneOTP: null,
-        otpExpiry: null,
-      });
 
       // Generate JWT token (only for phone-only auth, not for authenticated users)
       let token = null;
       if (!isAuthenticatedUser) {
         token = jwt.sign(
           {
-            userId: user.id,
-            phone: user.phone,
-            role: user.role || 'customer'
+            userId: updatedUser.id,
+            phone: updatedUser.phone,
+            role: updatedUser.role || 'customer'
           },
           JWT_SECRET,
           { expiresIn: '24h' }
@@ -739,7 +741,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Return user data without sensitive fields
-      const { password, phoneOTP, otpExpiry, ...userWithoutSensitiveData } = user;
+      const { password, phoneOTP, emailOTP, otpExpiry, ...userWithoutSensitiveData } = updatedUser;
 
       const response: any = {
         user: {
@@ -2014,10 +2016,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'User not found or no phone number' });
       }
 
-      const otp = await otpService.sendPhoneOTP(userId, user.phone, user.name);
+      const sent = await otpService.sendPhoneOTP(userId, user.phone, user.name);
 
-      if (otp) {
-        res.json({ message: 'SMS OTP sent successfully', otp });
+      if (sent) {
+        res.json({ message: 'SMS OTP sent successfully' });
       } else {
         res.status(500).json({ message: 'Failed to send SMS OTP' });
       }

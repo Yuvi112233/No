@@ -85,8 +85,6 @@ export default function EmailOTPVerification({
       const { api } = await import("../lib/api");
       const response = await api.auth.verifyEmailOTP(userId, otpValue);
 
-      localStorage.removeItem('debug_email_otp');
-
       toast({
         title: "Email Verified!",
         description: "Welcome to SmartQ!",

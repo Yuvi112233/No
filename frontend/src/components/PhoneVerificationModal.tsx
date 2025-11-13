@@ -46,15 +46,11 @@ export function PhoneVerificationModal({ isOpen, onClose, onVerified }: PhoneVer
     setIsLoading(true);
     try {
       const fullPhone = `${countryCode}${phone}`;
-      const response = await api.auth.sendOTP(fullPhone);
+      await api.auth.sendOTP(fullPhone);
       
-      // For testing: show OTP in toast
-      const otpValue = response.debug?.otp || response.otp || '123456';
-      setGeneratedOtp(otpValue);
       toast({
-        title: '🔐 OTP Sent (Testing Mode)',
-        description: `Your OTP is: ${otpValue}`,
-        duration: 10000,
+        title: 'OTP Sent',
+        description: 'Please check your phone for the verification code',
       });
 
       setStep('otp');
@@ -102,15 +98,7 @@ export function PhoneVerificationModal({ isOpen, onClose, onVerified }: PhoneVer
     }
   };
 
-  const handleAutoFillOtp = () => {
-    if (generatedOtp) {
-      setOtp(generatedOtp);
-      toast({
-        title: 'OTP Auto-filled',
-        description: 'Click Verify to continue',
-      });
-    }
-  };
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -173,18 +161,6 @@ export function PhoneVerificationModal({ isOpen, onClose, onVerified }: PhoneVer
                   Sent to {countryCode}{phone}
                 </p>
               </div>
-
-              {/* Testing Mode: Auto-fill button */}
-              {generatedOtp && (
-                <Button
-                  onClick={handleAutoFillOtp}
-                  variant="outline"
-                  className="w-full border-teal-200 text-teal-700 hover:bg-teal-50"
-                >
-                  <Check className="w-4 h-4 mr-2" />
-                  Auto-fill OTP (Testing)
-                </Button>
-              )}
 
               <div className="flex gap-2">
                 <Button
