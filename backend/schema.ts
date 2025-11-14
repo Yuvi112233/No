@@ -38,6 +38,7 @@ export const salons = pgTable("salons", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   ownerId: varchar("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
+  slug: text("slug").unique(), // SEO-friendly URL slug
   description: text("description"),
   address: text("address").notNull(),
   latitude: decimal("latitude", { precision: 10, scale: 6 }),

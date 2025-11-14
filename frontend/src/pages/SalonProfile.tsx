@@ -28,7 +28,7 @@ const capitalizeWords = (text: string) => {
 };
 
 export default function SalonProfile() {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>(); // Can be either slug or UUID
   const [, setLocation] = useLocation();
   const { user, updateUser } = useAuth();
   const { addItem, removeItem, items, getItemCount } = useCart();
@@ -43,16 +43,21 @@ export default function SalonProfile() {
     window.scrollTo(0, 0);
   }, [id]);
 
-  // Track salon page view for live viewer count
+  const { data: salon, isLoading } = useQuery<SalonDetails>({
+    queryKey: ['/api/salons', id],
+    enabled: !!id,
+  });
+
+  // Track salon page view for live viewer count (use actual salon ID from data)
   useEffect(() => {
-    if (!id || !user) return;
+    if (!salon?.id || !user) return;
 
     // Send salon_view_start message via WebSocket
     const ws = (window as any).wsConnection;
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({
         type: 'salon_view_start',
-        salonId: id,
+        salonId: salon.id,
         userId: user.id
       }));
     }
@@ -62,20 +67,20 @@ export default function SalonProfile() {
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({
           type: 'salon_view_end',
-          salonId: id,
+          salonId: salon.id,
           userId: user.id
         }));
       }
     };
-  }, [id, user]);
+  }, [salon?.id, user]);
 
   const isFavorited = useMemo(() => {
-    if (!user || !user.favoriteSalons) return false;
-    return user.favoriteSalons.includes(id || "");
-  }, [user, id]);
+    if (!user || !user.favoriteSalons || !salon?.id) return false;
+    return user.favoriteSalons.includes(salon.id);
+  }, [user, salon?.id]);
 
   const addFavoriteMutation = useMutation({
-    mutationFn: () => api.users.addFavorite(id!),
+    mutationFn: () => api.users.addFavorite(salon!.id),
     onSuccess: (updatedUser) => {
       if (updatedUser) {
         updateUser(updatedUser);
@@ -93,7 +98,7 @@ export default function SalonProfile() {
   });
 
   const removeFavoriteMutation = useMutation({
-    mutationFn: () => api.users.removeFavorite(id!),
+    mutationFn: () => api.users.removeFavorite(salon!.id),
     onSuccess: (updatedUser) => {
       if (updatedUser) {
         updateUser(updatedUser);
@@ -123,10 +128,11 @@ export default function SalonProfile() {
   };
 
   const handleShare = async () => {
-    // Construct clean URL - just the salon ID
-    const salonUrl = `${window.location.origin}/salon/${id}`;
+    // Use the salon's slug if available, otherwise fall back to ID
+    const salonSlug = (salon as any)?.slug || id;
+    const salonUrl = `${window.location.origin}/salon/${salonSlug}`;
     
-    try {
+    try{
       // Try to use Web Share API if available (works on mobile and some desktop browsers)
       if (navigator.share) {
         // Share only the URL without any additional text
@@ -185,13 +191,6 @@ export default function SalonProfile() {
     return items.some(item => item.service.id === serviceId);
   };
   const { toast } = useToast();
-
-
-
-  const { data: salon, isLoading } = useQuery<SalonDetails>({
-    queryKey: ['/api/salons', id],
-    enabled: !!id,
-  });
 
   // Auto-scroll reviews horizontally after 4 seconds on mobile
   useEffect(() => {

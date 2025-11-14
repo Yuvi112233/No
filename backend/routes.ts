@@ -1118,7 +1118,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/salons/:id', async (req, res) => {
     try {
-      const salon = await storage.getSalon(req.params.id);
+      // Try to get salon by ID first, then by slug
+      let salon = await storage.getSalon(req.params.id);
+      
+      // If not found by ID, try by slug
+      if (!salon && (storage as any).getSalonBySlug) {
+        salon = await (storage as any).getSalonBySlug(req.params.id);
+      }
+      
       if (!salon) return res.status(404).json({ message: 'Salon not found' });
 
       const services = await storage.getServicesBySalon(salon.id);
