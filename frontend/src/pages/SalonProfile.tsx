@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Clock, Heart, ShoppingCart, Zap, ImageIcon, X, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
+import { Star, MapPin, Clock, Heart, ShoppingCart, Zap, ImageIcon, X, ChevronLeft, ChevronRight, ArrowLeft, Share2 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 import { useToast } from "@/hooks/use-toast";
@@ -119,6 +119,51 @@ export default function SalonProfile() {
       removeFavoriteMutation.mutate();
     } else {
       addFavoriteMutation.mutate();
+    }
+  };
+
+  const handleShare = async () => {
+    // Construct clean URL - just the salon ID
+    const salonUrl = `${window.location.origin}/salon/${id}`;
+    
+    try {
+      // Try to use Web Share API if available (works on mobile and some desktop browsers)
+      if (navigator.share) {
+        // Share only the URL without any additional text
+        await navigator.share({
+          url: salonUrl,
+        });
+        toast({
+          title: "Shared successfully!",
+          description: "Thanks for sharing this salon",
+        });
+      } else {
+        // Fallback: Copy only the clean URL to clipboard
+        await navigator.clipboard.writeText(salonUrl);
+        toast({
+          title: "Link copied!",
+          description: "Salon link copied to clipboard",
+        });
+      }
+    } catch (error: any) {
+      // User cancelled share or error occurred
+      if (error.name !== 'AbortError') {
+        // Fallback: Copy just the URL to clipboard
+        try {
+          await navigator.clipboard.writeText(salonUrl);
+          toast({
+            title: "Link copied!",
+            description: "Salon link copied to clipboard",
+          });
+        } catch (clipboardError) {
+          console.error('Share error:', clipboardError);
+          toast({
+            title: "Unable to share",
+            description: "Please copy the URL manually",
+            variant: "destructive",
+          });
+        }
+      }
     }
   };
 
@@ -298,18 +343,30 @@ export default function SalonProfile() {
                   <Badge className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white capitalize">
                     {salon.type}
                   </Badge>
-                  {user && (
+                  <div className="flex items-center gap-1">
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={handleFavoriteClick}
-                      disabled={addFavoriteMutation.isPending || removeFavoriteMutation.isPending}
-                      data-testid="button-favorite"
+                      onClick={handleShare}
+                      data-testid="button-share"
                       className="hover:bg-teal-50"
+                      title="Share this salon"
                     >
-                      <Heart className={`h-6 w-6 ${isFavorited ? 'text-red-500 fill-current' : 'text-gray-400'}`} />
+                      <Share2 className="h-6 w-6 text-teal-600" />
                     </Button>
-                  )}
+                    {user && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleFavoriteClick}
+                        disabled={addFavoriteMutation.isPending || removeFavoriteMutation.isPending}
+                        data-testid="button-favorite"
+                        className="hover:bg-teal-50"
+                      >
+                        <Heart className={`h-6 w-6 ${isFavorited ? 'text-red-500 fill-current' : 'text-gray-400'}`} />
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 {salon.description && (
