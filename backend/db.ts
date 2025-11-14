@@ -73,6 +73,7 @@ const userSchema = new mongoose.Schema({
 const salonSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   name: { type: String, required: true },
+  slug: { type: String, unique: true, sparse: true }, // SEO-friendly URL slug
   ownerId: { type: String, required: true },
   address: { type: String, required: true },
   latitude: { type: Number, required: true },

@@ -146,8 +146,33 @@ export class MongoStorage implements IStorage {
   }
 
   // Salons
+  // Helper function to generate unique slug
+  private generateSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  private async ensureUniqueSlug(baseSlug: string): Promise<string> {
+    let slug = baseSlug;
+    let counter = 1;
+    
+    while (await SalonModel.findOne({ slug }).lean()) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    
+    return slug;
+  }
+
   async getSalon(id: string): Promise<Salon | undefined> {
     const salon = await SalonModel.findOne({ id }).lean();
+    return salon ? salon as unknown as Salon : undefined;
+  }
+
+  async getSalonBySlug(slug: string): Promise<Salon | undefined> {
+    const salon = await SalonModel.findOne({ slug }).lean();
     return salon ? salon as unknown as Salon : undefined;
   }
 
@@ -170,9 +195,15 @@ export class MongoStorage implements IStorage {
 
   async createSalon(salon: InsertSalon): Promise<Salon> {
     const id = randomUUID();
+    
+    // Generate unique slug from salon name
+    const baseSlug = this.generateSlug(salon.name);
+    const slug = await this.ensureUniqueSlug(baseSlug);
+    
     const newSalon: Salon = {
       ...salon,
       id,
+      slug,
       rating: 0,
       createdAt: new Date(),
     };
