@@ -781,10 +781,10 @@ export default function Dashboard() {
                             name="description"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-sm font-medium text-teal-900">Description</FormLabel>
+                                <FormLabel className="text-sm font-medium text-teal-900">Tagline</FormLabel>
                                 <FormControl>
                                   <Textarea
-                                    placeholder="Describe your salon..."
+                                    placeholder="Enter your salon's tagline..."
                                     {...field}
                                     value={field.value || ""}
                                     data-testid="textarea-salon-description"
@@ -1296,6 +1296,12 @@ export default function Dashboard() {
                           salonId={selectedSalonId}
                           onServicesAdded={() => {
                             queryClient.invalidateQueries({ queryKey: ['salon-services', selectedSalonId] });
+                            
+                            // Check if manual location is set, if not show the modal
+                            const currentSalon = salons.find((s: any) => s.id === selectedSalonId);
+                            if (!currentSalon?.manualLocation || currentSalon.manualLocation.trim() === '') {
+                              setIsLocationModalOpen(true);
+                            }
                           }}
                         />
                       )}
