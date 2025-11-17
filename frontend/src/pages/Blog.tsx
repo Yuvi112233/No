@@ -70,23 +70,20 @@ export default function Blog() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-teal-50 to-white">
         {/* Header */}
         <header className="bg-white border-b sticky top-0 z-50 shadow-sm">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => setLocation('/')}>
-              <Sparkles className="h-8 w-8 text-purple-600" />
-              <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                SmartQ
-              </span>
+              <img src="/loadlogo.png" alt="AltQ Logo" className="h-20 filter invert" />
             </div>
             <nav className="hidden md:flex gap-6">
-              <a href="/about" className="text-gray-600 hover:text-purple-600 transition-colors">About</a>
-              <a href="/features" className="text-gray-600 hover:text-purple-600 transition-colors">Features</a>
-              <a href="/for-salons" className="text-gray-600 hover:text-purple-600 transition-colors">For Salons</a>
-              <a href="/blog" className="text-purple-600 font-semibold">Blog</a>
+              <a href="/about" className="text-gray-600 hover:text-[#0f857a] transition-colors">About</a>
+              <a href="/features" className="text-gray-600 hover:text-[#0f857a] transition-colors">Features</a>
+              <a href="/for-salons" className="text-gray-600 hover:text-[#0f857a] transition-colors">For Salons</a>
+              <a href="/blog" className="font-semibold" style={{ color: '#0f857a' }}>Blog</a>
             </nav>
-            <Button onClick={() => setLocation('/')} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+            <Button onClick={() => setLocation('/')} className="hover:opacity-90" style={{ backgroundColor: '#0f857a' }}>
               Get Started
             </Button>
           </div>
@@ -96,7 +93,7 @@ export default function Blog() {
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: '#0f857a' }}>
                 Salon Industry Insights & Tips
               </h1>
               <p className="text-xl text-gray-600 mb-8">
@@ -104,15 +101,15 @@ export default function Blog() {
               </p>
               <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-purple-600" />
+                  <TrendingUp className="h-5 w-5" style={{ color: '#0f857a' }} />
                   <span>Industry Trends</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-purple-600" />
+                  <Users className="h-5 w-5" style={{ color: '#0f857a' }} />
                   <span>Customer Experience</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-purple-600" />
+                  <Sparkles className="h-5 w-5" style={{ color: '#0f857a' }} />
                   <span>Business Growth</span>
                 </div>
               </div>
@@ -135,7 +132,7 @@ export default function Blog() {
                     />
                   </div>
                   <div className="md:w-1/2 p-8 md:p-12">
-                    <span className="inline-block px-3 py-1 bg-purple-100 text-purple-600 rounded-full text-sm font-semibold mb-4">
+                    <span className="inline-block px-3 py-1 bg-teal-50 rounded-full text-sm font-semibold mb-4" style={{ color: '#0f857a' }}>
                       Featured Post
                     </span>
                     <h2 className="text-3xl font-bold mb-4 text-gray-900">
@@ -154,7 +151,7 @@ export default function Blog() {
                         <span>{blogPosts[0].readTime}</span>
                       </div>
                     </div>
-                    <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                    <Button className="hover:opacity-90" style={{ backgroundColor: '#0f857a' }}>
                       Read More <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
@@ -182,7 +179,7 @@ export default function Blog() {
                       className="w-full h-48 object-cover"
                     />
                     <div className="p-6">
-                      <span className="inline-block px-3 py-1 bg-purple-100 text-purple-600 rounded-full text-xs font-semibold mb-3">
+                      <span className="inline-block px-3 py-1 bg-teal-50 rounded-full text-xs font-semibold mb-3" style={{ color: '#0f857a' }}>
                         {post.category}
                       </span>
                       <h3 className="text-xl font-bold mb-3 text-gray-900">
@@ -210,18 +207,19 @@ export default function Blog() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-16 md:py-20 bg-gradient-to-r from-purple-600 to-pink-600">
+        <section className="py-16 md:py-20" style={{ backgroundColor: '#0f857a' }}>
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
               Ready to Transform Your Salon?
             </h2>
-            <p className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-teal-50 mb-8 max-w-2xl mx-auto">
               Join thousands of salons using AltQ to eliminate wait times and delight customers
             </p>
             <Button 
               size="lg"
               onClick={() => setLocation('/')}
-              className="bg-white text-purple-600 hover:bg-gray-100 text-lg px-8 py-6"
+              className="bg-white hover:bg-gray-100 text-lg px-8 py-6"
+              style={{ color: '#0f857a' }}
             >
               Start Free Trial
             </Button>
@@ -234,8 +232,7 @@ export default function Blog() {
             <div className="grid md:grid-cols-4 gap-8 mb-8">
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <Sparkles className="h-6 w-6 text-purple-400" />
-                  <span className="text-xl font-bold">AltQ</span>
+                  <img src="/loadlogo.png" alt="AltQ Logo" className="h-20" />
                 </div>
                 <p className="text-gray-400">
                   Alternate for your queue - Smart salon management

@@ -34,7 +34,7 @@ const BlogPost1: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              <span>By: SmartQ Insights Team</span>
+              <span>By: Team AltQ</span>
             </div>
             <div className="flex items-center gap-2">
               <BarChart2 className="h-4 w-4" />
